@@ -1,97 +1,61 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #f4f6f9;
 }
 
-/* LOGIN */
-.login-container {
+.container {
+  display: flex;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(120deg, #4e54c8, #8f94fb);
-}
-
-.login-box {
-  background: white;
-  padding: 40px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-.login-box input {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-}
-
-/* APP LAYOUT */
-.app {
-  display: flex;
 }
 
 /* SIDEBAR */
 .sidebar {
-  width: 220px;
-  background: #1f2937;
+  width: 250px;
+  background: linear-gradient(180deg, #2c3e50, #3498db);
   color: white;
-  height: 100vh;
   padding: 20px;
 }
 
-.sidebar button {
+.sidebar button,
+.sidebar select {
   width: 100%;
-  margin: 10px 0;
+  margin-top: 10px;
   padding: 10px;
-  background: #374151;
-  color: white;
   border: none;
   cursor: pointer;
 }
 
-.sidebar select {
-  width: 100%;
-  padding: 8px;
+.logoutBtn {
+  background: red;
+  color: white;
 }
 
 /* MAIN */
 .main {
   flex: 1;
   padding: 20px;
-}
-
-/* TOPBAR */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  background: white;
-  padding: 10px;
-  margin-bottom: 20px;
-}
-
-/* CARDS */
-.cards {
-  display: flex;
-  gap: 10px;
+  background: #f4f6f7;
 }
 
 .card {
-  flex: 1;
   background: white;
-  padding: 20px;
+  padding: 15px;
+  margin: 10px 0;
   border-radius: 8px;
+  cursor: pointer;
 }
 
-/* BANK LIST */
-.bank-list {
-  margin-top: 20px;
+.row {
+  font-weight: bold;
 }
 
-.bank-item {
-  background: white;
+.ledger {
+  margin-top: 10px;
   padding: 10px;
-  margin: 5px 0;
-  border-left: 5px solid green;
+  background: #ecf0f1;
+}
+
+.login {
+  text-align: center;
+  margin-top: 100px;
 }
