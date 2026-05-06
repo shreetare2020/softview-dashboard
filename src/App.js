@@ -1,66 +1,111 @@
 import React, { useState } from "react";
-import { login, signup } from "./authService";
 
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const [isSignup, setIsSignup] = useState(false);
+  const handleLogin = (e) => {
+    e.preventDefault();
 
-  const handleAuth = async () => {
-    try {
-      if (isSignup) {
-        await signup(email, password, "viewer");
-        alert("Signup successful! Now login.");
-        setIsSignup(false);
-      } else {
-        await login(email, password);
-        alert("Login success");
-      }
-    } catch (err) {
-      alert(err.message);
+    // temporary fake login (Firebase baad me add karenge)
+    if (email && password) {
+      setIsLoggedIn(true);
+    } else {
+      alert("Enter email and password");
     }
   };
 
-  return (
-    <div className="login-container">
-      <div className="login-box">
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setEmail("");
+    setPassword("");
+  };
 
-        <h2>🏦 Banking Dashboard</h2>
+  // 👉 LOGIN SCREEN
+  if (!isLoggedIn) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h2>Login Page</h2>
 
-        <input
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <form onSubmit={handleLogin}>
+            <input
+              style={styles.input}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            <input
+              style={styles.input}
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-        {/* LOGIN / SIGNUP BUTTON */}
-        <button onClick={handleAuth}>
-          {isSignup ? "Create Account (Signup)" : "Login"}
-        </button>
-
-        {/* 🔥 SIGNUP TOGGLE BUTTON (THIS WAS MISSING) */}
-        <p
-          style={{
-            cursor: "pointer",
-            color: "blue",
-            marginTop: "10px"
-          }}
-          onClick={() => setIsSignup(!isSignup)}
-        >
-          {isSignup
-            ? "Already have account? Login"
-            : "New user? Create account (Signup)"}
-        </p>
-
+            <button style={styles.button} type="submit">
+              Login
+            </button>
+          </form>
+        </div>
       </div>
+    );
+  }
+
+  // 👉 DASHBOARD SCREEN
+  return (
+    <div style={styles.dashboard}>
+      <h1>Dashboard ✅</h1>
+      <p>Welcome to Banking System</p>
+
+      <button style={styles.logout} onClick={handleLogout}>
+        Logout
+      </button>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f4f4f4",
+  },
+  card: {
+    padding: "30px",
+    background: "#fff",
+    borderRadius: "10px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+    textAlign: "center",
+  },
+  input: {
+    display: "block",
+    margin: "10px auto",
+    padding: "10px",
+    width: "250px",
+  },
+  button: {
+    padding: "10px 20px",
+    background: "green",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+  },
+  dashboard: {
+    padding: "20px",
+  },
+  logout: {
+    padding: "10px 20px",
+    background: "red",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+  },
+};
 
 export default App;
