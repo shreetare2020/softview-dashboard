@@ -1,14 +1,17 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/manifest.json",
-      "dest": "/manifest.json",
-      "headers": { "Access-Control-Allow-Origin": "*" }
+      "source": "/(css|js|media|static)/(.*)",
+      "destination": "/static/$1/$2"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
