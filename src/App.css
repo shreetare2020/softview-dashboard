@@ -1,64 +1,83 @@
-/* RESET */
+/* RESET & FONTS */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* MAIN LAYOUT */
+:root {
+  --sidebar-bg: #1a2a44;
+  --primary-blue: #2a5298;
+  --light-bg: #f4f7fa;
+  --text-dark: #333;
+  --success: #27ae60;
+  --danger: #e74c3c;
+}
+
 .app {
   display: flex;
   height: 100vh;
-  background: #f5f7fb;
+  background: var(--light-bg);
 }
 
-/* SIDEBAR */
+/* SIDEBAR RE-DESIGN */
 .sidebar {
-  width: 240px;
-  background: linear-gradient(180deg, #1e3c72, #2a5298);
+  width: 260px;
+  background: var(--sidebar-bg);
   color: white;
-  padding: 20px;
-  position: relative;
+  padding: 25px 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
 .sidebar h2 {
-  margin-bottom: 20px;
+  font-size: 18px;
   text-align: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 15px;
 }
 
 .sidebar select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
-  border: none;
   margin-bottom: 20px;
+  outline: none;
 }
 
-.sidebar div {
-  margin: 10px 0;
+.nav-links div {
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+.nav-links .active {
+  background: var(--primary-blue);
+  font-weight: bold;
+}
+
+.nav-links div:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.logout-btn {
+  margin-top: auto;
+  background: var(--danger);
+  color: white;
+  border: none;
   padding: 10px;
   border-radius: 6px;
-  transition: 0.3s;
-}
-
-.sidebar div:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* 🔥 CLOCK (BOTTOM LEFT - STYLISH) */
-.clockBox {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #fff;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  font-weight: bold;
 }
 
 /* MAIN AREA */
@@ -66,150 +85,85 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  position: relative;
+  overflow: hidden;
 }
 
-/* HEADER */
 .header {
   background: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.header b {
+  padding: 15px 30px;
+  border-bottom: 1px solid #ddd;
+  text-align: right;
   font-size: 14px;
+  color: var(--primary-blue);
 }
 
-.header button {
-  padding: 8px 14px;
-  border: none;
-  background: #ff4d4f;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.header button:hover {
-  background: #d9363e;
-}
-
-/* CURRENT FIRM */
-.firmTitle {
-  font-size: 13px;
-  color: #2a5298;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-/* CONTENT */
 .content {
-  padding: 20px;
+  padding: 30px;
   overflow-y: auto;
 }
 
-/* CARD */
-.card {
+.page-title {
+  margin-bottom: 25px;
+}
+
+.page-title h2 { color: var(--sidebar-bg); font-size: 24px; }
+.page-title p { color: #666; font-size: 14px; }
+
+/* LEDGER CARD STYLING */
+.ledger-card {
   background: white;
-  padding: 15px;
-  margin-bottom: 15px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: 0.3s;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid #eee;
 }
 
-.card:hover {
-  transform: translateY(-3px);
+.card-header {
+  padding: 18px 25px;
+  background: #fff;
+  border-radius: 10px;
+  font-size: 16px;
+  color: var(--primary-blue);
 }
 
-/* LEDGER STYLE */
-.card div {
-  margin: 5px 0;
+/* LEDGER TABLE */
+.ledger-container {
+  padding: 0 20px 20px 20px;
 }
 
-/* TABLE */
-table {
+.ledger-table {
+  width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  font-size: 14px;
 }
 
-th, td {
-  padding: 8px;
+.ledger-table th {
+  background: #f8f9fa;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #eee;
+  color: #555;
+}
+
+.ledger-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.ledger-table tr:hover { background: #fafafa; }
+
+/* CLOCK & FOOTER */
+.clockBox {
+  margin-top: 15px;
+  font-size: 12px;
+  opacity: 0.7;
   text-align: center;
 }
 
-/* 🔥 FOOTER RIGHT (VISIBLE & CLEAN) */
 .footerRight {
-  position: absolute;
-  bottom: 12px;
-  right: 20px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #2a5298;
-  opacity: 0.9;
-}
-
-/* LOGIN PAGE */
-.loginPage {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(120deg, #4facfe, #00f2fe);
-}
-
-/* LOGIN CARD */
-.loginCard {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-}
-
-.loginCard h2 {
-  margin-bottom: 20px;
-  color: #2a5298;
-}
-
-.loginCard input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  outline: none;
-}
-
-.loginCard input:focus {
-  border-color: #4facfe;
-}
-
-.loginCard button {
-  width: 100%;
-  padding: 10px;
-  background: #4facfe;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.loginCard button:hover {
-  background: #2a5298;
-}
-
-/* SCROLLBAR */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 6px;
+  padding: 15px 30px;
+  text-align: right;
+  font-size: 12px;
+  color: #aaa;
 }
