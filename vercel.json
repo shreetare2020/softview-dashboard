@@ -1,17 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/(css|js|media|static)/(.*)",
-      "destination": "/static/$1/$2"
-    },
-    {
-      "source": "/manifest.json",
-      "destination": "/manifest.json"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
