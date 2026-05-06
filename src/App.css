@@ -1,61 +1,105 @@
-body {
-  margin: 0;
-  font-family: Arial;
+:root {
+  --primary-bg: #1a1c23;
+  --accent: #4c51bf;
+  --success: #48bb78;
+  --danger: #f56565;
+  --text-main: #f7fafc;
 }
 
-.container {
+/* Login Page */
+.login-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 350px;
+}
+
+/* Layout */
+.app-layout {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* SIDEBAR */
 .sidebar {
-  width: 250px;
-  background: linear-gradient(180deg, #2c3e50, #3498db);
+  width: 260px;
+  background: var(--primary-bg);
   color: white;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
 }
 
-.sidebar button,
-.sidebar select {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-.logoutBtn {
-  background: red;
-  color: white;
-}
-
-/* MAIN */
-.main {
-  flex: 1;
-  padding: 20px;
-  background: #f4f6f7;
-}
-
-.card {
-  background: white;
-  padding: 15px;
-  margin: 10px 0;
+.nav-item {
+  padding: 12px;
+  margin: 5px 0;
   border-radius: 8px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.row {
-  font-weight: bold;
+.nav-item:hover, .nav-item.active {
+  background: var(--accent);
 }
 
-.ledger {
-  margin-top: 10px;
+/* Previews */
+.preview-card {
+  background: rgba(255,255,255,0.1);
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
+/* Ledger Table */
+.bank-summary-row {
+  background: #fff;
+  padding: 15px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  border-left: 5px solid var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fdfdfd;
+}
+
+.ledger-table th {
+  background: #edf2f7;
   padding: 10px;
-  background: #ecf0f1;
 }
 
-.login {
-  text-align: center;
-  margin-top: 100px;
+.txt-green { color: var(--success); font-weight: bold; }
+.txt-red { color: var(--danger); font-weight: bold; }
+
+.export-btns {
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-excel { background: #2f855a; color: white; border: none; padding: 5px 15px; border-radius: 4px; }
+.btn-pdf { background: #c53030; color: white; border: none; padding: 5px 15px; border-radius: 4px; }
+
+.firm-footer-code {
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+  font-size: 0.8rem;
+  color: #718096;
 }
