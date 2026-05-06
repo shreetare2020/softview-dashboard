@@ -3,6 +3,8 @@ import "./App.css";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -11,8 +13,7 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expanded, setExpanded] = useState(null);
-  const [activePage, setActivePage] = useState("Dashboard"); // Page tracking ke liye
-
+  const [activePage, setActivePage] = useState("Dashboard");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [time, setTime] = useState(new Date());
@@ -60,6 +61,31 @@ export default function App() {
     return l.length ? l[l.length - 1].balance : 0;
   };
 
+  const exportExcel = (account) => {
+    const data = getLedger(account);
+    const csv = [["Date", "Particulars", "Receipt", "Payment", "Balance"],
+      ...data.map((d) => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance])
+    ].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Ledger_${account}.csv`;
+    a.click();
+  };
+
+  const exportPDF = (account) => {
+    const doc = new jsPDF();
+    const data = getLedger(account);
+    doc.text(`Bank Ledger: ${account}`, 14, 15);
+    doc.autoTable({
+      startY: 20,
+      head: [["Date", "Particulars", "Receipt", "Payment", "Balance"]],
+      body: data.map((d) => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance]),
+    });
+    doc.save(`Ledger_${account}.pdf`);
+  };
+
   if (!user) {
     return (
       <div className="loginPage">
@@ -81,21 +107,19 @@ export default function App() {
           <option value="">Select Firm</option>
           {firms.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
         </select>
-        
         <div className="nav-links">
            <div className={activePage === "Dashboard" ? "active" : ""} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
-           <div onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
-           <div onClick={() => setActivePage("Bank Master")}>🏦 Bank Master</div>
-           <div onClick={() => setActivePage("User Master")}>👥 User Master</div>
+           <div className={activePage === "Firm Master" ? "active" : ""} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
+           <div className={activePage === "Bank Master" ? "active" : ""} onClick={() => setActivePage("Bank Master")}>🏦 Bank Master</div>
+           <div className={activePage === "User Master" ? "active" : ""} onClick={() => setActivePage("User Master")}>👥 User Master</div>
         </div>
-
         <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
         <div className="clockBox">{time.toLocaleString()}</div>
       </div>
 
       <div className="main">
         <div className="header">
-           <span className="dev-text">Developed by Softview Technologies</span>
+           <span style={{float:'left', color:'#888', fontSize:'12px'}}>Developed by Softview Technologies</span>
            <b>{user.email}</b>
         </div>
         
@@ -105,64 +129,62 @@ export default function App() {
             <p>{selectedFirm || "Please select a firm from sidebar"}</p>
           </div>
 
-          {/* DASHBOARD PAGE START */}
-          {activePage === "Dashboard" && selectedFirm && 
-            banks.filter((b) => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase())
-            .map((b, i) => (
-              <div key={i} className="card ledger-card">
-                
-                {/* BANK SUMMARY LINE (CLICK TO EXPAND) */}
-                <div 
-                  className="card-header dashboard-bank-row" 
-                  onClick={() => setExpanded(expanded === b.account ? null : b.account)}
-                  style={{cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center'}}
-                >
-                  <div className="bank-info-main">
-                    <span className="expand-icon">{expanded === b.account ? '▼' : '▶'}</span>
-                    <span className="bank-label" style={{fontWeight: '600', marginLeft: '10px'}}>🏦 {b.name}</span>
-                    <span className="acc-label" style={{color: '#777', fontSize: '13px', marginLeft: '10px'}}>({b.account})</span>
-                  </div>
-                  <div className="bank-balance-main">
-                    <span style={{fontSize: '12px', color: '#666', marginRight: '5px'}}>BALANCE:</span>
-                    <b style={{color: '#2a5298', fontSize: '17px'}}>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
-                  </div>
-                </div>
-                
-                {/* EXPANDABLE LEDGER & EXPORT BUTTONS */}
-                {expanded === b.account && (
-                  <div className="ledger-container" style={{padding: '20px', background: '#fafbfc', borderTop: '1px solid #eee'}}>
-                    
-                    {/* EXCEL & PDF BUTTONS */}
-                    <div className="export-bar" style={{display: 'flex', gap: '10px', justifyContent: 'flex-end', marginBottom: '15px'}}>
-                      <button className="btn-ex" onClick={() => exportExcel(b.account)} style={{background: '#27ae60', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}>📥 Excel</button>
-                      <button className="btn-pdf" onClick={() => exportPDF(b.account)} style={{background: '#e74c3c', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}>📄 PDF Report</button>
-                    </div>
-
-                    <table className="ledger-table" style={{width: '100%', borderCollapse: 'collapse', background: 'white'}}>
-                      <thead>
-                        <tr style={{background: '#f1f4f9'}}>
-                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Date</th>
-                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Particulars</th>
-                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Receipt (⬇)</th>
-                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Payment (⬆)</th>
-                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Balance</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {getLedger(b.account).map((l, idx) => (
-                          <tr key={idx} style={{borderBottom: '1px solid #f1f1f1'}}>
-                            <td style={{padding: '12px'}}>{l.date}</td>
-                            <td style={{padding: '12px'}}>{l.remark || "Bank Entry"}</td>
-                            <td style={{padding: '12px', color: '#27ae60', fontWeight: 'bold'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
-                            <td style={{padding: '12px', color: '#e74c3c', fontWeight: 'bold'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
-                            <td style={{padding: '12px', fontWeight: 'bold'}}>₹{l.balance.toLocaleString('en-IN')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+          {/* DASHBOARD SECTION */}
+          {activePage === "Dashboard" && selectedFirm && banks.filter((b) => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase()).map((b, i) => (
+            <div key={i} className="card ledger-card" style={{marginBottom:'15px', border:'1px solid #eee', borderRadius:'8px', overflow:'hidden'}}>
+              <div onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer', padding:'15px', display:'flex', justifyContent:'space-between', background:'#fff'}}>
+                <span><b>{expanded === b.account ? '▼' : '▶'} 🏦 {b.name}</b> <small style={{color:'#777'}}>({b.account})</small></span>
+                <b style={{color:'#2a5298'}}>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
               </div>
-            ))
-          }
-          {/* DASHBOARD PAGE END */}
+              {expanded === b.account && (
+                <div style={{padding:'15px', background:'#fafbfc', borderTop:'1px solid #eee'}}>
+                  <div style={{textAlign:'right', marginBottom:'10px'}}>
+                    <button className="btn-ex" onClick={() => exportExcel(b.account)}>📥 Excel</button>
+                    <button className="btn-pdf" onClick={() => exportPDF(b.account)} style={{marginLeft:'5px'}}>📄 PDF</button>
+                  </div>
+                  <table className="ledger-table" style={{width:'100%', background:'#fff'}}>
+                    <thead>
+                      <tr style={{background:'#f1f4f9'}}><th>Date</th><th>Particulars</th><th>Receipt (⬇)</th><th>Payment (⬆)</th><th>Balance</th></tr>
+                    </thead>
+                    <tbody>
+                      {getLedger(b.account).map((l, idx) => (
+                        <tr key={idx}>
+                          <td>{l.date}</td><td>{l.remark || "Entry"}</td>
+                          <td style={{color:'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
+                          <td style={{color:'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
+                          <td><b>₹{l.balance.toLocaleString('en-IN')}</b></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* FIRM MASTER */}
+          {activePage === "Firm Master" && (
+            <div className="card master-card">
+              <h3>🏢 Firm Management</h3>
+              <table className="ledger-table">
+                <thead><tr><th>Firm Name</th></tr></thead>
+                <tbody>{firms.map((f, i) => (<tr key={i}><td>{f.name}</td></tr>))}</tbody>
+              </table>
+            </div>
+          )}
+
+          {/* BANK MASTER */}
+          {activePage === "Bank Master" && (
+            <div className="card master-card">
+              <h3>🏦 Bank Accounts</h3>
+              <table className="ledger-table">
+                <thead><tr><th>Firm</th><th>Bank</th><th>Account</th></tr></thead>
+                <tbody>{banks.map((b, i) => (<tr key={i}><td>{b.firm}</td><td>{b.name}</td><td>{b.account}</td></tr>))}</tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
