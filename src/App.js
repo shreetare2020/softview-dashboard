@@ -3,8 +3,6 @@ import "./App.css";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -13,6 +11,8 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expanded, setExpanded] = useState(null);
+  const [activePage, setActivePage] = useState("Dashboard"); // Page tracking ke liye
+
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [time, setTime] = useState(new Date());
@@ -38,8 +38,6 @@ export default function App() {
     catch { alert("Login Failed"); }
   };
 
-  const logout = () => signOut(auth);
-
   const getLedger = (account) => {
     let balance = 0;
     const acc = String(account || "").trim();
@@ -51,7 +49,7 @@ export default function App() {
       const amt = Number(t.amount || t.Amount || 0);
       const type = String(t.type || t.Type || "").toLowerCase();
       let receipt = 0, payment = 0;
-      if (type === "receipt" || type === "cr") { receipt = amt; balance += amt; } 
+      if (type === "receipt" || type === "cr" || type === "in") { receipt = amt; balance += amt; } 
       else { payment = amt; balance -= amt; }
       return { ...t, receipt, payment, balance };
     });
@@ -70,7 +68,6 @@ export default function App() {
           <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" onChange={(e) => setPass(e.target.value)} />
           <button onClick={login}>Login</button>
-          <p>Softview Technologies</p>
         </div>
       </div>
     );
@@ -84,56 +81,75 @@ export default function App() {
           <option value="">Select Firm</option>
           {firms.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
         </select>
+        
         <div className="nav-links">
-           <div className="active">📊 Dashboard</div>
+           <div className={activePage === "Dashboard" ? "active" : ""} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
+           <div onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
+           <div onClick={() => setActivePage("Bank Master")}>🏦 Bank Master</div>
+           <div onClick={() => setActivePage("User Master")}>👥 User Master</div>
         </div>
-        <button className="logout-btn" onClick={logout} style={{marginTop: '20px'}}>Logout</button>
+
+        <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
         <div className="clockBox">{time.toLocaleString()}</div>
       </div>
 
       <div className="main">
-        <div className="header"><b>{user.email}</b></div>
+        <div className="header">
+           <span className="dev-text">Developed by Softview Technologies</span>
+           <b>{user.email}</b>
+        </div>
+        
         <div className="content">
           <div className="page-title">
-            <h2>Financial Overview</h2>
-            <p>{selectedFirm || "Please select a firm"}</p>
+            <h2>{activePage}</h2>
+            <p>{selectedFirm || "Please select a firm from sidebar"}</p>
           </div>
 
-          {selectedFirm && banks.filter((b) => b.firm === selectedFirm).map((b, i) => (
-            <div key={i} className="card ledger-card">
-              <div className="card-header" onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer'}}>
-                <b>🏦 {b.name} | {b.account} | ₹{getBalance(b.account)}</b>
-              </div>
-              {expanded === b.account && (
-                <div className="ledger-container">
-                  <table className="ledger-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Particulars</th>
-                        <th>Receipt (⬇)</th>
-                        <th>Payment (⬆)</th>
-                        <th>Balance</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getLedger(b.account).map((l, idx) => (
-                        <tr key={idx}>
-                          <td>{l.date}</td>
-                          <td>{l.remark || "Transaction"}</td>
-                          <td style={{color: 'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
-                          <td style={{color: 'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
-                          <td style={{fontWeight: 'bold'}}>₹{l.balance}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          {activePage === "Dashboard" && selectedFirm && 
+            banks.filter((b) => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase())
+            .map((b, i) => (
+              <div key={i} className="card ledger-card">
+                <div className="card-header" onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer', display:'flex', justifyContent:'space-between'}}>
+                  <span>🏦 {b.name} ({b.account})</span>
+                  <b style={{color: '#2a5298'}}>₹{getBalance(b.account)}</b>
                 </div>
-              )}
+                
+                {expanded === b.account && (
+                  <div className="ledger-container">
+                    <table className="ledger-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Particulars</th>
+                          <th>Receipt (⬇)</th>
+                          <th>Payment (⬆)</th>
+                          <th>Balance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getLedger(b.account).map((l, idx) => (
+                          <tr key={idx}>
+                            <td>{l.date}</td>
+                            <td>{l.remark || "Transaction"}</td>
+                            <td style={{color: 'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
+                            <td style={{color: 'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
+                            <td style={{fontWeight: 'bold'}}>₹{l.balance}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))
+          }
+
+          {activePage !== "Dashboard" && (
+            <div className="card">
+              <p style={{padding: '20px'}}>{activePage} content will appear here.</p>
             </div>
-          ))}
+          )}
         </div>
-        <div className="footerRight">Developed by Softview Technologies</div>
       </div>
     </div>
   );
