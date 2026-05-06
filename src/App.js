@@ -2,93 +2,71 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedFirm, setSelectedFirm] = useState('Select Firm');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Digital Clock Logic
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // 1. LOGIN PAGE VIEW
-  if (!isLoggedIn) {
-    return (
-      <div className="login-screen">
-        <div className="login-card">
-          <div className="login-header">
-            <h1>Banking Dashboard</h1>
-            <p>Softview Technologies Control Panel</p>
-          </div>
-          <div className="login-body">
-            <div className="input-group">
-              <label>Email Address</label>
-              <input type="email" placeholder="admin@softview.com" />
-            </div>
-            <div className="input-group">
-              <label>Password</label>
-              <input type="password" placeholder="••••••••" />
-            </div>
-            <button className="main-login-btn" onClick={() => setIsLoggedIn(true)}>
-              Secure Login
-            </button>
-          </div>
-          <div className="login-footer">
-            Developed by <strong>Softview Technologies</strong><br/>
-            📞 7972084304
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 2. DASHBOARD VIEW (After Login)
   return (
-    <div className="dashboard-wrapper">
+    <div className="main-layout">
+      {/* 1. LEFT SIDEBAR */}
       <aside className="sidebar">
-        <div className="sidebar-top">
-          <div className="brand-logo">SOFTVIEW</div>
-          <div className="firm-selector">
-            <select onChange={(e) => setSelectedFirm(e.target.value)}>
-              <option>Rathi Jaju & Associates</option>
-              <option>Firm 2</option>
-              <option>Firm 3</option>
-            </select>
-          </div>
-        </div>
-
-        <nav className="side-nav">
+        <div className="sidebar-logo">SOFTVIEW</div>
+        <nav className="nav-menu">
           <div className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>📊 Dashboard</div>
           <div className={`nav-link ${activeTab === 'firm' ? 'active' : ''}`} onClick={() => setActiveTab('firm')}>🏢 Firm Master</div>
           <div className={`nav-link ${activeTab === 'bank' ? 'active' : ''}`} onClick={() => setActiveTab('bank')}>🏦 Bank Master</div>
           <div className={`nav-link ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user')}>👥 User Master</div>
         </nav>
-
         <div className="sidebar-footer">
-          <div className="user-profile">
-            <span className="user-name">👤 Shreekant Rathi</span>
-            <span className="user-role">Admin</span>
-          </div>
-          <div className="live-clock">
-            {currentTime.toLocaleDateString()}<br/>
-            <strong>{currentTime.toLocaleTimeString()}</strong>
-          </div>
-          <button className="logout-trigger" onClick={() => setIsLoggedIn(false)}>Sign Out</button>
+          <button className="btn-logout">Sign Out</button>
         </div>
       </aside>
 
-      <main className="main-stage">
-        <header className="top-bar">
-          <h2>{selectedFirm}</h2>
-          <div className="firm-code-tag">Code: RJA-001</div>
+      {/* 2. RIGHT SIDE CONTENT AREA */}
+      <div className="content-container">
+        {/* TOP HEADER */}
+        <header className="top-header">
+          <div className="header-left">
+            <select className="firm-dropdown" onChange={(e) => setSelectedFirm(e.target.value)}>
+              <option>Select Firm 🔽</option>
+              <option>Rathi Jaju & Associates</option>
+              <option>Softview Technologies</option>
+            </select>
+          </div>
+
+          <div className="header-right">
+            <div className="profile-info">
+              <span className="user-title">👤 Shreekant Rathi</span>
+              <span className="user-badge">Admin</span>
+            </div>
+            <div className="clock-info">
+              <div className="date-str">{currentTime.toLocaleDateString()}</div>
+              <div className="time-str">{currentTime.toLocaleTimeString()}</div>
+            </div>
+          </div>
         </header>
-        <div className="stage-content">
-          {activeTab === 'dashboard' && <div className="welcome-msg">Welcome to your Banking Overview!</div>}
-          {/* Add other modules logic here */}
-        </div>
-      </main>
+
+        {/* MAIN DISPLAY STAGE */}
+        <main className="stage">
+          <div className="firm-banner">
+            <h1>{selectedFirm}</h1>
+            <p>Code: {selectedFirm !== 'Select Firm' ? 'RJA-001' : '--'}</p>
+          </div>
+          <div className="dashboard-grid">
+             {/* Yahan aapke bank accounts ka expansion logic aayega */}
+             <div className="placeholder-card">Welcome to your Professional Banking Dashboard!</div>
+          </div>
+        </main>
+        
+        <footer className="main-footer">
+          Developed by <strong>Softview Technologies</strong> | 7972084304
+        </footer>
+      </div>
     </div>
   );
 }
