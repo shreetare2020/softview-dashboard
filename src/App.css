@@ -225,3 +225,39 @@
 .del-btn:hover { 
   background: #fed7d7; 
 }
+/* Dashboard Row Styling */
+.dashboard-bank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 15px 20px !important;
+  transition: background 0.2s;
+}
+.dashboard-bank-row:hover { background: #f0f4f8; }
+
+.bank-info-main { display: flex; align-items: center; gap: 12px; }
+.expand-icon { font-size: 12px; color: #2a5298; width: 20px; }
+.bank-label { font-weight: 600; color: #1a2a44; font-size: 15px; }
+.acc-label { color: #777; font-size: 13px; }
+
+.bank-balance-main { display: flex; align-items: center; gap: 8px; }
+.bal-text { font-size: 12px; color: #666; text-transform: uppercase; }
+.bal-amt { color: #2a5298; font-size: 17px; }
+
+/* Export Buttons Bar */
+.export-bar {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #ddd;
+}
+.btn-ex { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.btn-pdf { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+
+/* Table Colors */
+.txt-green { color: #27ae60; font-weight: 600; }
+.txt-red { color: #e74c3c; font-weight: 600; }
+.txt-bold { font-weight: 700; color: #333; }

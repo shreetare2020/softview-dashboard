@@ -105,35 +105,57 @@ export default function App() {
             <p>{selectedFirm || "Please select a firm from sidebar"}</p>
           </div>
 
+          {/* DASHBOARD PAGE START */}
           {activePage === "Dashboard" && selectedFirm && 
             banks.filter((b) => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase())
             .map((b, i) => (
               <div key={i} className="card ledger-card">
-                <div className="card-header" onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer', display:'flex', justifyContent:'space-between'}}>
-                  <span>🏦 {b.name} ({b.account})</span>
-                  <b style={{color: '#2a5298'}}>₹{getBalance(b.account)}</b>
+                
+                {/* BANK SUMMARY LINE (CLICK TO EXPAND) */}
+                <div 
+                  className="card-header dashboard-bank-row" 
+                  onClick={() => setExpanded(expanded === b.account ? null : b.account)}
+                  style={{cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center'}}
+                >
+                  <div className="bank-info-main">
+                    <span className="expand-icon">{expanded === b.account ? '▼' : '▶'}</span>
+                    <span className="bank-label" style={{fontWeight: '600', marginLeft: '10px'}}>🏦 {b.name}</span>
+                    <span className="acc-label" style={{color: '#777', fontSize: '13px', marginLeft: '10px'}}>({b.account})</span>
+                  </div>
+                  <div className="bank-balance-main">
+                    <span style={{fontSize: '12px', color: '#666', marginRight: '5px'}}>BALANCE:</span>
+                    <b style={{color: '#2a5298', fontSize: '17px'}}>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
+                  </div>
                 </div>
                 
+                {/* EXPANDABLE LEDGER & EXPORT BUTTONS */}
                 {expanded === b.account && (
-                  <div className="ledger-container">
-                    <table className="ledger-table">
+                  <div className="ledger-container" style={{padding: '20px', background: '#fafbfc', borderTop: '1px solid #eee'}}>
+                    
+                    {/* EXCEL & PDF BUTTONS */}
+                    <div className="export-bar" style={{display: 'flex', gap: '10px', justifyContent: 'flex-end', marginBottom: '15px'}}>
+                      <button className="btn-ex" onClick={() => exportExcel(b.account)} style={{background: '#27ae60', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}>📥 Excel</button>
+                      <button className="btn-pdf" onClick={() => exportPDF(b.account)} style={{background: '#e74c3c', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}>📄 PDF Report</button>
+                    </div>
+
+                    <table className="ledger-table" style={{width: '100%', borderCollapse: 'collapse', background: 'white'}}>
                       <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Particulars</th>
-                          <th>Receipt (⬇)</th>
-                          <th>Payment (⬆)</th>
-                          <th>Balance</th>
+                        <tr style={{background: '#f1f4f9'}}>
+                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Date</th>
+                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Particulars</th>
+                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Receipt (⬇)</th>
+                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Payment (⬆)</th>
+                          <th style={{padding: '12px', textAlign: 'left', fontSize: '13px'}}>Balance</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getLedger(b.account).map((l, idx) => (
-                          <tr key={idx}>
-                            <td>{l.date}</td>
-                            <td>{l.remark || "Transaction"}</td>
-                            <td style={{color: 'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
-                            <td style={{color: 'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
-                            <td style={{fontWeight: 'bold'}}>₹{l.balance}</td>
+                          <tr key={idx} style={{borderBottom: '1px solid #f1f1f1'}}>
+                            <td style={{padding: '12px'}}>{l.date}</td>
+                            <td style={{padding: '12px'}}>{l.remark || "Bank Entry"}</td>
+                            <td style={{padding: '12px', color: '#27ae60', fontWeight: 'bold'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
+                            <td style={{padding: '12px', color: '#e74c3c', fontWeight: 'bold'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
+                            <td style={{padding: '12px', fontWeight: 'bold'}}>₹{l.balance.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -143,69 +165,4 @@ export default function App() {
               </div>
             ))
           }
-
-          <div className="content">
-  {/* Dashboard Logic remains the same... */}
-
-  {/* FIRM MASTER CONTENT */}
-  {activePage === "Firm Master" && (
-    <div className="card master-card">
-      <h3>🏢 Firm Management</h3>
-      <div className="master-form">
-        <input placeholder="Firm Name" id="fName" />
-        <button onClick={() => {/* Add Firm Logic */}}>Add Firm</button>
-      </div>
-      <table className="ledger-table">
-        <thead><tr><th>Firm Name</th><th>Action</th></tr></thead>
-        <tbody>
-          {firms.map((f, i) => (
-            <tr key={i}><td>{f.name}</td><td><button className="del-btn">Delete</button></td></tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-
-  {/* BANK MASTER CONTENT */}
-  {activePage === "Bank Master" && (
-    <div className="card master-card">
-      <h3>🏦 Bank Accounts</h3>
-      <div className="master-form">
-        <select id="bFirm">
-          <option value="">Select Firm</option>
-          {firms.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
-        </select>
-        <input placeholder="Bank Name" id="bName" />
-        <input placeholder="Account Number" id="bAcc" />
-        <button onClick={() => {/* Add Bank Logic */}}>Add Bank</button>
-      </div>
-      <table className="ledger-table">
-        <thead><tr><th>Firm</th><th>Bank</th><th>Account</th></tr></thead>
-        <tbody>
-          {banks.map((b, i) => (
-            <tr key={i}><td>{b.firm}</td><td>{b.name}</td><td>{b.account}</td></tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-
-  {/* USER MASTER CONTENT */}
-  {activePage === "User Master" && (
-    <div className="card master-card">
-      <h3>👥 User Access Control</h3>
-      <p>Managing users for Softview Technologies dashboard.</p>
-      <table className="ledger-table">
-        <thead><tr><th>User Email</th><th>Role</th></tr></thead>
-        <tbody>
-          <tr><td>{user.email}</td><td>Admin</td></tr>
-        </tbody>
-      </table>
-    </div>
-  )}
-</div>
-        </div>
-      </div>
-    </div>
-  );
-}
+          {/* DASHBOARD PAGE END */}
