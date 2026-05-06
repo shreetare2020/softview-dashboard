@@ -61,17 +61,19 @@ export default function App() {
     return l.length ? l[l.length - 1].balance : 0;
   };
 
+  // --- EXPORT FUNCTIONS ---
   const exportExcel = (account) => {
     const data = getLedger(account);
-    const csv = [["Date", "Particulars", "Receipt", "Payment", "Balance"],
-      ...data.map((d) => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance])
-    ].map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Ledger_${account}.csv`;
-    a.click();
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + ["Date,Particulars,Receipt,Payment,Balance", 
+         ...data.map(d => `${d.date},${d.remark || 'Entry'},${d.receipt},${d.payment},${d.balance}`)]
+         .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Ledger_${account}.csv`);
+    document.body.appendChild(link);
+    link.click();
   };
 
   const exportPDF = (account) => {
@@ -79,9 +81,9 @@ export default function App() {
     const data = getLedger(account);
     doc.text(`Bank Ledger: ${account}`, 14, 15);
     doc.autoTable({
-      startY: 20,
+      startY: 22,
       head: [["Date", "Particulars", "Receipt", "Payment", "Balance"]],
-      body: data.map((d) => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance]),
+      body: data.map(d => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance]),
     });
     doc.save(`Ledger_${account}.pdf`);
   };
@@ -119,7 +121,7 @@ export default function App() {
 
       <div className="main">
         <div className="header">
-           <span style={{float:'left', color:'#888', fontSize:'12px'}}>Developed by Softview Technologies</span>
+           <span className="dev-text">Developed by Softview Technologies</span>
            <b>{user.email}</b>
         </div>
         
@@ -130,59 +132,46 @@ export default function App() {
           </div>
 
           {/* DASHBOARD SECTION */}
-          {activePage === "Dashboard" && selectedFirm && banks.filter((b) => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase()).map((b, i) => (
-            <div key={i} className="card ledger-card" style={{marginBottom:'15px', border:'1px solid #eee', borderRadius:'8px', overflow:'hidden'}}>
-              <div onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer', padding:'15px', display:'flex', justifyContent:'space-between', background:'#fff'}}>
-                <span><b>{expanded === b.account ? '▼' : '▶'} 🏦 {b.name}</b> <small style={{color:'#777'}}>({b.account})</small></span>
-                <b style={{color:'#2a5298'}}>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
-              </div>
-              {expanded === b.account && (
-                <div style={{padding:'15px', background:'#fafbfc', borderTop:'1px solid #eee'}}>
-                  <div style={{textAlign:'right', marginBottom:'10px'}}>
-                    <button className="btn-ex" onClick={() => exportExcel(b.account)}>📥 Excel</button>
-                    <button className="btn-pdf" onClick={() => exportPDF(b.account)} style={{marginLeft:'5px'}}>📄 PDF</button>
+          {activePage === "Dashboard" && selectedFirm && 
+            banks.filter(b => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase()).map((b, i) => (
+              <div key={i} className="card ledger-card">
+                <div className="dashboard-bank-row" onClick={() => setExpanded(expanded === b.account ? null : b.account)}>
+                  <div className="bank-info-main">
+                    <span className="expand-icon">{expanded === b.account ? '▼' : '▶'}</span>
+                    <span className="bank-label">🏦 {b.name}</span>
+                    <span className="acc-label">({b.account})</span>
                   </div>
-                  <table className="ledger-table" style={{width:'100%', background:'#fff'}}>
-                    <thead>
-                      <tr style={{background:'#f1f4f9'}}><th>Date</th><th>Particulars</th><th>Receipt (⬇)</th><th>Payment (⬆)</th><th>Balance</th></tr>
-                    </thead>
-                    <tbody>
-                      {getLedger(b.account).map((l, idx) => (
-                        <tr key={idx}>
-                          <td>{l.date}</td><td>{l.remark || "Entry"}</td>
-                          <td style={{color:'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
-                          <td style={{color:'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
-                          <td><b>₹{l.balance.toLocaleString('en-IN')}</b></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="bank-balance-main">
+                    <b className="bal-amt">₹{getBalance(b.account).toLocaleString('en-IN')}</b>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
 
-          {/* FIRM MASTER */}
-          {activePage === "Firm Master" && (
-            <div className="card master-card">
-              <h3>🏢 Firm Management</h3>
-              <table className="ledger-table">
-                <thead><tr><th>Firm Name</th></tr></thead>
-                <tbody>{firms.map((f, i) => (<tr key={i}><td>{f.name}</td></tr>))}</tbody>
-              </table>
-            </div>
-          )}
-
-          {/* BANK MASTER */}
-          {activePage === "Bank Master" && (
-            <div className="card master-card">
-              <h3>🏦 Bank Accounts</h3>
-              <table className="ledger-table">
-                <thead><tr><th>Firm</th><th>Bank</th><th>Account</th></tr></thead>
-                <tbody>{banks.map((b, i) => (<tr key={i}><td>{b.firm}</td><td>{b.name}</td><td>{b.account}</td></tr>))}</tbody>
-              </table>
-            </div>
-          )}
+                {expanded === b.account && (
+                  <div className="ledger-container">
+                    <div className="export-bar">
+                      <button className="btn-ex" onClick={() => exportExcel(b.account)}>📥 Excel</button>
+                      <button className="btn-pdf" onClick={() => exportPDF(b.account)}>📄 PDF</button>
+                    </div>
+                    <table className="ledger-table">
+                      <thead>
+                        <tr><th>Date</th><th>Particulars</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr>
+                      </thead>
+                      <tbody>
+                        {getLedger(b.account).map((l, idx) => (
+                          <tr key={idx}>
+                            <td>{l.date}</td><td>{l.remark}</td>
+                            <td style={{color:'green'}}>₹{l.receipt}</td>
+                            <td style={{color:'red'}}>₹{l.payment}</td>
+                            <td><b>₹{l.balance}</b></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))
+          }
         </div>
       </div>
     </div>
