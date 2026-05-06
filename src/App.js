@@ -144,11 +144,66 @@ export default function App() {
             ))
           }
 
-          {activePage !== "Dashboard" && (
-            <div className="card">
-              <p style={{padding: '20px'}}>{activePage} content will appear here.</p>
-            </div>
-          )}
+          <div className="content">
+  {/* Dashboard Logic remains the same... */}
+
+  {/* FIRM MASTER CONTENT */}
+  {activePage === "Firm Master" && (
+    <div className="card master-card">
+      <h3>🏢 Firm Management</h3>
+      <div className="master-form">
+        <input placeholder="Firm Name" id="fName" />
+        <button onClick={() => {/* Add Firm Logic */}}>Add Firm</button>
+      </div>
+      <table className="ledger-table">
+        <thead><tr><th>Firm Name</th><th>Action</th></tr></thead>
+        <tbody>
+          {firms.map((f, i) => (
+            <tr key={i}><td>{f.name}</td><td><button className="del-btn">Delete</button></td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  {/* BANK MASTER CONTENT */}
+  {activePage === "Bank Master" && (
+    <div className="card master-card">
+      <h3>🏦 Bank Accounts</h3>
+      <div className="master-form">
+        <select id="bFirm">
+          <option value="">Select Firm</option>
+          {firms.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
+        </select>
+        <input placeholder="Bank Name" id="bName" />
+        <input placeholder="Account Number" id="bAcc" />
+        <button onClick={() => {/* Add Bank Logic */}}>Add Bank</button>
+      </div>
+      <table className="ledger-table">
+        <thead><tr><th>Firm</th><th>Bank</th><th>Account</th></tr></thead>
+        <tbody>
+          {banks.map((b, i) => (
+            <tr key={i}><td>{b.firm}</td><td>{b.name}</td><td>{b.account}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  {/* USER MASTER CONTENT */}
+  {activePage === "User Master" && (
+    <div className="card master-card">
+      <h3>👥 User Access Control</h3>
+      <p>Managing users for Softview Technologies dashboard.</p>
+      <table className="ledger-table">
+        <thead><tr><th>User Email</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>{user.email}</td><td>Admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
         </div>
       </div>
     </div>
