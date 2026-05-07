@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth, db } from "./firebase"; 
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
@@ -24,8 +26,30 @@ export default function App() {
     }
   }, [user]);
 
-  if (!user) return <div className="p-20">Please login via your Auth screen...</div>;
+  const handleLogin = (e) => {
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login Failed: " + err.message));
+  };
 
+  // LOGIN PAGE UI (image_deac70 look)
+  if (!user) {
+    return (
+      <div className="login-bg">
+        <div className="login-card">
+          <div className="login-icon">🏢</div>
+          <h2 className="brand-dark">BANKING PRO</h2>
+          <form onSubmit={handleLogin}>
+            <input type="email" placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} required />
+            <input type="password" placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} required />
+            <button type="submit" className="btn-auth">LOGIN</button>
+          </form>
+          <div className="login-footer">Developed by: SOFTVIEW TECHNOLOGIES</div>
+        </div>
+      </div>
+    );
+  }
+
+  // MAIN DASHBOARD UI
   return (
     <div className="app-shell">
       <div className="sidebar">
@@ -79,7 +103,7 @@ export default function App() {
                                 <button className="exp-btn excel">DOWNLOAD EXCEL</button>
                               </div>
                             </div>
-                            <p style={{textAlign:'center', color:'#999'}}>No transactions found for this account.</p>
+                            <p style={{textAlign:'center', color:'#999'}}>No transactions found.</p>
                           </div>
                         </td>
                       </tr>
@@ -90,7 +114,6 @@ export default function App() {
             </table>
           </div>
         )}
-        {activeTab !== "Dashboard" && <div className="card"><h3>{activeTab} Content</h3><p>Data loading from Firebase...</p></div>}
       </div>
     </div>
   );
