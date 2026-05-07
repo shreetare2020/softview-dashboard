@@ -1,43 +1,60 @@
-/* Login Page Premium Styling */
-.login-page {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --navy: #0f172a;
+  --gold: #b58921;
+  --bg: #f1f5f9;
+}
+
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); }
+
+.app-shell { display: flex; min-height: 100vh; }
+
+/* Fixed Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--navy);
+  color: white;
+  position: fixed;
   height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  z-index: 100;
 }
 
-.login-card {
-  background: white;
-  padding: 40px;
-  border-radius: 24px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  text-align: center;
+.sidebar-brand { padding: 30px 20px; font-size: 22px; font-weight: 800; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+.nav-links { flex: 1; padding: 20px 0; }
+.nav-item { padding: 15px 25px; cursor: pointer; color: #94a3b8; font-weight: 600; transition: 0.3s; }
+.nav-item.active { background: linear-gradient(90deg, var(--gold) 0%, transparent 100%); color: white; border-left: 4px solid var(--gold); }
+
+.sidebar-footer { padding: 20px; font-size: 11px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
+
+/* Main Stage */
+.main-stage { margin-left: 260px; flex: 1; padding: 30px; }
+
+.top-right-header {
+  display: flex; justify-content: flex-end; align-items: center; gap: 20px;
+  background: white; padding: 15px 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.login-logo { font-size: 50px; margin-bottom: 10px; }
-.login-card h1 { color: #b58921; margin: 0; letter-spacing: 2px; }
-.login-card p { color: #64748b; margin-bottom: 30px; font-size: 14px; }
+.live-time { font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 5px 12px; border-radius: 20px; }
 
-.input-group { text-align: left; margin-bottom: 20px; }
-.input-group label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 5px; }
-.input-group input { 
-  width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; 
-  box-sizing: border-box; transition: 0.3s;
-}
-.input-group input:focus { border-color: #b58921; outline: none; }
+/* Dashboard Cards */
+.card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.filter-container { background: var(--navy); padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; color: white; }
 
-.login-submit {
-  width: 100%; background: #b58921; color: white; padding: 15px; border: none;
-  border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;
-}
-.login-submit:hover { background: #96711b; transform: translateY(-2px); }
+.pro-select { padding: 10px 15px; border-radius: 8px; border: none; min-width: 250px; font-weight: 600; }
 
-/* Dashboard Fixes */
-.ledger-row-bg { background: #f8fafc !important; padding: 20px !important; }
-.ledger-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.btn-excel { background: #16a34a; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-right: 10px; }
-.btn-pdf { background: #dc2626; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
-.btn-gold-sm { background: #b58921; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+/* Tables */
+.pro-table { width: 100%; border-collapse: collapse; }
+.pro-table th { background: #f8fafc; padding: 12px; text-align: left; font-size: 12px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+.pro-table td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+.ledger-box { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin: 10px 0; }
+
+/* Login Premium */
+.login-screen { height: 100vh; background: var(--navy); display: flex; justify-content: center; align-items: center; }
+.login-card { background: white; padding: 40px; border-radius: 24px; width: 350px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+.login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+.btn-gold { background: var(--gold); color: white; border: none; padding: 12px 20px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; }
