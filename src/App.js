@@ -1,109 +1,120 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-import { auth, db } from "./firebase";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
-import * as XLSX from 'xlsx';
+import React, { useState } from "react";
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("Dashboard");
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [user] = useState("Admin User");
 
-  // Firestore Data
-  const [firms, setFirms] = useState([]);
-  const [banks, setBanks] = useState([]);
-  const [userMaster, setUserMaster] = useState([]);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => { unsub(); clearInterval(timer); };
-  }, []);
-
-  // Fetch Data
-  useEffect(() => {
-    if (user) {
-      onSnapshot(collection(db, "firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
-      onSnapshot(collection(db, "banks"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
-      onSnapshot(collection(db, "users"), s => setUserMaster(s.docs.map(d => ({id: d.id, ...d.data()}))));
-    }
-  }, [user]);
-
-  // Excel Export with Color Logic
-  const handleExport = (data, name) => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, `${name}.xlsx`);
-  };
-
-  if (loading) return <div className="loader">Initializing Security...</div>;
-
-  if (!user) {
-    return (
-      <div className="login-page">
-        <div className="login-card">
-          <h1>Banking Portal Login</h1>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value);
-          }}>
-            <input name="email" type="email" placeholder="Email Address" required />
-            <input name="password" type="password" placeholder="Password" required />
-            <button type="submit">LOGIN</button>
-          </form>
-        </div>
-        <div className="login-footer">
-          Developed by <strong>Softview Technologies</strong> | 7972084304
-        </div>
-      </div>
-    );
-  }
+  const now = new Date();
+  const dateTime = `${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
 
   return (
-    <div className="dashboard-layout">
-      <div className="sidebar">
-        <h3>BANKING SYSTEM</h3>
-        <hr />
-        <div className="nav-link" onClick={() => setActiveTab("Dashboard")}>Dashboard</div>
-        <div className="nav-link" onClick={() => setActiveTab("Firm Master")}>Firm Master</div>
-        <div className="nav-link" onClick={() => setActiveTab("Bank Master")}>Bank Master</div>
-        <div className="nav-link" onClick={() => setActiveTab("User Master")}>User Master</div>
-        <button onClick={() => signOut(auth)} className="logout-btn">Logout</button>
+    <div style={{ fontFamily: "sans-serif" }} className="min-h-screen bg-gray-100 text-sm">
+
+      {/* Top Bar */}
+      <div className="flex justify-between items-start p-3 bg-white shadow">
+        <div></div>
+        <div className="text-right">
+          <div className="font-bold">{user}</div>
+          <div className="text-gray-500">{dateTime}</div>
+        </div>
       </div>
 
-      <div className="main-content">
-        <div className="top-bar">
-          <div className="user-name">{user.email}</div>
-          <div className="clock-box">
-            {currentTime.toLocaleDateString()} || {currentTime.toLocaleTimeString()}
+      {/* Layout */}
+      <div className="grid grid-cols-5 gap-3 p-3">
+
+        {/* Sidebar */}
+        <div className="col-span-1 space-y-2">
+          <div className="p-2 bg-white shadow rounded">Dashboard</div>
+          <div className="p-2 bg-white shadow rounded">Firm Master</div>
+          <div className="p-2 bg-white shadow rounded">Bank Master</div>
+          <div className="p-2 bg-white shadow rounded">User Master</div>
+          <button className="w-full bg-red-500 text-white p-2 rounded">Logout</button>
+        </div>
+
+        {/* Content */}
+        <div className="col-span-4 space-y-4">
+
+          {/* Dashboard */}
+          <div className="bg-white shadow p-3 rounded">
+            <div className="flex justify-between">
+              <h2 className="font-bold">Bank Summary</h2>
+              <button className="bg-blue-500 text-white px-2 py-1 rounded">Expand</button>
+            </div>
+
+            <table className="w-full text-xs border mt-3">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th>Date</th>
+                  <th>Opening</th>
+                  <th>Particular</th>
+                  <th>Receipt</th>
+                  <th>Payment</th>
+                  <th>Closing</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>01-05</td>
+                  <td>1000</td>
+                  <td>Sales</td>
+                  <td style={{ color: "green" }}>↓ 500</td>
+                  <td style={{ color: "red" }}>↑ 0</td>
+                  <td>1500</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="flex gap-2 mt-2">
+              <button className="bg-green-500 text-white px-2 py-1 rounded">Excel Export</button>
+              <button className="bg-purple-500 text-white px-2 py-1 rounded">PDF Export</button>
+            </div>
           </div>
-        </div>
 
-        {/* Content starts here based on activeTab */}
-        <div className="page-header">
-           <h2>{activeTab}</h2>
-        </div>
+          {/* Firm Master */}
+          <div className="bg-white shadow p-3 rounded">
+            <h2 className="font-bold">Firm Master</h2>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              <input className="border p-1" placeholder="Firm Name" />
+              <input className="border p-1" placeholder="Bank Link" />
+              <button className="bg-blue-500 text-white rounded">Add Firm</button>
+            </div>
+          </div>
 
-        {activeTab === "Dashboard" && (
-           <div className="card">
-              <h3>Bank Summary</h3>
-              {/* Table with Expand logic for Ledger */}
-              {/* Receipt Green Arrow & Payment Red Arrow Logic */}
-           </div>
-        )}
+          {/* Bank Master */}
+          <div className="bg-white shadow p-3 rounded">
+            <h2 className="font-bold">Bank Master</h2>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <input className="border p-1" placeholder="Bank Name" />
+              <input className="border p-1" placeholder="Account No" />
+              <input className="border p-1" placeholder="Branch" />
+              <input className="border p-1" placeholder="Opening Amt" />
+            </div>
+            <button className="mt-2 bg-blue-500 text-white px-2 py-1 rounded">Add Bank</button>
+          </div>
 
-        {/* Similar sections for Firm Master, Bank Master (with Edit/Delete/Close logic), and User Master */}
+          {/* User Master */}
+          <div className="bg-white shadow p-3 rounded">
+            <h2 className="font-bold">User Master</h2>
+            <div className="grid grid-cols-5 gap-2 mt-2">
+              <input className="border p-1" placeholder="User Code" />
+              <input className="border p-1" placeholder="Name" />
+              <input className="border p-1" placeholder="Email" />
+              <input className="border p-1" placeholder="Password" />
+              <select className="border p-1">
+                <option>Admin</option>
+                <option>Viewer</option>
+              </select>
+            </div>
+            <button className="mt-2 bg-blue-500 text-white px-2 py-1 rounded">Add User</button>
+          </div>
 
-        <div className="footer-dev">
-          Developed by <strong>Softview Technologies</strong> | Contact: 7972084304
         </div>
       </div>
+
+      {/* Footer */}
+      <div className="text-xs p-2 text-left text-gray-600">
+        Developed by Softview Technologies | Contact: 7972084304
+      </div>
+
     </div>
   );
 }
