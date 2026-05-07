@@ -5,53 +5,72 @@
   --danger: #ef4444;
 }
 
-/* Login Page - Kabhi change nahi hoga */
-.login-bg {
+body { margin: 0; font-family: 'Inter', sans-serif; background: #f1f5f9; }
+
+/* LOGIN SCREEN - DARK & SECURE */
+.login-screen {
   background: var(--navy);
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.login-card { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-.login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-.login-card button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.login-card { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; }
 
-/* Internal Layout */
-.app-shell { display: flex; height: 100vh; overflow: hidden; position: relative; }
-.sidebar { width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; z-index: 10; }
+/* MAIN LAYOUT */
+.app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR LEFT */
+.sidebar {
+  width: 260px;
+  background: var(--navy);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+.sidebar-brand { padding: 30px 20px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #334155; }
+.nav-links { flex: 1; padding: 20px 0; }
 .nav-item { padding: 15px 25px; cursor: pointer; color: #94a3b8; font-weight: 500; transition: 0.3s; }
-.nav-item.active, .nav-item:hover { background: var(--accent); color: white; }
+.nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
-.main-content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; overflow-y: auto; position: relative; }
+/* MAIN STAGE */
+.main-stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
 
-/* Upper Right: User & Clock */
-.header-right {
+/* 1) TOP RIGHT: USER & CLOCK */
+.top-right-header {
   position: absolute;
-  top: 15px;
+  top: 20px;
   right: 40px;
   text-align: right;
+  z-index: 500;
 }
-.user-name { font-weight: 800; color: var(--navy); font-size: 16px; }
-.live-clock { color: #64748b; font-size: 13px; font-family: 'Courier New', Courier, monospace; }
+.user-name { font-weight: 800; color: var(--navy); display: block; font-size: 16px; }
+.live-clock { color: #64748b; font-size: 13px; font-family: monospace; font-weight: bold; }
 
-/* Bottom Left: Developed By */
-.footer-left {
+/* 2) BOTTOM LEFT: BRANDING */
+.footer-branding {
   position: fixed;
-  bottom: 10px;
-  left: 275px;
-  font-size: 11px;
+  bottom: 15px;
+  left: 275px; /* Sidebar ke theek baad */
+  font-size: 12px;
   color: #94a3b8;
-  z-index: 5;
+  z-index: 500;
 }
 
-/* Dashboard & Masters */
-.page-container { padding: 80px 40px 40px 40px; }
-.card { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-.pro-table { width: 100%; border-collapse: collapse; }
-.pro-table th { background: #f1f5f9; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
-.pro-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+/* CARDS & TABLES */
+.content-container { padding: 80px 40px 40px 40px; }
+.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+.pro-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.pro-table th { background: #f8fafc; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 13px; color: #475569; }
+.pro-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-.amt-receipt { color: var(--success); font-weight: bold; }
-.amt-payment { color: var(--danger); font-weight: bold; }
-.bank-closed-row { background-color: #fee2e2 !important; color: #b91c1c; font-weight: bold; }
+/* ARROWS & STATUS */
+.amt-receipt { color: var(--success); font-weight: bold; } /* Green Down ↓ */
+.amt-payment { color: var(--danger); font-weight: bold; } /* Red Up ↑ */
+.bank-closed-warning { background-color: #fee2e2 !important; color: #b91c1c; border: 1px solid #f87171; }
+
+/* FORM STYLING */
+.form-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+.form-group input, .form-group select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.btn-save { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
