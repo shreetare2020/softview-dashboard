@@ -7,10 +7,10 @@ import { collection, onSnapshot, addDoc } from "firebase/firestore";
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activePage, setActivePage] = useState("Dashboard");
-  const [firms, setFirms] = useState([]);
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [activePage, setActivePage] = useState("Dashboard");
+  const [firms, setFirms] = useState([]);
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,50 +22,62 @@ export default function App() {
     return () => { unsub(); clearInterval(timer); };
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    return onSnapshot(collection(db, "firms"), (s) => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
-  }, [user]);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (error) {
+      alert("Login Error: Please check your email and password.");
+    }
+  };
 
-  if (loading) return <div style={{padding: "50px", textAlign: "center"}}>Verifying Session...</div>;
+  if (loading) return <div className="loader">Authenticating... Please Wait.</div>;
 
   if (!user) {
     return (
       <div className="loginPage">
-        <div className="loginCard">
+        <form className="loginCard" onSubmit={handleLogin}>
           <h2>🏦 SOFTVIEW BANKING</h2>
-          <input placeholder="Email Address" onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" onChange={(e) => setPass(e.target.value)} />
-          <button onClick={() => signInWithEmailAndPassword(auth, email, pass)}>SECURE LOGIN</button>
-        </div>
+          <p style={{color: '#666', fontSize: '14px'}}>Secure Professional Portal</p>
+          <input type="email" placeholder="Admin Email" required onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" required onChange={(e) => setPass(e.target.value)} />
+          <button type="submit">ACCESS DASHBOARD</button>
+        </form>
       </div>
     );
   }
 
   return (
-    <div style={{display: "flex"}}>
+    <div className="app-layout">
       <div className="sidebar">
-        <h3>MANAGEMENT</h3>
-        <div className={`nav-item ${activePage === "Dashboard" ? "active" : ""}`} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
-        <div className={`nav-item ${activePage === "Firm Master" ? "active" : ""}`} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
-        <button onClick={() => signOut(auth)} style={{background: "red", color: "white", border: "none", padding: "10px", width: "100%", marginTop: "20px", borderRadius: "5px", cursor: "pointer"}}>Logout</button>
+        <h2 className="brand">BANKING SYSTEM</h2>
+        <div className="nav-links">
+          <div className={activePage === "Dashboard" ? "active" : ""} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
+          <div className={activePage === "Firm Master" ? "active" : ""} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
+          <div className={activePage === "Bank Master" ? "active" : ""} onClick={() => setActivePage("Bank Master")}>🏦 Bank Master</div>
+        </div>
+        <button className="logout-btn" onClick={() => signOut(auth)}>Log Out</button>
       </div>
-      <div style={{flex: 1, padding: "30px"}}>
-        <h2>{activePage}</h2>
-        {activePage === "Firm Master" && (
-          <div style={{background: "white", padding: "20px", borderRadius: "10px"}}>
-             <h4>Add New Firm</h4>
-             <input id="fName" placeholder="Firm Name" style={{padding: "10px", marginRight: "10px"}} />
-             <button onClick={() => addDoc(collection(db, "firms"), {name: document.getElementById('fName').value})} style={{padding: "10px", background: "green", color: "white", border: "none"}}>Add</button>
-             <table style={{marginTop: "20px"}}>
-               <thead><tr><th>SR.</th><th>FIRM NAME</th></tr></thead>
-               <tbody>{firms.map((f, i) => <tr key={i}><td>{i+1}</td><td>{f.name}</td></tr>)}</tbody>
-             </table>
-          </div>
-        )}
-        <div className="footer-right">
-           <b>{time.toLocaleString()}</b><br/>
-           Developed by Softview Technologies | 7972084304
+
+      <div className="main-content">
+        <div className="top-nav">
+          <span className="page-title">{activePage}</span>
+          <span className="user-info">{user.email}</span>
+        </div>
+
+        <div className="content-body">
+           {/* Form Content will go here based on activePage */}
+           {activePage === "Firm Master" && (
+             <div className="card">
+               <h3>Firm Management</h3>
+               {/* Add Form Logic Here */}
+             </div>
+           )}
+        </div>
+
+        <div className="footer-fixed">
+          <div className="clock-box">{time.toLocaleString()}</div>
+          <div className="dev-credit">Developed by Softview Technologies | 7972084304</div>
         </div>
       </div>
     </div>

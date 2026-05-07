@@ -1,39 +1,47 @@
-:root {
-  --navy: #1a2a44;
-  --blue: #2a5298;
-  --light-bg: #f4f7f6;
-  --white: #ffffff;
+.loginPage {
+  background: #1a2a44;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-body { font-family: 'Segoe UI', sans-serif; background: var(--light-bg); margin: 0; }
-
-/* Login Page Professional Look */
-.loginPage { 
-  display: flex; justify-content: center; align-items: center; 
-  height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
-}
-.loginCard { 
-  background: var(--white); padding: 40px; border-radius: 12px; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center;
-}
-.loginCard h2 { color: var(--navy); margin-bottom: 25px; font-weight: 600; }
-.loginCard input { 
-  width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; 
-  border-radius: 6px; box-sizing: border-box;
-}
-.loginCard button { 
-  width: 100%; padding: 12px; background: var(--navy); color: white; 
-  border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;
+.loginCard {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+  text-align: center;
 }
 
-/* Sidebar & Table Styles */
-.sidebar { width: 260px; background: var(--navy); color: white; min-height: 100vh; padding: 20px; }
-.nav-item { padding: 12px; cursor: pointer; border-radius: 5px; margin: 5px 0; transition: 0.3s; }
-.nav-item.active { background: var(--blue); font-weight: bold; }
+.loginCard input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
 
-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-th { background: #f8f9fa; padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; color: var(--navy); }
-td { padding: 15px; border-bottom: 1px solid #eee; }
+.loginCard button {
+  width: 100%;
+  padding: 12px;
+  background: #2a5298;
+  color: white;
+  border: none;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-/* Footer info */
-.footer-right { position: fixed; bottom: 15px; right: 25px; text-align: right; color: #666; font-size: 12px; }
+.footer-fixed {
+  position: fixed;
+  bottom: 15px;
+  right: 25px;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.clock-box { font-weight: bold; color: #1a2a44; font-size: 14px; }
+.dev-credit { font-size: 11px; color: #777; }
