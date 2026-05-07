@@ -13,7 +13,7 @@ function LoginScreen() {
       <div className="login-card">
         <div className="login-logo">🏦</div>
         <h1>BANKING PRO</h1>
-        <form className="login-form" onSubmit={(e) => {
+        <form onSubmit={(e) => {
           e.preventDefault();
           signInWithEmailAndPassword(auth, e.target.email.value, e.target.pass.value);
         }}>
@@ -36,6 +36,8 @@ export default function App() {
   const [usersList, setUsersList] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expandedBank, setExpandedBank] = useState(null);
+  
+  // Edit State
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
 
@@ -62,13 +64,6 @@ export default function App() {
       body: [[currentTime.toLocaleDateString(), 'Opening Balance', `Rs. ${b.balance}`]],
     });
     doc.save(`${b.bankName}_Statement.pdf`);
-  };
-
-  const exportExcel = (b) => {
-    const ws = XLSX.utils.json_to_sheet([{ Date: currentTime.toLocaleDateString(), Particulars: 'Opening Balance', Balance: b.balance }]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-    XLSX.writeFile(wb, `${b.bankName}_Ledger.xlsx`);
   };
 
   const handleUpdate = async (e, collectionName) => {
@@ -133,10 +128,7 @@ export default function App() {
                                 <div className="ledger-panel">
                                   <div className="flex-between mb-10">
                                     <span className="ledger-title">Statement View</span>
-                                    <div className="btn-group">
-                                      <button className="btn-excel-sm" onClick={() => exportExcel(b)}>Excel</button>
-                                      <button className="btn-pdf-sm" onClick={() => exportPDF(b)}>PDF</button>
-                                    </div>
+                                    <button className="btn-pdf-sm" onClick={() => exportPDF(b)}>PDF</button>
                                   </div>
                                   <table className="pro-table inner">
                                     <thead><tr><th>Date</th><th>Particulars</th><th>Balance</th></tr></thead>
@@ -167,16 +159,15 @@ export default function App() {
                   <input name="fName" placeholder="Firm Name" className="pro-input" value={editData.name || ""} onChange={(e)=>setEditData({...editData, name: e.target.value})} required />
                   <input name="fAddr" placeholder="Address" className="pro-input" value={editData.address || ""} onChange={(e)=>setEditData({...editData, address: e.target.value})} required />
                   <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
-                  {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
                 </form>
               </div>
               <div className="card-premium mt-20">
                 <table className="pro-table">
-                  <thead><tr><th>Firm Name</th><th>Address</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>Firm Name</th><th>Actions</th></tr></thead>
                   <tbody>
                     {firms.map(f => (
                       <tr key={f.id}>
-                        <td>{f.name}</td><td>{f.address}</td>
+                        <td>{f.name}</td>
                         <td>
                           <button className="btn-edit-sm" onClick={() => {setEditId(f.id); setEditData(f);}}>Edit</button>
                           <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "firms", f.id))}>Delete</button>
@@ -206,16 +197,15 @@ export default function App() {
                   <input name="acc" placeholder="A/c No" className="pro-input" value={editData.accNo || ""} onChange={(e)=>setEditData({...editData, accNo: e.target.value})} required />
                   <input name="bal" placeholder="Balance" className="pro-input" value={editData.balance || ""} onChange={(e)=>setEditData({...editData, balance: e.target.value})} required />
                   <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
-                  {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
                 </form>
               </div>
               <div className="card-premium mt-20">
                 <table className="pro-table">
-                  <thead><tr><th>Bank</th><th>Firm</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>Bank</th><th>Actions</th></tr></thead>
                   <tbody>
                     {banks.map(b => (
                       <tr key={b.id}>
-                        <td>{b.bankName}</td><td>{b.firmName}</td>
+                        <td>{b.bankName}</td>
                         <td>
                           <button className="btn-edit-sm" onClick={() => {setEditId(b.id); setEditData(b);}}>Edit</button>
                           <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "banks", b.id))}>Delete</button>
@@ -234,27 +224,25 @@ export default function App() {
                 <h3>{editId ? "📝 Edit User" : "👥 User Master"}</h3>
                 <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "users") : async (ev) => {
                   ev.preventDefault();
-                  await addDoc(collection(db, "users"), { uName: ev.target.uName.value, uEmail: ev.target.uEmail.value, uPass: ev.target.uPass.value, uRole: ev.target.uRole.value });
+                  await addDoc(collection(db, "users"), { uName: ev.target.uName.value, uEmail: ev.target.uEmail.value, uRole: ev.target.uRole.value });
                   ev.target.reset();
                 }(e)}>
                   <input name="uName" placeholder="Name" className="pro-input" value={editData.uName || ""} onChange={(e)=>setEditData({...editData, uName: e.target.value})} required />
                   <input name="uEmail" placeholder="Email" className="pro-input" value={editData.uEmail || ""} onChange={(e)=>setEditData({...editData, uEmail: e.target.value})} required />
-                  <input name="uPass" type="password" placeholder="Pass" className="pro-input" value={editData.uPass || ""} onChange={(e)=>setEditData({...editData, uPass: e.target.value})} required />
                   <select name="uRole" className="pro-input" value={editData.uRole || "Admin"} onChange={(e)=>setEditData({...editData, uRole: e.target.value})}>
                     <option value="Admin">Admin</option>
                     <option value="Operator">Operator</option>
                   </select>
                   <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
-                  {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
                 </form>
               </div>
               <div className="card-premium mt-20">
                 <table className="pro-table">
-                  <thead><tr><th>Name</th><th>Role</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>User</th><th>Actions</th></tr></thead>
                   <tbody>
                     {usersList.map(u => (
                       <tr key={u.id}>
-                        <td>{u.uName}</td><td>{u.uRole}</td>
+                        <td>{u.uName}</td>
                         <td>
                           <button className="btn-edit-sm" onClick={() => {setEditId(u.id); setEditData(u);}}>Edit</button>
                           <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "users", u.id))}>Delete</button>
