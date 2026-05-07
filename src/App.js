@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-// --- Login Screen ---
+// --- Fixed Login Screen Component ---
 function LoginScreen() {
   const handleLogin = (e) => {
     e.preventDefault();
@@ -84,7 +84,7 @@ export default function App() {
         <div className="sidebar-brand">BANKING PRO</div>
         <div className="nav-links">
           {['Dashboard', 'Firm Master', 'Bank Master', 'User Master'].map(tab => (
-            <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+            <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => {setActiveTab(tab); setExpandedBank(null);}}>
               {tab}
             </div>
           ))}
@@ -153,8 +153,8 @@ export default function App() {
           )}
 
           {activeTab !== "Dashboard" && (
-            <div className="card-premium master-view">
-              <h3>{activeTab} Data</h3>
+            <div className="card-premium" style={{padding: '30px'}}>
+              <h3>{activeTab} Management</h3>
               <table className="pro-table">
                 <thead>
                   {activeTab === "Firm Master" && <tr><th>Firm Name</th><th>Address</th></tr>}
