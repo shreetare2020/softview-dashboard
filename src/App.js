@@ -11,7 +11,7 @@ export default function App() {
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [usersList, setUsersList] = useState([]); // User Master ke liye
+  const [usersList, setUsersList] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [activePage, setActivePage] = useState("Dashboard");
@@ -29,14 +29,13 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  // Sabhi Masters ka data fetch karna
+  // Masters ka data fetch karne ka logic
   useEffect(() => {
     if (!user) return;
     const unsubFirms = onSnapshot(collection(db, "firms"), (s) => setFirms(s.docs.map(d => d.data())));
     const unsubBanks = onSnapshot(collection(db, "banks"), (s) => setBanks(s.docs.map(d => d.data())));
     const unsubTrans = onSnapshot(collection(db, "transactions"), (s) => setTransactions(s.docs.map(d => d.data())));
     const unsubUsers = onSnapshot(collection(db, "users"), (s) => setUsersList(s.docs.map(d => d.data())));
-    
     return () => { unsubFirms(); unsubBanks(); unsubTrans(); unsubUsers(); };
   }, [user]);
 
@@ -75,7 +74,6 @@ export default function App() {
           <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" onChange={(e) => setPass(e.target.value)} />
           <button onClick={login}>Login</button>
-          <p className="dev-tag">Developed by Softview Technologies</p>
         </div>
       </div>
     );
@@ -101,39 +99,38 @@ export default function App() {
 
       <div className="main">
         <div className="header">
-           <span className="dev-text">Softview Technologies</span>
+           <span>Softview Technologies</span>
            <b>{user.email}</b>
         </div>
         
         <div className="content">
-          <div className="page-title">
-            <h2>{activePage}</h2>
-          </div>
+          <div className="page-title"><h2>{activePage}</h2></div>
 
-          {/* User Master Page */}
+          {/* User Master Content */}
           {activePage === "User Master" && (
             <div className="card">
               <h3>System Users</h3>
-              <table className="ledger-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
-                <tbody>
-                  {usersList.map((u, i) => (
-                    <tr key={i}><td>{u.name}</td><td>{u.email}</td><td>{u.role}</td></tr>
-                  ))}
-                </tbody>
-              </table>
+              <ul>{usersList.map((u, i) => <li key={i}>{u.name} ({u.role})</li>)}</ul>
             </div>
           )}
 
-          {/* Firm Master Page */}
+          {/* Firm Master Content */}
           {activePage === "Firm Master" && (
             <div className="card">
               <h3>Registered Firms</h3>
-              <ul>{firms.map((f, i) => <li key={i}>{f.name} - {f.address || 'No Address'}</li>)}</ul>
+              <ul>{firms.map((f, i) => <li key={i}>{f.name}</li>)}</ul>
             </div>
           )}
 
-          {/* Dashboard Logic */}
+          {/* Bank Master Content */}
+          {activePage === "Bank Master" && (
+            <div className="card">
+              <h3>Bank Accounts</h3>
+              <ul>{banks.map((b, i) => <li key={i}>{b.name} - {b.account} ({b.firm})</li>)}</ul>
+            </div>
+          )}
+
+          {/* Dashboard Content */}
           {activePage === "Dashboard" && selectedFirm && 
             banks.filter(b => String(b.firm || b.Firm || "").toLowerCase() === selectedFirm.toLowerCase()).map((b, i) => (
               <div key={i} className="card ledger-card">
@@ -144,13 +141,13 @@ export default function App() {
                 {expanded === b.account && (
                   <div className="ledger-container">
                     <table className="ledger-table">
-                      <thead><tr><th>Date</th><th>Remark</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr></thead>
+                      <thead><tr><th>Date</th><th>Particulars</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr></thead>
                       <tbody>
                         {getLedger(b.account).map((l, idx) => (
                           <tr key={idx}>
                             <td>{l.date}</td><td>{l.remark}</td>
-                            <td className="txt-green">₹{l.receipt}</td>
-                            <td className="txt-red">₹{l.payment}</td>
+                            <td style={{color:'green'}}>₹{l.receipt}</td>
+                            <td style={{color:'red'}}>₹{l.payment}</td>
                             <td>₹{l.balance}</td>
                           </tr>
                         ))}
