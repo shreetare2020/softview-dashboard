@@ -1,17 +1,75 @@
-/* Login Screen Style */
-.login-bg { background: #1a237e; height: 100vh; display: flex; justify-content: center; align-items: center; }
-.login-card { background: white; padding: 40px; border-radius: 15px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-.login-icon { font-size: 50px; margin-bottom: 10px; }
-.brand-dark { color: #1a237e; margin-bottom: 25px; }
-.login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-.btn-auth { width: 100%; padding: 12px; background: #1a237e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-.login-footer { margin-top: 20px; font-size: 11px; color: #666; }
+/* Color Palette */
+:root {
+  --dark-blue: #0a0e2e; /* Deep Premium Blue */
+  --gold: #ffca28;      /* Vibrant Gold */
+  --light-bg: #f4f7fe;
+  --white: #ffffff;
+}
 
-/* Dashboard Colors */
-.app-shell { display: flex; min-height: 100vh; background: #f8f9fa; }
-.sidebar { width: 240px; background: #1a237e; color: white; padding: 20px; display: flex; flex-direction: column; }
-.nav-item.active { background: rgba(255,255,255,0.15); font-weight: bold; }
-.card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.pro-table th { border-bottom: 2px solid #1a237e; color: #1a237e; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+/* --- LOGIN PAGE --- */
+.login-bg { 
+  background: radial-gradient(circle, var(--dark-blue) 0%, #05071a 100%); 
+  height: 100vh; display: flex; justify-content: center; align-items: center; 
+}
+.login-card { 
+  background: var(--white); padding: 40px; border-radius: 20px; width: 380px; 
+  text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-top: 5px solid var(--gold);
+}
+.btn-auth { 
+  width: 100%; padding: 14px; background: var(--dark-blue); color: var(--gold); 
+  border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;
+}
+
+/* --- DASHBOARD SHELL --- */
+.app-shell { display: flex; min-height: 100vh; background: var(--light-bg); }
+
+.sidebar { 
+  width: 260px; background: var(--dark-blue); color: var(--white); 
+  display: flex; flex-direction: column; position: fixed; height: 100vh;
+}
+.brand { 
+  font-size: 22px; font-weight: 800; color: var(--gold); padding: 30px 25px; 
+  text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.nav-item { 
+  padding: 15px 25px; cursor: pointer; color: #b0bec5; transition: 0.3s;
+}
+.nav-item:hover, .nav-item.active { 
+  background: rgba(255,255,255,0.05); color: var(--gold); border-right: 4px solid var(--gold);
+}
+
+.main-content { flex: 1; margin-left: 260px; padding: 30px; }
+
+/* --- TABLES & CARDS --- */
+.card { 
+  background: var(--white); border-radius: 12px; padding: 25px; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;
+}
+.pro-table { width: 100%; border-collapse: collapse; }
+.pro-table th { 
+  background: #f8f9fa; text-align: left; padding: 15px; color: var(--dark-blue); 
+  font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--gold);
+}
+.pro-table td { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 15px; }
+
+/* LEDGER EXPANSION */
+.ledger-box { 
+  background: #fafafa; border: 1.5px solid var(--dark-blue); 
+  border-radius: 10px; padding: 20px; margin: 10px 0;
+}
+.btn-ledger { 
+  background: var(--gold); color: var(--dark-blue); padding: 8px 15px; 
+  border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
+}
+.exp-btn { 
+  padding: 8px 15px; border-radius: 5px; border: none; color: white; 
+  font-weight: bold; margin-left: 10px; cursor: pointer;
+}
+.pdf { background: #d32f2f; }
+.excel { background: #2e7d32; }
+
 .amt { color: #2e7d32; font-weight: bold; }
-.btn-ledger.active { background: #ffc107; }
+.dev-footer { margin-top: auto; padding: 20px; font-size: 11px; text-align: center; color: #666; }
+.dev-footer strong { color: var(--gold); }

@@ -2,54 +2,53 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth, db } from "./firebase"; 
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
+  const [firms, setFirms] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsubAuth();
+    onAuthStateChanged(auth, (u) => setUser(u));
   }, []);
 
   useEffect(() => {
     if (user) {
-      const unsubFirms = onSnapshot(collection(db, "firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
-      const unsubBanks = onSnapshot(collection(db, "banks"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
-      return () => { unsubFirms(); unsubBanks(); };
+      onSnapshot(collection(db, "banks"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      onSnapshot(collection(db, "firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      onSnapshot(collection(db, "users"), s => setUsersList(s.docs.map(d => ({id: d.id, ...d.data()}))));
     }
   }, [user]);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login Failed: " + err.message));
+    signInWithEmailAndPassword(auth, email, password).catch(() => alert("Galt Details!"));
   };
 
-  // LOGIN PAGE UI (image_deac70 look)
   if (!user) {
     return (
       <div className="login-bg">
         <div className="login-card">
-          <div className="login-icon">🏢</div>
+          <div style={{fontSize: '50px'}}>🏢</div>
           <h2 className="brand-dark">BANKING PRO</h2>
           <form onSubmit={handleLogin}>
-            <input type="email" placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} required />
-            <input type="password" placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} required />
+            <input type="email" placeholder="Email" onChange={(e)=>setEmail(e.target.value)} required />
+            <input type="password" placeholder="Password" onChange={(e)=>setPassword(e.target.value)} required />
             <button type="submit" className="btn-auth">LOGIN</button>
           </form>
-          <div className="login-footer">Developed by: SOFTVIEW TECHNOLOGIES</div>
+          <div className="dev-footer">Powered by <strong>SOFTVIEW TECHNOLOGIES</strong></div>
         </div>
       </div>
     );
   }
 
-  // MAIN DASHBOARD UI
   return (
     <div className="app-shell">
       <div className="sidebar">
@@ -59,21 +58,19 @@ export default function App() {
             {tab}
           </div>
         ))}
-        <div className="dev-footer">
-          Developed by:<br/>
-          <strong>SOFTVIEW TECHNOLOGIES</strong><br/>
-          +91 7972084304
-        </div>
+        <div className="dev-footer">Developed by: <strong>SOFTVIEW TECHNOLOGIES</strong><br/>+91 7972084304</div>
       </div>
 
       <div className="main-content">
-        <header className="top-bar">
+        <header className="top-bar card" style={{display:'flex', justifyContent:'space-between', padding:'15px 25px'}}>
           <span>Welcome, <strong>{user.email}</strong></span>
-          <button className="logout-btn" onClick={() => signOut(auth)}>LOGOUT</button>
+          <button className="exp-btn pdf" onClick={() => signOut(auth)}>LOGOUT</button>
         </header>
 
-        {activeTab === "Dashboard" && (
-          <div className="card">
+        <div className="card">
+          <h2 style={{color: '#0a0e2e', marginBottom: '20px'}}>{activeTab}</h2>
+          
+          {activeTab === "Dashboard" ? (
             <table className="pro-table">
               <thead>
                 <tr><th>Bank Name</th><th>Account No</th><th>Balance</th><th>Action</th></tr>
@@ -86,8 +83,7 @@ export default function App() {
                       <td><strong>{bank.accNo}</strong></td>
                       <td className="amt">₹ {bank.balance}</td>
                       <td>
-                        <button className={`btn-ledger ${expandedId === bank.id ? 'active' : ''}`} 
-                                onClick={() => setExpandedId(expandedId === bank.id ? null : bank.id)}>
+                        <button className="btn-ledger" onClick={() => setExpandedId(expandedId === bank.id ? null : bank.id)}>
                           {expandedId === bank.id ? 'Close' : 'Ledger'}
                         </button>
                       </td>
@@ -96,14 +92,14 @@ export default function App() {
                       <tr>
                         <td colSpan="4">
                           <div className="ledger-box">
-                            <div className="ledger-header">
-                              <span><strong>IFSC:</strong> {bank.ifsc || 'N/A'}</span>
-                              <div className="export-group">
-                                <button className="exp-btn pdf">DOWNLOAD PDF</button>
-                                <button className="exp-btn excel">DOWNLOAD EXCEL</button>
+                            <div style={{display:'flex', justifyContent:'space-between'}}>
+                              <span><strong>IFSC:</strong> {bank.ifsc}</span>
+                              <div>
+                                <button className="exp-btn pdf">PDF</button>
+                                <button className="exp-btn excel">EXCEL</button>
                               </div>
                             </div>
-                            <p style={{textAlign:'center', color:'#999'}}>No transactions found.</p>
+                            <p style={{marginTop:'15px', color:'#999'}}>Transactions fetching...</p>
                           </div>
                         </td>
                       </tr>
@@ -112,8 +108,21 @@ export default function App() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
+          ) : (
+            <table className="pro-table">
+              <thead>
+                {activeTab === "User Master" ? <tr><th>Name</th><th>Email</th><th>Role</th></tr> : 
+                 activeTab === "Firm Master" ? <tr><th>Firm Name</th><th>GST</th><th>Address</th></tr> :
+                 <tr><th>Bank</th><th>Acc No</th><th>Firm</th></tr>}
+              </thead>
+              <tbody>
+                {activeTab === "User Master" && usersList.map(u => <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td><td>{u.role}</td></tr>)}
+                {activeTab === "Firm Master" && firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td></tr>)}
+                {activeTab === "Bank Master" && banks.map(b => <tr key={b.id}><td>{b.bankName}</td><td>{b.accNo}</td><td>{b.firmName}</td></tr>)}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );
