@@ -1,112 +1,125 @@
-// Ensure all necessary imports are at the top to avoid Vercel Build Failure
 import React, { useState, useEffect } from 'react';
 import './App.css';
+// Firebase imports ko apne config ke hisaab se sahi rakhein
+import { auth, db } from "./firebase"; 
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
-// ... (Firebase imports and config)
-
-function App() {
-  // UI States
+export default function App() {
+  const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const [firms, setFirms] = useState([]);
+  const [banks, setBanks] = useState([]);
+  const [usersList, setUsersList] = useState([]);
+  const [selectedFirm, setSelectedFirm] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
-  // Data Logic for User Master (Fix for image_de3f3a)
-  const renderUserMaster = () => (
-    <div className="card-premium">
-      <table className="pro-table">
-        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
-        <tbody>
-          {usersList.map(user => (
-            <tr key={user.id}>
-              <td>{user.uName}</td>
-              <td>{user.uEmail}</td>
-              <td><span className="badge">{user.role}</span></td>
-              <td><button className="btn-action">Edit</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
 
-  // Ledger Expansion Fix (Fix for image_de3b5d and image_de4b59)
-  const renderLedger = (bank) => (
-    <tr className="no-hover">
-      <td colSpan="5">
-        <div className="ledger-container">
-          <div className="ledger-header">
-            <div>
-              <strong>Account:</strong> {bank.accNo} | <strong>IFSC:</strong> {bank.ifsc || 'N/A'}
-            </div>
-            <div>
-              <button className="btn-export btn-pdf">Download PDF</button>
-              <button className="btn-export btn-excel">Export Excel</button>
-            </div>
-          </div>
-          
-          <button className="btn-export btn-add-entry">+ Add New Entry</button>
-          
-          <table className="inner-table">
-            <thead>
-              <tr><th>Date</th><th>Particulars</th><th>Debit (Dr)</th><th>Credit (Cr)</th><th>Balance</th></tr>
-            </thead>
-            <tbody>
-              {/* Mapping ledger entries from Firebase */}
-              <tr>
-                <td>07-05-2026</td>
-                <td>Opening Balance</td>
-                <td>0.00</td>
-                <td>{bank.balance}</td>
-                <td>{bank.balance}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </td>
-    </tr>
-  );
+  useEffect(() => {
+    if (user) {
+      onSnapshot(collection(db, "firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      onSnapshot(collection(db, "banks"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      onSnapshot(collection(db, "users"), s => setUsersList(s.docs.map(d => ({id: d.id, ...d.data()}))));
+    }
+  }, [user]);
+
+  if (!user) return <div className="login-trigger">Please Login...</div>;
 
   return (
-    <div className="app-container">
-      {/* Sidebar and Header ... */}
-      
-      <main className="main-content">
-        {activeTab === "Dashboard" ? (
-          <div className="dashboard-view">
-            <div className="card-premium">
-              <select className="firm-select">
-                <option>Select Firm...</option>
-                {firms.map(f => <option key={f.id}>{f.name}</option>)}
-              </select>
-            </div>
-
-            <table className="pro-table">
-              <thead><tr><th>Bank Name</th><th>Account No</th><th>Balance</th><th>Action</th></tr></thead>
-              <tbody>
-                {banks.map(bank => (
-                  <React.Fragment key={bank.id}>
-                    <tr>
-                      <td>{bank.bankName}</td>
-                      <td>{bank.accNo}</td>
-                      <td className="bal-text">₹ {bank.balance}</td>
-                      <td>
-                        <button className="btn-action" onClick={() => setExpandedId(expandedId === bank.id ? null : bank.id)}>
-                          {expandedId === bank.id ? 'Close' : 'Ledger'}
-                        </button>
-                      </td>
-                    </tr>
-                    {expandedId === bank.id && renderLedger(bank)}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+    <div className="app-shell">
+      <div className="sidebar">
+        <h2 className="brand">BANKING PRO</h2>
+        {['Dashboard', 'Firm Master', 'Bank Master', 'User Master'].map(tab => (
+          <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+            {tab}
           </div>
-        ) : activeTab === "User Master" ? renderUserMaster() : (
-          /* Render Firm/Bank Masters */
-          <div>Master Forms Here...</div>
-        )}
-      </main>
+        ))}
+        <div className="dev-footer">Developed by: <br/><strong>SOFTVIEW TECHNOLOGIES</strong></div>
+      </div>
+
+      <div className="main-content">
+        <header className="top-bar">
+          <span>Welcome, <strong>{user.email}</strong></span>
+          <button className="logout-btn" onClick={() => signOut(auth)}>LOGOUT</button>
+        </header>
+
+        <div className="stage">
+          {activeTab === "Dashboard" ? (
+            <>
+              <div className="filter-card">
+                <label>SELECT FIRM:</label>
+                <select value={selectedFirm} onChange={(e) => setSelectedFirm(e.target.value)}>
+                  <option value="">-- Choose Firm --</option>
+                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                </select>
+              </div>
+
+              <div className="table-wrapper">
+                <table className="pro-table">
+                  <thead>
+                    <tr><th>Bank Name</th><th>Account No</th><th>Balance</th><th>Action</th></tr>
+                  </thead>
+                  <tbody>
+                    {banks.filter(b => b.firmName === selectedFirm || !selectedFirm).map(bank => (
+                      <React.Fragment key={bank.id}>
+                        <tr>
+                          <td>{bank.bankName}</td>
+                          <td className="text-bold">{bank.accNo}</td>
+                          <td className="amt-green">₹ {bank.balance}</td>
+                          <td>
+                            <button className={`btn-ledger ${expandedId === bank.id ? 'active' : ''}`} onClick={() => setExpandedId(expandedId === bank.id ? null : bank.id)}>
+                              {expandedId === bank.id ? 'Close' : 'Ledger'}
+                            </button>
+                          </td>
+                        </tr>
+                        {expandedId === bank.id && (
+                          <tr className="ledger-row-expanded">
+                            <td colSpan="4">
+                              <div className="ledger-box fade-in">
+                                <div className="ledger-controls">
+                                  <span><strong>IFSC:</strong> {bank.ifsc || 'N/A'}</span>
+                                  <div className="export-btns">
+                                    <button className="exp-btn pdf">PDF</button>
+                                    <button className="exp-btn excel">EXCEL</button>
+                                  </div>
+                                </div>
+                                <table className="inner-ledger-table">
+                                  <thead>
+                                    <tr><th>Date</th><th>Particulars</th><th>Dr</th><th>Cr</th></tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr><td colSpan="4" className="text-center">No transactions found.</td></tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : activeTab === "User Master" ? (
+            <div className="card-premium">
+               <h3>User Management</h3>
+               <table className="pro-table">
+                  <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+                  <tbody>
+                    {usersList.map(u => <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td><td>{u.role}</td></tr>)}
+                  </tbody>
+               </table>
+            </div>
+          ) : (
+            <div className="card-premium">Masters Loading...</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-export default App;
