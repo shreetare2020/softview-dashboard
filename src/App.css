@@ -1,47 +1,59 @@
-.loginPage {
-  background: #1a2a44;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:root {
+  --navy: #1a2a44;
+  --slate: #334155;
+  --bg-light: #f8fafc;
+  --accent: #2563eb;
 }
 
-.loginCard {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  width: 320px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-  text-align: center;
+body { font-family: 'Inter', sans-serif; background: var(--bg-light); margin: 0; }
+
+/* Dashboard Professional Layout */
+.app-container { display: flex; height: 100vh; }
+
+.sidebar { 
+  width: 280px; 
+  background: var(--navy); 
+  color: white; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 20px;
 }
 
-.loginCard input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-sizing: border-box;
+.sidebar h2 { 
+  font-size: 1.2rem; 
+  border-bottom: 1px solid #334155; 
+  padding-bottom: 20px; 
+  letter-spacing: 1px; 
 }
 
-.loginCard button {
-  width: 100%;
-  padding: 12px;
-  background: #2a5298;
-  color: white;
-  border: none;
-  font-weight: bold;
-  border-radius: 6px;
-  cursor: pointer;
+.nav-link { 
+  padding: 12px 15px; 
+  margin: 5px 0; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  transition: 0.3s;
 }
 
-.footer-fixed {
-  position: fixed;
-  bottom: 15px;
-  right: 25px;
-  text-align: right;
-  line-height: 1.4;
+.nav-link:hover, .nav-link.active { background: var(--accent); }
+
+/* Main Content Styling */
+.main-content { flex: 1; padding: 40px; overflow-y: auto; }
+
+.card { 
+  background: white; 
+  border-radius: 12px; 
+  padding: 25px; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+  border: 1px solid #e2e8f0;
 }
 
-.clock-box { font-weight: bold; color: #1a2a44; font-size: 14px; }
-.dev-credit { font-size: 11px; color: #777; }
+/* Dignified Footer at Bottom Right */
+.footer-info { 
+  position: fixed; 
+  bottom: 20px; 
+  right: 30px; 
+  text-align: right; 
+}
+
+.clock-box { font-weight: 700; color: var(--navy); font-size: 14px; }
+.dev-credit { font-size: 11px; color: #64748b; margin-top: 2px; }
