@@ -12,8 +12,8 @@ export default function App() {
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
   
-  // New States for Filter and Expansion
-  const [selectedFirmFilter, setSelectedFirmFilter] = useState("All");
+  // Professional Dashboard States
+  const [selectedFirmFilter, setSelectedFirmFilter] = useState(""); 
   const [expandedBank, setExpandedBank] = useState(null);
   
   const [editingFirm, setEditingFirm] = useState(null);
@@ -72,110 +72,137 @@ export default function App() {
 
         <div className="content-container">
           {activeTab === "Dashboard" && (
-            <div className="card">
-              <div style={{display:'flex', justifyContent:'space-between', marginBottom:'20px'}}>
-                <h3>Consolidated Bank Summary</h3>
-                {/* 1) FIRM FILTER DROPDOWN */}
-                <select 
-                  onChange={(e) => setSelectedFirmFilter(e.target.value)}
-                  style={{padding:'8px', borderRadius:'6px', border:'1px solid #cbd5e1'}}
-                >
-                  <option value="All">All Firms (Filter)</option>
-                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
-                </select>
+            <div className="dashboard-wrapper">
+              {/* 1) PROFESSIONAL FILTER CONTAINER */}
+              <div className="filter-container">
+                <div>
+                  <span className="filter-label">🏢 Active Firm:</span>
+                  <select 
+                    className="pro-select"
+                    value={selectedFirmFilter}
+                    onChange={(e) => {
+                      setSelectedFirmFilter(e.target.value);
+                      setExpandedBank(null); 
+                    }}
+                  >
+                    <option value="">-- Select Firm to View Dashboard --</option>
+                    {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                  </select>
+                </div>
+                <h3 style={{margin:0, color:'var(--navy)'}}>Bank Summary Dashboard</h3>
               </div>
 
-              <table className="pro-table">
-                <thead>
-                  <tr><th>Firm</th><th>Bank Name</th><th>A/c No</th><th>Balance</th><th>Status</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                  {banks
-                    .filter(b => selectedFirmFilter === "All" || b.firmName === selectedFirmFilter)
-                    .map(b => {
-                      const isClosed = b.status === 'Closed';
-                      const hasBal = parseFloat(b.balance) !== 0;
-                      if (isClosed && !hasBal) return null;
+              {/* 2) CONDITIONAL DASHBOARD VIEW */}
+              {!selectedFirmFilter ? (
+                <div className="empty-state">
+                  <div style={{fontSize:'40px', marginBottom:'10px'}}>📊</div>
+                  <h3>No Firm Selected</h3>
+                  <p>Please select a firm from the dropdown above to view its bank summary and ledgers.</p>
+                </div>
+              ) : (
+                <div className="card" style={{padding:'0', overflow:'hidden'}}>
+                  <table className="pro-table">
+                    <thead>
+                      <tr>
+                        <th>Firm Name</th>
+                        <th>Bank Name</th>
+                        <th>A/c No</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th style={{textAlign:'center'}}>Ledger</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {banks
+                        .filter(b => b.firmName === selectedFirmFilter)
+                        .map(b => {
+                          const isClosed = b.status === 'Closed';
+                          const hasBal = parseFloat(b.balance) !== 0;
+                          if (isClosed && !hasBal) return null;
 
-                      return (
-                        <React.Fragment key={b.id}>
-                          <tr className={isClosed && hasBal ? 'bank-closed-warning' : ''}>
-                            <td>{b.firmName}</td>
-                            <td>{b.bankName}</td>
-                            <td>{b.accNo}</td>
-                            <td className={parseFloat(b.balance) >= 0 ? 'amt-receipt' : 'amt-payment'}>
-                              ₹ {b.balance} {parseFloat(b.balance) >= 0 ? ' ↓' : ' ↑'}
-                            </td>
-                            <td>{b.status}</td>
-                            <td>
-                              {/* 2) EXPAND LEDGER BUTTON */}
-                              <button onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}>
-                                {expandedBank === b.id ? "Hide" : "Expand"}
-                              </button>
-                            </td>
-                          </tr>
-                          {expandedBank === b.id && (
-  <tr>
-    <td colSpan="6" style={{background:'#f8fafc', padding:'20px'}}>
-      <div style={{border:'1px solid #e2e8f0', padding:'20px', borderRadius:'8px', background:'white', boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
-          <h4 style={{margin:0, color:'#0f172a'}}>Bank Ledger: {b.bankName} ({b.accNo})</h4>
-          <button style={{padding:'5px 15px', fontSize:'12px'}}>Print PDF</button>
-        </div>
-        
-        <table className="pro-table" style={{border:'1px solid #f1f5f9'}}>
-          <thead>
-            <tr style={{background:'#f8fafc'}}>
-              <th style={{width:'120px'}}>Date</th>
-              <th>Particulars</th>
-              <th style={{textAlign:'right'}}>Receipt (Cr)</th>
-              <th style={{textAlign:'right'}}>Payment (Dr)</th>
-              <th style={{textAlign:'right'}}>Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* 1. Hamesha Pehli Row Opening Balance ki hogi */}
-            <tr style={{fontWeight:'600', background:'#fffbeb'}}>
-              <td>-</td>
-              <td>Opening Balance</td>
-              <td style={{textAlign:'right'}} className="amt-receipt">
-                {parseFloat(b.openingBal || 0) >= 0 ? `₹ ${b.openingBal}` : '-'}
-              </td>
-              <td style={{textAlign:'right'}} className="amt-payment">
-                {parseFloat(b.openingBal || 0) < 0 ? `₹ ${Math.abs(b.openingBal)}` : '-'}
-              </td>
-              <td style={{textAlign:'right', fontWeight:'bold'}}>₹ {b.openingBal || 0}</td>
-            </tr>
+                          return (
+                            <React.Fragment key={b.id}>
+                              <tr className={isClosed && hasBal ? 'bank-closed-warning' : ''}>
+                                <td style={{fontWeight:'bold'}}>{b.firmName}</td>
+                                <td>{b.bankName}</td>
+                                <td>{b.accNo}</td>
+                                <td className={parseFloat(b.balance) >= 0 ? 'amt-receipt' : 'amt-payment'}>
+                                  ₹ {b.balance} {parseFloat(b.balance) >= 0 ? ' ↓' : ' ↑'}
+                                </td>
+                                <td>
+                                  <span className={`status-badge ${b.status?.toLowerCase()}`}>
+                                    {b.status}
+                                  </span>
+                                </td>
+                                <td style={{textAlign:'center'}}>
+                                  <button 
+                                    className="btn-save" 
+                                    style={{padding:'5px 15px', fontSize:'12px'}}
+                                    onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}
+                                  >
+                                    {expandedBank === b.id ? "Close Ledger" : "View Ledger"}
+                                  </button>
+                                </td>
+                              </tr>
 
-            {/* 2. Iske niche saare transactions aayenge (Future logic ke liye placeholder) */}
-            {/* b.transactions?.map((t, index) => (...)) */}
-            
-            {/* 3. Final Closing Row */}
-            <tr style={{background:'#f1f5f9', fontWeight:'800'}}>
-              <td colSpan="4" style={{textAlign:'right'}}>Current Net Balance:</td>
-              <td style={{textAlign:'right'}} className={parseFloat(b.balance) >= 0 ? 'amt-receipt' : 'amt-payment'}>
-                ₹ {b.balance} {parseFloat(b.balance) >= 0 ? ' (Dr)' : ' (Cr)'}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </td>
-  </tr>
-)}
-                        </React.Fragment>
-                      );
-                    })}
-                </tbody>
-              </table>
+                              {/* 3) PROFESSIONAL LEDGER EXPANSION */}
+                              {expandedBank === b.id && (
+                                <tr>
+                                  <td colSpan="6" style={{background:'#f8fafc', padding:'20px'}}>
+                                    <div style={{border:'1px solid #e2e8f0', padding:'20px', borderRadius:'8px', background:'white', boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
+                                      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
+                                        <h4 style={{margin:0, color:'#0f172a'}}>Bank Ledger: {b.bankName} ({b.accNo})</h4>
+                                        <button style={{padding:'5px 15px', fontSize:'12px'}}>Print PDF</button>
+                                      </div>
+                                      
+                                      <table className="pro-table" style={{border:'1px solid #f1f5f9'}}>
+                                        <thead>
+                                          <tr style={{background:'#f8fafc'}}>
+                                            <th style={{width:'120px'}}>Date</th>
+                                            <th>Particulars</th>
+                                            <th style={{textAlign:'right'}}>Receipt (Cr)</th>
+                                            <th style={{textAlign:'right'}}>Payment (Dr)</th>
+                                            <th style={{textAlign:'right'}}>Balance</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr style={{fontWeight:'600', background:'#fffbeb'}}>
+                                            <td>-</td>
+                                            <td>Opening Balance</td>
+                                            <td style={{textAlign:'right'}} className="amt-receipt">
+                                              {parseFloat(b.openingBal || 0) >= 0 ? `₹ ${b.openingBal || 0}` : '-'}
+                                            </td>
+                                            <td style={{textAlign:'right'}} className="amt-payment">
+                                              {parseFloat(b.openingBal || 0) < 0 ? `₹ ${Math.abs(b.openingBal || 0)}` : '-'}
+                                            </td>
+                                            <td style={{textAlign:'right', fontWeight:'bold'}}>₹ {b.openingBal || 0}</td>
+                                          </tr>
+                                          <tr style={{background:'#f1f5f9', fontWeight:'800'}}>
+                                            <td colSpan="4" style={{textAlign:'right'}}>Current Net Balance:</td>
+                                            <td style={{textAlign:'right'}} className={parseFloat(b.balance) >= 0 ? 'amt-receipt' : 'amt-payment'}>
+                                              ₹ {b.balance} {parseFloat(b.balance) >= 0 ? ' (Dr)' : ' (Cr)'}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Firm Master remains same with Edit/Delete as per previous update */}
           {activeTab === "Firm Master" && (
             <div className="card">
-               <h3>🏢 Firm Master Management</h3>
-               <form className="form-group" onSubmit={async (e) => {
+              <h3>🏢 Firm Master Management</h3>
+              <form className="form-group" onSubmit={async (e) => {
                 e.preventDefault();
                 const name = e.target.fName.value;
                 if(editingFirm) {
@@ -191,22 +218,25 @@ export default function App() {
               </form>
               <table className="pro-table">
                 <tbody>
-                  {firms.map((f, i) => (
-                    <tr key={f.id}><td>{f.name}</td><td>
-                      <button onClick={()=>setEditingFirm(f)}>Edit</button>
-                      <button onClick={()=>deleteItem("firms", f.id)}>Delete</button>
-                    </td></tr>
+                  {firms.map((f) => (
+                    <tr key={f.id}>
+                      <td>{f.name}</td>
+                      <td>
+                        <button onClick={()=>setEditingFirm(f)}>Edit</button>
+                        <button onClick={()=>deleteItem("firms", f.id)}>Delete</button>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* Bank Master linking remains active */}
           {activeTab === "Bank Master" && (
             <div className="card">
               <h3>🏦 Bank Master Setup</h3>
-              {/* Previous Bank Master Form Code... */}
+              <p style={{color: '#64748b'}}>Use the form to link banks with active firms.</p>
+              {/* Add your Bank Master form logic here */}
             </div>
           )}
         </div>

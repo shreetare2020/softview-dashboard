@@ -1,76 +1,48 @@
-:root {
-  --navy: #0f172a;
-  --accent: #2563eb;
-  --success: #22c55e;
-  --danger: #ef4444;
-}
-
-body { margin: 0; font-family: 'Inter', sans-serif; background: #f1f5f9; }
-
-/* LOGIN SCREEN - DARK & SECURE */
-.login-screen {
-  background: var(--navy);
-  height: 100vh;
+/* Professional Filter Styling */
+.filter-container {
+  background: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  border-left: 5px solid var(--accent);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
   display: flex;
-  justify-content: center;
   align-items: center;
-}
-.login-card { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; }
-
-/* MAIN LAYOUT */
-.app-shell { display: flex; height: 100vh; overflow: hidden; }
-
-/* SIDEBAR LEFT */
-.sidebar {
-  width: 260px;
-  background: var(--navy);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
-}
-.sidebar-brand { padding: 30px 20px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #334155; }
-.nav-links { flex: 1; padding: 20px 0; }
-.nav-item { padding: 15px 25px; cursor: pointer; color: #94a3b8; font-weight: 500; transition: 0.3s; }
-.nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
-
-/* MAIN STAGE */
-.main-stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
-
-/* 1) TOP RIGHT: USER & CLOCK */
-.top-right-header {
-  position: absolute;
-  top: 20px;
-  right: 40px;
-  text-align: right;
-  z-index: 500;
-}
-.user-name { font-weight: 800; color: var(--navy); display: block; font-size: 16px; }
-.live-clock { color: #64748b; font-size: 13px; font-family: monospace; font-weight: bold; }
-
-/* 2) BOTTOM LEFT: BRANDING */
-.footer-branding {
-  position: fixed;
-  bottom: 15px;
-  left: 275px; /* Sidebar ke theek baad */
-  font-size: 12px;
-  color: #94a3b8;
-  z-index: 500;
+  justify-content: space-between;
 }
 
-/* CARDS & TABLES */
-.content-container { padding: 80px 40px 40px 40px; }
-.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-.pro-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.pro-table th { background: #f8fafc; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 13px; color: #475569; }
-.pro-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.filter-label {
+  font-weight: 700;
+  color: var(--navy);
+  margin-right: 15px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
 
-/* ARROWS & STATUS */
-.amt-receipt { color: var(--success); font-weight: bold; } /* Green Down ↓ */
-.amt-payment { color: var(--danger); font-weight: bold; } /* Red Up ↑ */
-.bank-closed-warning { background-color: #fee2e2 !important; color: #b91c1c; border: 1px solid #f87171; }
+.pro-select {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+}
 
-/* FORM STYLING */
-.form-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-.form-group input, .form-group select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
-.btn-save { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.pro-select:focus {
+  border-color: var(--accent);
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  background: #f1f5f9;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+}
