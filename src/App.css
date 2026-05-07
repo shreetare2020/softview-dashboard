@@ -30,3 +30,45 @@ tr:hover { background-color: #fcfcfc; }
 .txt-green { color: #27ae60; font-weight: 600; }
 .txt-red { color: #e74c3c; font-weight: 600; }
 .bal-amt { color: var(--primary); font-size: 18px; }
+/* Footer & Clock Styling */
+.footer-info {
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  z-index: 100;
+}
+
+.clockBox {
+  font-weight: bold;
+  color: #1a2a44;
+  margin-bottom: 2px;
+}
+
+/* Form Styling */
+.master-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.master-form input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.btn-add {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
