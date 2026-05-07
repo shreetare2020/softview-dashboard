@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-// --- Fixed Login Screen Component ---
+// --- Login Screen ---
 function LoginScreen() {
   const handleLogin = (e) => {
     e.preventDefault();
