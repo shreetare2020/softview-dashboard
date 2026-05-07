@@ -145,3 +145,48 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color
   transition: 0.3s;
 }
 .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(181, 137, 33, 0.3); }
+.mt-20 { margin-top: 20px; }
+.txt-success { color: #16a34a; font-weight: 700; }
+
+.master-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
+
+.master-form input, .pro-input {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.btn-del {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-role {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.live-time {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 5px 15px;
+  border-radius: 20px;
+}
