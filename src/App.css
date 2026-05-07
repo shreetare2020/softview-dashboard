@@ -1,12 +1,13 @@
-/* Color Palette */
 :root {
-  --dark-blue: #0a0e2e; /* Deep Premium Blue */
-  --gold: #ffca28;      /* Vibrant Gold */
-  --light-bg: #f4f7fe;
+  --dark-blue: #0a0e2e;
+  --gold: #ffca28;
+  --light-bg: #f0f2f5;
   --white: #ffffff;
+  --red: #ff5252;
+  --green: #4caf50;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
 
 /* --- LOGIN PAGE --- */
 .login-bg { 
@@ -14,62 +15,64 @@
   height: 100vh; display: flex; justify-content: center; align-items: center; 
 }
 .login-card { 
-  background: var(--white); padding: 40px; border-radius: 20px; width: 380px; 
-  text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-top: 5px solid var(--gold);
+  background: var(--white); padding: 45px; border-radius: 20px; width: 400px; 
+  text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-top: 6px solid var(--gold);
 }
-.btn-auth { 
-  width: 100%; padding: 14px; background: var(--dark-blue); color: var(--gold); 
-  border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;
-}
+.brand-dark { color: var(--dark-blue); font-size: 26px; font-weight: 800; margin-bottom: 30px; }
 
-/* --- DASHBOARD SHELL --- */
+/* --- LAYOUT --- */
 .app-shell { display: flex; min-height: 100vh; background: var(--light-bg); }
 
+/* SIDEBAR */
 .sidebar { 
-  width: 260px; background: var(--dark-blue); color: var(--white); 
-  display: flex; flex-direction: column; position: fixed; height: 100vh;
+  width: 260px; background: var(--dark-blue); color: white; 
+  display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100;
 }
-.brand { 
-  font-size: 22px; font-weight: 800; color: var(--gold); padding: 30px 25px; 
-  text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.nav-item { 
-  padding: 15px 25px; cursor: pointer; color: #b0bec5; transition: 0.3s;
-}
-.nav-item:hover, .nav-item.active { 
-  background: rgba(255,255,255,0.05); color: var(--gold); border-right: 4px solid var(--gold);
-}
+.sidebar-brand { font-size: 22px; font-weight: 800; color: var(--gold); padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.nav-item { padding: 15px 25px; cursor: pointer; color: #b0bec5; transition: 0.3s; font-weight: 500; }
+.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: var(--gold); border-left: 5px solid var(--gold); }
+.logout-container { margin-top: auto; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-.main-content { flex: 1; margin-left: 260px; padding: 30px; }
+/* MAIN CONTENT */
+.main-stage { flex: 1; margin-left: 260px; padding: 20px; position: relative; }
 
-/* --- TABLES & CARDS --- */
-.card { 
-  background: var(--white); border-radius: 12px; padding: 25px; 
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;
-}
-.pro-table { width: 100%; border-collapse: collapse; }
-.pro-table th { 
-  background: #f8f9fa; text-align: left; padding: 15px; color: var(--dark-blue); 
-  font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--gold);
-}
-.pro-table td { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 15px; }
+/* HEADER (Point 1 & 2) */
+.header-top { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 20px; padding-right: 10px; }
+.welcome-txt { font-size: 14px; font-weight: 600; color: var(--dark-blue); }
+.clock-txt { font-size: 13px; color: #666; font-family: monospace; }
 
-/* LEDGER EXPANSION */
-.ledger-box { 
-  background: #fafafa; border: 1.5px solid var(--dark-blue); 
-  border-radius: 10px; padding: 20px; margin: 10px 0;
-}
-.btn-ledger { 
-  background: var(--gold); color: var(--dark-blue); padding: 8px 15px; 
-  border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
-}
-.exp-btn { 
-  padding: 8px 15px; border-radius: 5px; border: none; color: white; 
-  font-weight: bold; margin-left: 10px; cursor: pointer;
-}
-.pdf { background: #d32f2f; }
-.excel { background: #2e7d32; }
+/* DASHBOARD CARDS */
+.card-premium { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.filter-box { display: flex; align-items: center; gap: 15px; background: var(--dark-blue); color: white; padding: 15px; border-radius: 10px; margin-bottom: 25px; }
 
-.amt { color: #2e7d32; font-weight: bold; }
-.dev-footer { margin-top: auto; padding: 20px; font-size: 11px; text-align: center; color: #666; }
-.dev-footer strong { color: var(--gold); }
+/* TABLE STYLING */
+.pro-table { width: 100%; border-collapse: collapse; background: white; }
+.pro-table th { background: #f8f9fa; padding: 15px; text-align: left; color: var(--dark-blue); border-bottom: 2px solid var(--gold); font-size: 13px; text-transform: uppercase; }
+.pro-table td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+/* CLOSED BANK STYLING (Point 11) */
+.closed-bank-row { background: #ffebee !important; color: #c62828 !important; }
+
+/* LEDGER PASSBOOK LOOK (Point 8 & 9) */
+.ledger-container { background: #fffcf0; border: 2px solid var(--dark-blue); border-radius: 10px; padding: 20px; margin: 10px 0; }
+.ledger-actions { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; }
+.inner-ledger { width: 100%; border-collapse: collapse; background: white; }
+.inner-ledger th { background: var(--dark-blue); color: white; padding: 10px; font-size: 12px; }
+.inner-ledger td { padding: 10px; border: 1px solid #ddd; font-size: 13px; }
+
+/* FORM STYLING */
+.master-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+.master-form input, .master-form select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; }
+
+/* FOOTER (Point 4) */
+.footer-right { position: fixed; bottom: 20px; right: 20px; text-align: right; z-index: 10; }
+.footer-txt { color: var(--dark-blue); font-weight: 800; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+.footer-phone { color: #ff5722; font-weight: bold; font-size: 16px; }
+
+/* BUTTONS */
+.btn-primary { background: var(--dark-blue); color: var(--gold); padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+.btn-edit { color: #1976d2; margin-right: 10px; cursor: pointer; }
+.btn-delete { color: #d32f2f; cursor: pointer; }
+
+.dr-tag { color: var(--red); font-weight: bold; font-size: 11px; }
+.cr-tag { color: var(--green); font-weight: bold; font-size: 11px; }
