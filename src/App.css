@@ -1,56 +1,33 @@
-:root {
-  --dark-blue: #0a0e2e;
-  --gold: #ffca28;
-  --bg: #f4f7fe;
-  --white: #ffffff;
-}
+:root { --blue: #0a0e2e; --gold: #ffca28; --white: #ffffff; --bg: #f0f2f5; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+/* Login Page Fix */
+.login-screen { background: var(--blue); height: 100vh; display: flex; justify-content: center; align-items: center; color: white; }
+.login-card { background: var(--white); padding: 40px; border-radius: 12px; width: 350px; text-align: center; color: var(--blue); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+.login-subtitle { font-size: 14px; margin-bottom: 20px; color: #666; font-style: italic; }
 
-/* LOGIN PAGE (Premium) */
-.login-bg { background: var(--dark-blue); height: 100vh; display: flex; justify-content: center; align-items: center; }
-.login-card { background: var(--white); padding: 50px; border-radius: 15px; width: 400px; text-align: center; border-top: 8px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+/* Dashboard Layout */
+.app-container { display: flex; height: 100vh; overflow: hidden; background: var(--bg); }
+.sidebar { width: 260px; background: var(--blue); color: white; display: flex; flex-direction: column; padding: 20px 0; position: relative; }
+.sidebar-logo { font-size: 24px; font-weight: bold; color: var(--gold); text-align: center; margin-bottom: 30px; }
+.nav-btn { padding: 15px 25px; cursor: pointer; border: none; background: none; color: #ccc; text-align: left; width: 100%; font-size: 16px; }
+.nav-btn.active { background: rgba(255,255,255,0.1); color: var(--gold); border-left: 4px solid var(--gold); }
 
-/* LAYOUT */
-.app-shell { display: flex; min-height: 100vh; background: var(--bg); }
+/* Logout Position - Bottom Left */
+.logout-container { margin-top: auto; padding: 20px; }
+.btn-logout { width: 100%; padding: 10px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-/* SIDEBAR (Dark Blue) */
-.sidebar { width: 260px; background: var(--dark-blue); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 1000; }
-.sidebar-brand { font-size: 24px; font-weight: 800; color: var(--gold); padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.nav-item { padding: 15px 25px; cursor: pointer; color: #b0bec5; font-weight: 500; transition: 0.3s; }
-.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: var(--gold); border-left: 5px solid var(--gold); }
-.logout-box { margin-top: auto; padding: 20px; }
-.btn-logout { width: 100%; padding: 12px; background: #ff5252; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+/* Main Content Area */
+.main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+.header-right { position: absolute; top: 20px; right: 30px; text-align: right; }
+.welcome-txt { font-weight: bold; color: var(--blue); }
+.clock-txt { font-size: 13px; color: #555; }
 
-/* MAIN CONTENT */
-.main-stage { flex: 1; margin-left: 260px; padding: 30px; position: relative; }
+/* Footer Position - Bottom Right */
+.footer-right { position: fixed; bottom: 20px; right: 20px; text-align: right; pointer-events: none; }
+.softview-brand { font-size: 18px; font-weight: 800; color: var(--blue); margin-bottom: 2px; }
+.softview-phone { color: #ff5722; font-weight: bold; font-size: 15px; }
 
-/* HEADER (Right side Top) */
-.header-top { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 30px; }
-.welcome-msg { font-size: 16px; color: var(--dark-blue); font-weight: 600; }
-.live-clock { font-size: 14px; color: #666; font-family: 'Courier New', monospace; }
-
-/* FILTER & TABLES */
-.filter-card { background: var(--dark-blue); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
-.card { background: var(--white); border-radius: 12px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-
-/* BANK ROW & LEDGER */
-.pro-table { width: 100%; border-collapse: collapse; }
-.pro-table th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid var(--gold); text-transform: uppercase; font-size: 13px; }
-.pro-table td { padding: 18px 15px; border-bottom: 1px solid #eee; font-size: 15px; }
-.amt-cr { color: #2e7d32; font-weight: bold; }
-.amt-dr { color: #d32f2f; font-weight: bold; }
-
-/* PASSBOOK LOOK */
-.ledger-container { background: #fffdf0; border: 2px solid var(--dark-blue); border-radius: 10px; padding: 20px; margin: 15px 0; }
-.btn-exp { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; color: white; font-weight: bold; margin-left: 10px; }
-
-/* FOOTER (Point 4) */
-.footer-branding { position: fixed; bottom: 20px; right: 20px; text-align: right; }
-.softview-text { color: var(--dark-blue); font-size: 18px; font-weight: 900; letter-spacing: 1px; }
-.softview-phone { color: #ff5722; font-weight: bold; font-size: 16px; }
-
-/* FORM GRID */
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f9f9f9; padding: 20px; border-radius: 10px; }
-.form-grid input, .form-grid select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
-.btn-save { background: var(--dark-blue); color: var(--gold); border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+/* Table & Ledger */
+.card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.ledger-box { background: #fffde7; border: 1px solid #ddd; padding: 15px; margin-top: 10px; border-radius: 5px; }
