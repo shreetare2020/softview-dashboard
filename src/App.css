@@ -1,19 +1,56 @@
-.sidebar { width: 260px; background: #0a0e2e; color: white; position: fixed; height: 100vh; }
-.sidebar-brand { color: #ffca28; font-size: 24px; padding: 30px; border-bottom: 1px solid #222; }
-.nav-item.active { background: #ffca28; color: #0a0e2e; font-weight: bold; }
-.btn-logout { width: 90%; margin: 10px; background: #d32f2f; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+:root {
+  --dark-blue: #0a0e2e;
+  --gold: #ffca28;
+  --bg: #f4f7fe;
+  --white: #ffffff;
+}
 
-.header-top { position: absolute; top: 20px; right: 20px; text-align: right; }
-.footer-right { position: fixed; bottom: 20px; right: 20px; text-align: right; }
-.footer-txt { font-size: 18px; color: #0a0e2e; }
-.footer-phone { color: #ff5722; font-weight: bold; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-.amt { color: #2e7d32; font-weight: bold; font-family: monospace; }
-.closed-row { background: #ffebee !important; color: #d32f2f; }
+/* LOGIN PAGE (Premium) */
+.login-bg { background: var(--dark-blue); height: 100vh; display: flex; justify-content: center; align-items: center; }
+.login-card { background: var(--white); padding: 50px; border-radius: 15px; width: 400px; text-align: center; border-top: 8px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-.ledger-box { background: #fffdf0; border: 2px solid #0a0e2e; padding: 20px; border-radius: 10px; }
-.btn-pdf { background: #d32f2f; color: white; margin-right: 10px; }
-.btn-excel { background: #2e7d32; color: white; }
-.btn-save { background: #0a0e2e; color: #ffca28; font-weight: bold; }
+/* LAYOUT */
+.app-shell { display: flex; min-height: 100vh; background: var(--bg); }
 
-.master-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+/* SIDEBAR (Dark Blue) */
+.sidebar { width: 260px; background: var(--dark-blue); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 1000; }
+.sidebar-brand { font-size: 24px; font-weight: 800; color: var(--gold); padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.nav-item { padding: 15px 25px; cursor: pointer; color: #b0bec5; font-weight: 500; transition: 0.3s; }
+.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: var(--gold); border-left: 5px solid var(--gold); }
+.logout-box { margin-top: auto; padding: 20px; }
+.btn-logout { width: 100%; padding: 12px; background: #ff5252; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+/* MAIN CONTENT */
+.main-stage { flex: 1; margin-left: 260px; padding: 30px; position: relative; }
+
+/* HEADER (Right side Top) */
+.header-top { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 30px; }
+.welcome-msg { font-size: 16px; color: var(--dark-blue); font-weight: 600; }
+.live-clock { font-size: 14px; color: #666; font-family: 'Courier New', monospace; }
+
+/* FILTER & TABLES */
+.filter-card { background: var(--dark-blue); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+.card { background: var(--white); border-radius: 12px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+
+/* BANK ROW & LEDGER */
+.pro-table { width: 100%; border-collapse: collapse; }
+.pro-table th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid var(--gold); text-transform: uppercase; font-size: 13px; }
+.pro-table td { padding: 18px 15px; border-bottom: 1px solid #eee; font-size: 15px; }
+.amt-cr { color: #2e7d32; font-weight: bold; }
+.amt-dr { color: #d32f2f; font-weight: bold; }
+
+/* PASSBOOK LOOK */
+.ledger-container { background: #fffdf0; border: 2px solid var(--dark-blue); border-radius: 10px; padding: 20px; margin: 15px 0; }
+.btn-exp { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; color: white; font-weight: bold; margin-left: 10px; }
+
+/* FOOTER (Point 4) */
+.footer-branding { position: fixed; bottom: 20px; right: 20px; text-align: right; }
+.softview-text { color: var(--dark-blue); font-size: 18px; font-weight: 900; letter-spacing: 1px; }
+.softview-phone { color: #ff5722; font-weight: bold; font-size: 16px; }
+
+/* FORM GRID */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f9f9f9; padding: 20px; border-radius: 10px; }
+.form-grid input, .form-grid select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+.btn-save { background: var(--dark-blue); color: var(--gold); border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
