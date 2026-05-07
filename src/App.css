@@ -1,92 +1,83 @@
 :root {
-  --primary-navy: #0f172a;
-  --accent-blue: #2563eb;
-  --success-green: #16a34a;
-  --danger-red: #dc2626;
-  --text-slate: #64748b;
+  --navy: #0f172a;
+  --sidebar-blue: #1e293b;
+  --accent: #2563eb;
+  --bg: #f1f5f9;
+  --white: #ffffff;
 }
 
-/* login page design */
-.login-page {
-  background: var(--primary-navy);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Inter', sans-serif;
-}
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); }
 
-.login-card {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  width: 380px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-
-.login-card h1 { color: #1e293b; font-size: 24px; margin-bottom: 30px; }
-
-.login-card input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
-.login-card button {
-  width: 100%;
-  padding: 12px;
-  background: var(--accent-blue);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.login-footer {
-  margin-top: 40px;
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-/* Dashboard Sidebar & Header */
-.dashboard-layout { display: flex; height: 100vh; }
+/* Sidebar Fixed */
+.app-container { display: flex; height: 100vh; overflow: hidden; }
 
 .sidebar {
   width: 260px;
-  background: var(--primary-navy);
+  background: var(--navy);
   color: white;
-  padding: 20px;
   display: flex;
   flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+  z-index: 100;
 }
 
-.main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; background: #f8fafc; }
+.sidebar-header { padding: 25px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #334155; letter-spacing: 1px; }
 
-.top-bar {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  text-align: right;
+.nav-menu { flex: 1; padding: 20px 0; }
+.nav-item {
+  padding: 15px 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: 0.3s;
+  font-weight: 500;
+  color: #94a3b8;
+}
+.nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
+
+.logout-container { padding: 20px; border-top: 1px solid #334155; }
+.logout-btn {
+  width: 100%;
+  padding: 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.user-name { font-weight: bold; color: #1e293b; font-size: 16px; }
-.clock-box { color: var(--text-slate); font-size: 13px; font-family: monospace; }
+/* Main Content Area */
+.main-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
 
-.footer-dev {
+.top-header {
+  background: var(--white);
+  padding: 15px 40px;
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.user-profile { text-align: right; }
+.user-profile .name { font-weight: 700; color: var(--navy); display: block; }
+.user-profile .timer { font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #64748b; }
+
+.page-body { padding: 40px; }
+
+/* Dashboard Cards & Table */
+.card { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+.pro-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+.pro-table th { background: #f8fafc; padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0; color: #475569; }
+.pro-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+
+.footer-branding {
   position: fixed;
   bottom: 15px;
-  left: 275px;
+  left: 280px;
   font-size: 12px;
-  color: var(--text-slate);
+  color: #94a3b8;
 }
 
-/* Icons for Receipt/Payment */
-.receipt-amt { color: var(--success-green); font-weight: bold; }
-.payment-amt { color: var(--danger-red); font-weight: bold; }
-.bank-closed { background: #fee2e2 !important; color: #b91c1c; }
+/* Receipt/Payment Arrows */
+.arrow-up { color: #ef4444; margin-left: 5px; } /* Payment Red Up */
+.arrow-down { color: #22c55e; margin-left: 5px; } /* Receipt Green Down */

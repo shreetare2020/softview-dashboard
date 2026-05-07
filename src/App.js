@@ -1,120 +1,95 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import { auth } from "./firebase"; // Ensure firebase config is correct
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function App() {
-  const [user] = useState("Admin User");
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("Dashboard");
+  const [time, setTime] = useState(new Date());
 
-  const now = new Date();
-  const dateTime = `${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
+  useEffect(() => {
+    onAuthStateChanged(auth, (u) => setUser(u));
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = () => {
+    const d = time.toLocaleDateString('en-GB'); // DD/MM/YYYY
+    const t = time.toLocaleTimeString();
+    return `${d} || ${t}`;
+  };
+
+  if (!user) return <div className="login-screen">Please login to continue</div>;
 
   return (
-    <div style={{ fontFamily: "sans-serif" }} className="min-h-screen bg-gray-100 text-sm">
-
-      {/* Top Bar */}
-      <div className="flex justify-between items-start p-3 bg-white shadow">
-        <div></div>
-        <div className="text-right">
-          <div className="font-bold">{user}</div>
-          <div className="text-gray-500">{dateTime}</div>
+    <div className="app-container">
+      {/* SIDEBAR */}
+      <div className="sidebar">
+        <div className="sidebar-header">BANKING SYSTEM</div>
+        <div className="nav-menu">
+          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}>Dashboard</div>
+          <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => setActiveTab('Firm Master')}>Firm Master</div>
+          <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => setActiveTab('Bank Master')}>Bank Master</div>
+          <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => setActiveTab('User Master')}>User Master</div>
+        </div>
+        <div className="logout-container">
+          <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
         </div>
       </div>
 
-      {/* Layout */}
-      <div className="grid grid-cols-5 gap-3 p-3">
-
-        {/* Sidebar */}
-        <div className="col-span-1 space-y-2">
-          <div className="p-2 bg-white shadow rounded">Dashboard</div>
-          <div className="p-2 bg-white shadow rounded">Firm Master</div>
-          <div className="p-2 bg-white shadow rounded">Bank Master</div>
-          <div className="p-2 bg-white shadow rounded">User Master</div>
-          <button className="w-full bg-red-500 text-white p-2 rounded">Logout</button>
+      {/* MAIN CONTENT */}
+      <div className="main-content">
+        <div className="top-header">
+          <div className="user-profile">
+            <span className="name">{user.email}</span>
+            <span className="timer">{formatDateTime()}</span>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="col-span-4 space-y-4">
-
-          {/* Dashboard */}
-          <div className="bg-white shadow p-3 rounded">
-            <div className="flex justify-between">
-              <h2 className="font-bold">Bank Summary</h2>
-              <button className="bg-blue-500 text-white px-2 py-1 rounded">Expand</button>
+        <div className="page-body">
+          {activeTab === "Dashboard" && (
+            <div className="card">
+              <h2>Bank Summary</h2>
+              <table className="pro-table">
+                <thead>
+                  <tr>
+                    <th>Bank Name</th>
+                    <th>Account No</th>
+                    <th>Balance</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Sample Row */}
+                  <tr>
+                    <td>HDFC Bank</td>
+                    <td>XXXX 1234</td>
+                    <td>₹ 50,000 <span className="arrow-down">↓</span></td>
+                    <td><button>Expand</button></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+          )}
 
-            <table className="w-full text-xs border mt-3">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th>Date</th>
-                  <th>Opening</th>
-                  <th>Particular</th>
-                  <th>Receipt</th>
-                  <th>Payment</th>
-                  <th>Closing</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>01-05</td>
-                  <td>1000</td>
-                  <td>Sales</td>
-                  <td style={{ color: "green" }}>↓ 500</td>
-                  <td style={{ color: "red" }}>↑ 0</td>
-                  <td>1500</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div className="flex gap-2 mt-2">
-              <button className="bg-green-500 text-white px-2 py-1 rounded">Excel Export</button>
-              <button className="bg-purple-500 text-white px-2 py-1 rounded">PDF Export</button>
+          {activeTab === "Bank Master" && (
+            <div className="card">
+              <h2>Bank Master</h2>
+              <div className="form-mock">
+                {/* Yaha bank add karne ka form aayega */}
+                <p>Add Bank and Link with Firm dropdown here...</p>
+              </div>
             </div>
-          </div>
+          )}
+          
+          {/* Add Firm Master and User Master similar to Bank Master */}
+        </div>
 
-          {/* Firm Master */}
-          <div className="bg-white shadow p-3 rounded">
-            <h2 className="font-bold">Firm Master</h2>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              <input className="border p-1" placeholder="Firm Name" />
-              <input className="border p-1" placeholder="Bank Link" />
-              <button className="bg-blue-500 text-white rounded">Add Firm</button>
-            </div>
-          </div>
-
-          {/* Bank Master */}
-          <div className="bg-white shadow p-3 rounded">
-            <h2 className="font-bold">Bank Master</h2>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              <input className="border p-1" placeholder="Bank Name" />
-              <input className="border p-1" placeholder="Account No" />
-              <input className="border p-1" placeholder="Branch" />
-              <input className="border p-1" placeholder="Opening Amt" />
-            </div>
-            <button className="mt-2 bg-blue-500 text-white px-2 py-1 rounded">Add Bank</button>
-          </div>
-
-          {/* User Master */}
-          <div className="bg-white shadow p-3 rounded">
-            <h2 className="font-bold">User Master</h2>
-            <div className="grid grid-cols-5 gap-2 mt-2">
-              <input className="border p-1" placeholder="User Code" />
-              <input className="border p-1" placeholder="Name" />
-              <input className="border p-1" placeholder="Email" />
-              <input className="border p-1" placeholder="Password" />
-              <select className="border p-1">
-                <option>Admin</option>
-                <option>Viewer</option>
-              </select>
-            </div>
-            <button className="mt-2 bg-blue-500 text-white px-2 py-1 rounded">Add User</button>
-          </div>
-
+        <div className="footer-branding">
+          Developed by <strong>Softview Technologies</strong> | Contact: 7972084304
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="text-xs p-2 text-left text-gray-600">
-        Developed by Softview Technologies | Contact: 7972084304
-      </div>
-
     </div>
   );
 }
