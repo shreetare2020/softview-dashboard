@@ -7,14 +7,13 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-// Login Screen Component
 function LoginScreen() {
   return (
     <div className="login-screen">
       <div className="login-card">
         <div className="login-logo">🏦</div>
         <h1>BANKING PRO</h1>
-        <form onSubmit={(e) => {
+        <form className="login-form" onSubmit={(e) => {
           e.preventDefault();
           signInWithEmailAndPassword(auth, e.target.email.value, e.target.pass.value);
         }}>
@@ -37,8 +36,6 @@ export default function App() {
   const [usersList, setUsersList] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expandedBank, setExpandedBank] = useState(null);
-  
-  // Edit State
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
 
@@ -56,7 +53,6 @@ export default function App() {
     }
   }, [user]);
 
-  // Fixed PDF Export
   const exportPDF = (b) => {
     const doc = new jsPDF();
     doc.text(`Bank Statement: ${b.bankName}`, 14, 15);
@@ -75,16 +71,11 @@ export default function App() {
     XLSX.writeFile(wb, `${b.bankName}_Ledger.xlsx`);
   };
 
-  // Generic Update Handler
   const handleUpdate = async (e, collectionName) => {
     e.preventDefault();
-    try {
-      const docRef = doc(db, collectionName, editId);
-      await updateDoc(docRef, editData);
-      setEditId(null);
-      setEditData({});
-      alert("Updated Successfully!");
-    } catch (err) { alert("Error updating!"); }
+    await updateDoc(doc(db, collectionName, editId), editData);
+    setEditId(null);
+    setEditData({});
   };
 
   if (!user) return <LoginScreen />;
@@ -168,10 +159,10 @@ export default function App() {
             <div className="fade-in">
               <div className="card-premium">
                 <h3>{editId ? "📝 Edit Firm" : "🏢 Firm Master"}</h3>
-                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "firms") : async (e) => {
-                  e.preventDefault();
-                  await addDoc(collection(db, "firms"), { name: e.target.fName.value, address: e.target.fAddr.value });
-                  e.target.reset();
+                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "firms") : async (ev) => {
+                  ev.preventDefault();
+                  await addDoc(collection(db, "firms"), { name: ev.target.fName.value, address: ev.target.fAddr.value });
+                  ev.target.reset();
                 }(e)}>
                   <input name="fName" placeholder="Firm Name" className="pro-input" value={editData.name || ""} onChange={(e)=>setEditData({...editData, name: e.target.value})} required />
                   <input name="fAddr" placeholder="Address" className="pro-input" value={editData.address || ""} onChange={(e)=>setEditData({...editData, address: e.target.value})} required />
@@ -197,28 +188,61 @@ export default function App() {
               </div>
             </div>
           )}
-          
-          {/* User Master Section */}
+
+          {activeTab === "Bank Master" && (
+            <div className="fade-in">
+              <div className="card-premium">
+                <h3>{editId ? "📝 Edit Bank" : "🏦 Bank Master"}</h3>
+                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "banks") : async (ev) => {
+                  ev.preventDefault();
+                  await addDoc(collection(db, "banks"), { firmName: ev.target.fSelect.value, bankName: ev.target.bName.value, accNo: ev.target.acc.value, balance: ev.target.bal.value });
+                  ev.target.reset();
+                }(e)}>
+                  <select name="fSelect" className="pro-input" value={editData.firmName || ""} onChange={(e)=>setEditData({...editData, firmName: e.target.value})}>
+                    <option value="">Select Firm</option>
+                    {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                  </select>
+                  <input name="bName" placeholder="Bank Name" className="pro-input" value={editData.bankName || ""} onChange={(e)=>setEditData({...editData, bankName: e.target.value})} required />
+                  <input name="acc" placeholder="A/c No" className="pro-input" value={editData.accNo || ""} onChange={(e)=>setEditData({...editData, accNo: e.target.value})} required />
+                  <input name="bal" placeholder="Balance" className="pro-input" value={editData.balance || ""} onChange={(e)=>setEditData({...editData, balance: e.target.value})} required />
+                  <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
+                  {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
+                </form>
+              </div>
+              <div className="card-premium mt-20">
+                <table className="pro-table">
+                  <thead><tr><th>Bank</th><th>Firm</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {banks.map(b => (
+                      <tr key={b.id}>
+                        <td>{b.bankName}</td><td>{b.firmName}</td>
+                        <td>
+                          <button className="btn-edit-sm" onClick={() => {setEditId(b.id); setEditData(b);}}>Edit</button>
+                          <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "banks", b.id))}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {activeTab === "User Master" && (
             <div className="fade-in">
               <div className="card-premium">
                 <h3>{editId ? "📝 Edit User" : "👥 User Master"}</h3>
-                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "users") : async (e) => {
-                  e.preventDefault();
-                  await addDoc(collection(db, "users"), {
-                    uName: e.target.uName.value, uEmail: e.target.uEmail.value,
-                    uPass: e.target.uPass.value, uPhone: e.target.uPhone.value, uRole: e.target.uRole.value
-                  });
-                  e.target.reset();
+                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "users") : async (ev) => {
+                  ev.preventDefault();
+                  await addDoc(collection(db, "users"), { uName: ev.target.uName.value, uEmail: ev.target.uEmail.value, uPass: ev.target.uPass.value, uRole: ev.target.uRole.value });
+                  ev.target.reset();
                 }(e)}>
                   <input name="uName" placeholder="Name" className="pro-input" value={editData.uName || ""} onChange={(e)=>setEditData({...editData, uName: e.target.value})} required />
                   <input name="uEmail" placeholder="Email" className="pro-input" value={editData.uEmail || ""} onChange={(e)=>setEditData({...editData, uEmail: e.target.value})} required />
-                  <input name="uPass" type="password" placeholder="Password" className="pro-input" value={editData.uPass || ""} onChange={(e)=>setEditData({...editData, uPass: e.target.value})} required />
-                  <input name="uPhone" placeholder="Mobile" className="pro-input" value={editData.uPhone || ""} onChange={(e)=>setEditData({...editData, uPhone: e.target.value})} required />
+                  <input name="uPass" type="password" placeholder="Pass" className="pro-input" value={editData.uPass || ""} onChange={(e)=>setEditData({...editData, uPass: e.target.value})} required />
                   <select name="uRole" className="pro-input" value={editData.uRole || "Admin"} onChange={(e)=>setEditData({...editData, uRole: e.target.value})}>
                     <option value="Admin">Admin</option>
                     <option value="Operator">Operator</option>
-                    <option value="Viewer">Viewer</option>
                   </select>
                   <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
                   {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
