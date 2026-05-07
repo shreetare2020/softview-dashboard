@@ -1,15 +1,15 @@
 :root {
   --navy: #0f172a;
-  --sidebar-blue: #1e293b;
   --accent: #2563eb;
-  --bg: #f1f5f9;
-  --white: #ffffff;
+  --bg: #f8fafc;
+  --success: #22c55e;
+  --danger: #ef4444;
 }
 
-body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); }
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); }
 
-/* Sidebar Fixed */
-.app-container { display: flex; height: 100vh; overflow: hidden; }
+/* Main Layout */
+.app-shell { display: flex; height: 100vh; }
 
 .sidebar {
   width: 260px;
@@ -17,67 +17,52 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
   color: white;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-  z-index: 100;
+  padding: 0;
 }
 
-.sidebar-header { padding: 25px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #334155; letter-spacing: 1px; }
+.sidebar-brand { padding: 25px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #334155; text-align: center; }
 
-.nav-menu { flex: 1; padding: 20px 0; }
+.nav-links { flex: 1; padding: 20px 0; }
 .nav-item {
   padding: 15px 25px;
   cursor: pointer;
+  transition: 0.2s;
+  color: #94a3b8;
   display: flex;
   align-items: center;
-  transition: 0.3s;
   font-weight: 500;
-  color: #94a3b8;
 }
 .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
-.logout-container { padding: 20px; border-top: 1px solid #334155; }
-.logout-btn {
-  width: 100%;
-  padding: 12px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
+.main-stage { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
-/* Main Content Area */
-.main-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
-
-.top-header {
-  background: var(--white);
-  padding: 15px 40px;
+/* Top bar with User Info & Clock */
+.top-nav {
+  background: white;
+  padding: 12px 40px;
   display: flex;
   justify-content: flex-end;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.user-profile { text-align: right; }
-.user-profile .name { font-weight: 700; color: var(--navy); display: block; }
-.user-profile .timer { font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #64748b; }
+.user-meta { text-align: right; }
+.user-meta .name { font-weight: bold; color: var(--navy); display: block; font-size: 14px; }
+.user-meta .clock { font-family: monospace; color: #64748b; font-size: 12px; }
 
-.page-body { padding: 40px; }
+/* Dashboard Cards */
+.content-area { padding: 30px; }
+.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
 
-/* Dashboard Cards & Table */
-.card { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-.pro-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-.pro-table th { background: #f8fafc; padding: 15px; text-align: left; border-bottom: 2px solid #e2e8f0; color: #475569; }
-.pro-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+.pro-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.pro-table th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 13px; color: #475569; }
+.pro-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-.footer-branding {
-  position: fixed;
-  bottom: 15px;
-  left: 280px;
-  font-size: 12px;
-  color: #94a3b8;
-}
+.status-tag { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+.status-active { background: #dcfce7; color: #166534; }
+.status-closed { background: #fee2e2; color: #991b1b; }
 
-/* Receipt/Payment Arrows */
-.arrow-up { color: #ef4444; margin-left: 5px; } /* Payment Red Up */
-.arrow-down { color: #22c55e; margin-left: 5px; } /* Receipt Green Down */
+.amt-up { color: var(--danger); font-weight: bold; }
+.amt-down { color: var(--success); font-weight: bold; }
+
+/* Footer Branding */
+.footer-fix { position: fixed; bottom: 15px; left: 275px; font-size: 12px; color: #94a3b8; }
