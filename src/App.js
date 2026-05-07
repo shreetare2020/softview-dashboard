@@ -7,13 +7,14 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+// Login Screen Component
 function LoginScreen() {
   return (
     <div className="login-screen">
       <div className="login-card">
         <div className="login-logo">🏦</div>
         <h1>BANKING PRO</h1>
-        <form className="login-form" onSubmit={(e) => {
+        <form onSubmit={(e) => {
           e.preventDefault();
           signInWithEmailAndPassword(auth, e.target.email.value, e.target.pass.value);
         }}>
@@ -55,30 +56,16 @@ export default function App() {
     }
   }, [user]);
 
-  // PDF Export Fix
+  // Fixed PDF Export
   const exportPDF = (b) => {
-    try {
-      const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text("Bank Statement", 14, 20);
-      doc.setFontSize(12);
-      doc.text(`Bank: ${b.bankName} | A/c: ${b.accNo}`, 14, 30);
-      
-      const tableColumn = ["Date", "Particulars", "Balance"];
-      const tableRows = [[currentTime.toLocaleDateString(), "Opening Balance", `Rs. ${b.balance}`]];
-
-      doc.autoTable({
-        head: [tableColumn],
-        body: tableRows,
-        startY: 40,
-        theme: 'striped'
-      });
-      
-      doc.save(`${b.bankName}_Statement.pdf`);
-    } catch (error) {
-      console.error("PDF Error:", error);
-      alert("PDF generate karne mein dikkat aa rahi hai. Kripya dependencies check karein.");
-    }
+    const doc = new jsPDF();
+    doc.text(`Bank Statement: ${b.bankName}`, 14, 15);
+    doc.autoTable({
+      startY: 25,
+      head: [['Date', 'Particulars', 'Balance']],
+      body: [[currentTime.toLocaleDateString(), 'Opening Balance', `Rs. ${b.balance}`]],
+    });
+    doc.save(`${b.bankName}_Statement.pdf`);
   };
 
   const exportExcel = (b) => {
@@ -88,18 +75,16 @@ export default function App() {
     XLSX.writeFile(wb, `${b.bankName}_Ledger.xlsx`);
   };
 
-  // Edit Logic
-  const handleEdit = (item, type) => {
-    setEditId(item.id);
-    setEditData(item);
-  };
-
+  // Generic Update Handler
   const handleUpdate = async (e, collectionName) => {
     e.preventDefault();
-    const docRef = doc(db, collectionName, editId);
-    await updateDoc(docRef, editData);
-    setEditId(null);
-    setEditData({});
+    try {
+      const docRef = doc(db, collectionName, editId);
+      await updateDoc(docRef, editData);
+      setEditId(null);
+      setEditData({});
+      alert("Updated Successfully!");
+    } catch (err) { alert("Error updating!"); }
   };
 
   if (!user) return <LoginScreen />;
@@ -133,13 +118,13 @@ export default function App() {
           {activeTab === "Dashboard" && (
             <div className="fade-in">
               <div className="filter-container">
-                <label className="filter-label">SELECT FIRM HERE:</label>
+                <label className="filter-label">SELECT FIRM:</label>
                 <select className="pro-select-premium" value={selectedFirm} onChange={(e) => setSelectedFirm(e.target.value)}>
                   <option value="">-- Choose Firm --</option>
                   {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                 </select>
               </div>
-              {selectedFirm ? (
+              {selectedFirm && (
                 <div className="card-premium">
                   <table className="pro-table">
                     <thead><tr><th>Bank</th><th>A/c No</th><th>Balance</th><th>Action</th></tr></thead>
@@ -175,10 +160,45 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
-              ) : <div className="card-premium">Please select a firm from the menu above.</div>}
+              )}
             </div>
           )}
 
+          {activeTab === "Firm Master" && (
+            <div className="fade-in">
+              <div className="card-premium">
+                <h3>{editId ? "📝 Edit Firm" : "🏢 Firm Master"}</h3>
+                <form className="master-grid-form" onSubmit={(e) => editId ? handleUpdate(e, "firms") : async (e) => {
+                  e.preventDefault();
+                  await addDoc(collection(db, "firms"), { name: e.target.fName.value, address: e.target.fAddr.value });
+                  e.target.reset();
+                }(e)}>
+                  <input name="fName" placeholder="Firm Name" className="pro-input" value={editData.name || ""} onChange={(e)=>setEditData({...editData, name: e.target.value})} required />
+                  <input name="fAddr" placeholder="Address" className="pro-input" value={editData.address || ""} onChange={(e)=>setEditData({...editData, address: e.target.value})} required />
+                  <button type="submit" className="btn-gold">{editId ? "Update" : "Save"}</button>
+                  {editId && <button type="button" onClick={()=>setEditId(null)} className="btn-del-sm">Cancel</button>}
+                </form>
+              </div>
+              <div className="card-premium mt-20">
+                <table className="pro-table">
+                  <thead><tr><th>Firm Name</th><th>Address</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {firms.map(f => (
+                      <tr key={f.id}>
+                        <td>{f.name}</td><td>{f.address}</td>
+                        <td>
+                          <button className="btn-edit-sm" onClick={() => {setEditId(f.id); setEditData(f);}}>Edit</button>
+                          <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "firms", f.id))}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* User Master Section */}
           {activeTab === "User Master" && (
             <div className="fade-in">
               <div className="card-premium">
@@ -206,13 +226,13 @@ export default function App() {
               </div>
               <div className="card-premium mt-20">
                 <table className="pro-table">
-                  <thead><tr><th>Name</th><th>Mobile</th><th>Role</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>Name</th><th>Role</th><th>Actions</th></tr></thead>
                   <tbody>
                     {usersList.map(u => (
                       <tr key={u.id}>
-                        <td>{u.uName}</td><td>{u.uPhone}</td><td>{u.uRole}</td>
+                        <td>{u.uName}</td><td>{u.uRole}</td>
                         <td>
-                          <button className="btn-edit-sm" onClick={() => handleEdit(u)}>Edit</button>
+                          <button className="btn-edit-sm" onClick={() => {setEditId(u.id); setEditData(u);}}>Edit</button>
                           <button className="btn-del-sm" onClick={() => deleteDoc(doc(db, "users", u.id))}>Delete</button>
                         </td>
                       </tr>
@@ -222,7 +242,6 @@ export default function App() {
               </div>
             </div>
           )}
-          {/* Repeat same Edit Logic for Firm and Bank Master tabs */}
         </div>
       </div>
     </div>
