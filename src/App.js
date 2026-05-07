@@ -28,10 +28,25 @@ export default function App() {
     return () => unsub();
   }, []);
 
+  // --- DATA FETCHING WITH LOGS ---
   useEffect(() => {
-    onSnapshot(collection(db, "firms"), (s) => setFirms(s.docs.map((d) => d.data())));
-    onSnapshot(collection(db, "banks"), (s) => setBanks(s.docs.map((d) => d.data())));
-    onSnapshot(collection(db, "transactions"), (s) => setTransactions(s.docs.map((d) => d.data())));
+    // Firms fetch logic
+    onSnapshot(collection(db, "firms"), (s) => {
+      console.log("Firms found:", s.docs.length); 
+      setFirms(s.docs.map((d) => d.data()));
+    });
+
+    // Banks fetch logic
+    onSnapshot(collection(db, "banks"), (s) => {
+      console.log("Banks found in DB:", s.docs.length); 
+      setBanks(s.docs.map((d) => d.data()));
+    });
+
+    // Transactions fetch logic
+    onSnapshot(collection(db, "transactions"), (s) => {
+      console.log("Transactions found:", s.docs.length);
+      setTransactions(s.docs.map((d) => d.data()));
+    });
   }, []);
 
   const login = async () => {
@@ -61,7 +76,6 @@ export default function App() {
     return l.length ? l[l.length - 1].balance : 0;
   };
 
-  // --- EXPORT FUNCTIONS ---
   const exportExcel = (account) => {
     const data = getLedger(account);
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -96,6 +110,7 @@ export default function App() {
           <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" onChange={(e) => setPass(e.target.value)} />
           <button onClick={login}>Login</button>
+          <p style={{marginTop:'20px', fontSize:'10px', color:'#888'}}>SOFTVIEW TECHNOLOGIES</p>
         </div>
       </div>
     );
@@ -133,36 +148,43 @@ export default function App() {
 
           {/* DASHBOARD SECTION */}
           {activePage === "Dashboard" && selectedFirm && 
-            banks.filter(b => String(b.firm).toLowerCase() === String(selectedFirm).toLowerCase()).map((b, i) => (
-              <div key={i} className="card ledger-card">
-                <div className="dashboard-bank-row" onClick={() => setExpanded(expanded === b.account ? null : b.account)}>
+            banks.filter(b => (b.firm || b.Firm || "").toLowerCase() === selectedFirm.toLowerCase()).map((b, i) => (
+              <div key={i} className="card ledger-card" style={{marginBottom:'10px', border:'1px solid #eee'}}>
+                <div className="dashboard-bank-row" onClick={() => setExpanded(expanded === b.account ? null : b.account)} style={{cursor:'pointer', padding:'15px', display:'flex', justifyContent:'space-between'}}>
                   <div className="bank-info-main">
                     <span className="expand-icon">{expanded === b.account ? '▼' : '▶'}</span>
-                    <span className="bank-label">🏦 {b.name}</span>
-                    <span className="acc-label">({b.account})</span>
+                    <span className="bank-label" style={{fontWeight:'bold', marginLeft:'10px'}}>🏦 {b.name}</span>
+                    <span className="acc-label" style={{color:'#666', fontSize:'12px', marginLeft:'10px'}}>({b.account})</span>
                   </div>
                   <div className="bank-balance-main">
-                    <b className="bal-amt">₹{getBalance(b.account).toLocaleString('en-IN')}</b>
+                    <b className="bal-amt" style={{color:'#2a5298', fontSize:'16px'}}>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
                   </div>
                 </div>
 
                 {expanded === b.account && (
-                  <div className="ledger-container">
-                    <div className="export-bar">
-                      <button className="btn-ex" onClick={() => exportExcel(b.account)}>📥 Excel</button>
-                      <button className="btn-pdf" onClick={() => exportPDF(b.account)}>📄 PDF</button>
+                  <div className="ledger-container" style={{padding:'15px', background:'#f9f9f9', borderTop:'1px solid #eee'}}>
+                    <div className="export-bar" style={{textAlign:'right', marginBottom:'10px'}}>
+                      <button className="btn-ex" onClick={() => exportExcel(b.account)} style={{background:'#27ae60', color:'white', border:'none', padding:'5px 10px', borderRadius:'4px', cursor:'pointer'}}>📥 Excel</button>
+                      <button className="btn-pdf" onClick={() => exportPDF(b.account)} style={{background:'#e74c3c', color:'white', border:'none', padding:'5px 10px', borderRadius:'4px', cursor:'pointer', marginLeft:'5px'}}>📄 PDF</button>
                     </div>
-                    <table className="ledger-table">
+                    <table className="ledger-table" style={{width:'100%', borderCollapse:'collapse'}}>
                       <thead>
-                        <tr><th>Date</th><th>Particulars</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr>
+                        <tr style={{background:'#eee'}}>
+                          <th style={{padding:'8px', textAlign:'left'}}>Date</th>
+                          <th style={{padding:'8px', textAlign:'left'}}>Particulars</th>
+                          <th style={{padding:'8px', textAlign:'left'}}>Receipt</th>
+                          <th style={{padding:'8px', textAlign:'left'}}>Payment</th>
+                          <th style={{padding:'8px', textAlign:'left'}}>Balance</th>
+                        </tr>
                       </thead>
                       <tbody>
                         {getLedger(b.account).map((l, idx) => (
-                          <tr key={idx}>
-                            <td>{l.date}</td><td>{l.remark}</td>
-                            <td style={{color:'green'}}>₹{l.receipt}</td>
-                            <td style={{color:'red'}}>₹{l.payment}</td>
-                            <td><b>₹{l.balance}</b></td>
+                          <tr key={idx} style={{borderBottom:'1px solid #eee'}}>
+                            <td style={{padding:'8px'}}>{l.date}</td>
+                            <td style={{padding:'8px'}}>{l.remark || "-"}</td>
+                            <td style={{padding:'8px', color:'green'}}>{l.receipt > 0 ? `₹${l.receipt}` : "-"}</td>
+                            <td style={{padding:'8px', color:'red'}}>{l.payment > 0 ? `₹${l.payment}` : "-"}</td>
+                            <td style={{padding:'8px'}}><b>₹{l.balance}</b></td>
                           </tr>
                         ))}
                       </tbody>
@@ -172,6 +194,13 @@ export default function App() {
               </div>
             ))
           }
+
+          {/* Fallback agar koi bank na mile */}
+          {activePage === "Dashboard" && selectedFirm && banks.filter(b => (b.firm || b.Firm || "").toLowerCase() === selectedFirm.toLowerCase()).length === 0 && (
+            <div className="card" style={{padding:'20px', textAlign:'center', color:'#888'}}>
+              No banks found for this firm. Please check Bank Master.
+            </div>
+          )}
         </div>
       </div>
     </div>

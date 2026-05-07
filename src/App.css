@@ -261,3 +261,70 @@
 .txt-green { color: #27ae60; font-weight: 600; }
 .txt-red { color: #e74c3c; font-weight: 600; }
 .txt-bold { font-weight: 700; color: #333; }
+/* MODERN LOGIN PAGE */
+.loginPage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a2a44 0%, #2a5298 100%);
+}
+
+.loginCard {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.loginCard h2 {
+  color: #1a2a44;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.loginCard input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.loginCard input:focus {
+  border-color: #2a5298;
+  box-shadow: 0 0 5px rgba(42, 82, 152, 0.2);
+}
+
+.loginCard button {
+  width: 100%;
+  padding: 12px;
+  background: #2a5298;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.loginCard button:hover {
+  background: #1a2a44;
+  transform: translateY(-2px);
+}
+
+.loginCard p {
+  margin-top: 25px;
+  color: #888;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
