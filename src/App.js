@@ -115,30 +115,54 @@ export default function App() {
                             </td>
                           </tr>
                           {expandedBank === b.id && (
-                            <tr>
-                              <td colSpan="6" style={{background:'#f8fafc', padding:'20px'}}>
-                                <div style={{border:'1px solid #e2e8f0', padding:'15px', borderRadius:'8px', background:'white'}}>
-                                  <h4>Ledger Details: {b.bankName}</h4>
-                                  <table className="pro-table">
-                                    <thead>
-                                      <tr style={{background:'#f1f5f9'}}>
-                                        <th>Date</th><th>Particular</th><th>Receipt</th><th>Payment</th><th>Balance</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr>
-                                        <td>{new Date().toLocaleDateString()}</td>
-                                        <td>Opening Balance</td>
-                                        <td>{parseFloat(b.balance) >= 0 ? b.balance : '-'}</td>
-                                        <td>{parseFloat(b.balance) < 0 ? b.balance : '-'}</td>
-                                        <td>₹ {b.balance}</td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
+  <tr>
+    <td colSpan="6" style={{background:'#f8fafc', padding:'20px'}}>
+      <div style={{border:'1px solid #e2e8f0', padding:'20px', borderRadius:'8px', background:'white', boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
+          <h4 style={{margin:0, color:'#0f172a'}}>Bank Ledger: {b.bankName} ({b.accNo})</h4>
+          <button style={{padding:'5px 15px', fontSize:'12px'}}>Print PDF</button>
+        </div>
+        
+        <table className="pro-table" style={{border:'1px solid #f1f5f9'}}>
+          <thead>
+            <tr style={{background:'#f8fafc'}}>
+              <th style={{width:'120px'}}>Date</th>
+              <th>Particulars</th>
+              <th style={{textAlign:'right'}}>Receipt (Cr)</th>
+              <th style={{textAlign:'right'}}>Payment (Dr)</th>
+              <th style={{textAlign:'right'}}>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* 1. Hamesha Pehli Row Opening Balance ki hogi */}
+            <tr style={{fontWeight:'600', background:'#fffbeb'}}>
+              <td>-</td>
+              <td>Opening Balance</td>
+              <td style={{textAlign:'right'}} className="amt-receipt">
+                {parseFloat(b.openingBal || 0) >= 0 ? `₹ ${b.openingBal}` : '-'}
+              </td>
+              <td style={{textAlign:'right'}} className="amt-payment">
+                {parseFloat(b.openingBal || 0) < 0 ? `₹ ${Math.abs(b.openingBal)}` : '-'}
+              </td>
+              <td style={{textAlign:'right', fontWeight:'bold'}}>₹ {b.openingBal || 0}</td>
+            </tr>
+
+            {/* 2. Iske niche saare transactions aayenge (Future logic ke liye placeholder) */}
+            {/* b.transactions?.map((t, index) => (...)) */}
+            
+            {/* 3. Final Closing Row */}
+            <tr style={{background:'#f1f5f9', fontWeight:'800'}}>
+              <td colSpan="4" style={{textAlign:'right'}}>Current Net Balance:</td>
+              <td style={{textAlign:'right'}} className={parseFloat(b.balance) >= 0 ? 'amt-receipt' : 'amt-payment'}>
+                ₹ {b.balance} {parseFloat(b.balance) >= 0 ? ' (Dr)' : ' (Cr)'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+)}
                         </React.Fragment>
                       );
                     })}
