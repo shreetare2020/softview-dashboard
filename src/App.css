@@ -1,49 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* Action Buttons Styling */
+.btn-edit-sm {
+  background: #e0f2fe; color: #0369a1; border: none;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  margin-right: 8px; font-weight: 600; font-size: 12px;
+}
 
-:root { --navy: #0f172a; --gold: #b58921; --bg: #f1f5f9; }
+.btn-del-sm {
+  background: #fee2e2; color: #b91c1c; border: none;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  font-weight: 600; font-size: 12px;
+}
 
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); }
+.btn-edit-sm:hover { background: #bae6fd; }
+.btn-del-sm:hover { background: #fecaca; }
 
-/* Layout */
-.app-shell { display: flex; min-height: 100vh; }
-.sidebar { width: 280px; background: var(--navy); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
-.main-stage { margin-left: 280px; flex: 1; padding: 30px; }
-
-/* Sidebar Premium */
-.sidebar-brand { padding: 40px 25px; font-size: 24px; font-weight: 800; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); }
-.nav-links { flex: 1; padding: 20px 0; }
-.nav-item { padding: 18px 25px; cursor: pointer; color: #94a3b8; font-weight: 600; transition: 0.3s; }
-.nav-item.active { background: rgba(181, 137, 33, 0.2); color: white; border-left: 5px solid var(--gold); }
-.sidebar-footer { padding: 25px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
-.softview-logo { color: var(--gold); font-weight: 800; display: block; margin-bottom: 5px; }
-
-/* Header & Clock */
-.top-right-header { display: flex; justify-content: flex-end; align-items: center; gap: 20px; background: white; padding: 15px 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-.live-clock-box { background: #f8fafc; padding: 10px 20px; border-radius: 50px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px; font-family: monospace; font-weight: 700; color: var(--navy); }
-.clock-divider { color: var(--gold); }
-
-/* Cards & Tables */
-.card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 20px; }
-.filter-container { background: var(--navy); padding: 25px; border-radius: 16px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-.pro-select, .pro-input { padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
-.pro-table { width: 100%; border-collapse: collapse; }
-.pro-table th { text-align: left; padding: 15px; background: #f8fafc; color: #64748b; font-size: 13px; border-bottom: 2px solid #e2e8f0; }
-.pro-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-.txt-success { color: #16a34a; font-weight: 700; }
-
-/* Buttons */
-.btn-gold { background: var(--gold); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-gold-sm { background: var(--gold); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-.btn-logout { background: #fee2e2; color: #ef4444; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-excel { background: #16a34a; color: white; border: none; padding: 5px 10px; border-radius: 4px; margin-right: 5px; cursor: pointer; }
-.btn-pdf { background: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-
-/* Login */
-.login-screen { height: 100vh; background: var(--navy); display: flex; justify-content: center; align-items: center; }
-.login-card { background: white; padding: 40px; border-radius: 24px; width: 350px; text-align: center; }
-.login-form input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-.login-submit { width: 100%; background: var(--gold); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-
-.mt-20 { margin-top: 20px; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
-.ledger-box { background: #f8fafc; padding: 20px; border-radius: 12px; margin-top: 15px; border: 1px solid #e2e8f0; }
+.master-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
