@@ -11,6 +11,7 @@ export default function App() {
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [usersList, setUsersList] = useState([]); // User Master ke liye
   const [selectedFirm, setSelectedFirm] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [activePage, setActivePage] = useState("Dashboard");
@@ -28,16 +29,20 @@ export default function App() {
     return () => unsub();
   }, []);
 
+  // Sabhi Masters ka data fetch karna
   useEffect(() => {
+    if (!user) return;
     const unsubFirms = onSnapshot(collection(db, "firms"), (s) => setFirms(s.docs.map(d => d.data())));
     const unsubBanks = onSnapshot(collection(db, "banks"), (s) => setBanks(s.docs.map(d => d.data())));
     const unsubTrans = onSnapshot(collection(db, "transactions"), (s) => setTransactions(s.docs.map(d => d.data())));
-    return () => { unsubFirms(); unsubBanks(); unsubTrans(); };
-  }, []);
+    const unsubUsers = onSnapshot(collection(db, "users"), (s) => setUsersList(s.docs.map(d => d.data())));
+    
+    return () => { unsubFirms(); unsubBanks(); unsubTrans(); unsubUsers(); };
+  }, [user]);
 
   const login = async () => {
     try { await signInWithEmailAndPassword(auth, email, pass); } 
-    catch { alert("Login Failed - Please check credentials"); }
+    catch { alert("Login Failed"); }
   };
 
   const getLedger = (account) => {
@@ -60,18 +65,6 @@ export default function App() {
   const getBalance = (account) => {
     const l = getLedger(account);
     return l.length ? l[l.length - 1].balance : 0;
-  };
-
-  const exportPDF = (account) => {
-    const doc = new jsPDF();
-    const data = getLedger(account);
-    doc.text(`Bank Ledger: ${account}`, 14, 15);
-    doc.autoTable({
-      startY: 22,
-      head: [["Date", "Particulars", "Receipt", "Payment", "Balance"]],
-      body: data.map(d => [d.date, d.remark || "Entry", d.receipt, d.payment, d.balance]),
-    });
-    doc.save(`Ledger_${account}.pdf`);
   };
 
   if (!user) {
@@ -100,6 +93,7 @@ export default function App() {
            <div className={activePage === "Dashboard" ? "active" : ""} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
            <div className={activePage === "Firm Master" ? "active" : ""} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
            <div className={activePage === "Bank Master" ? "active" : ""} onClick={() => setActivePage("Bank Master")}>🏦 Bank Master</div>
+           <div className={activePage === "User Master" ? "active" : ""} onClick={() => setActivePage("User Master")}>👥 User Master</div>
         </div>
         <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
         <div className="clockBox">{time.toLocaleString()}</div>
@@ -114,39 +108,50 @@ export default function App() {
         <div className="content">
           <div className="page-title">
             <h2>{activePage}</h2>
-            <p>{selectedFirm || "Please select a firm from sidebar"}</p>
           </div>
 
+          {/* User Master Page */}
+          {activePage === "User Master" && (
+            <div className="card">
+              <h3>System Users</h3>
+              <table className="ledger-table">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+                <tbody>
+                  {usersList.map((u, i) => (
+                    <tr key={i}><td>{u.name}</td><td>{u.email}</td><td>{u.role}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Firm Master Page */}
+          {activePage === "Firm Master" && (
+            <div className="card">
+              <h3>Registered Firms</h3>
+              <ul>{firms.map((f, i) => <li key={i}>{f.name} - {f.address || 'No Address'}</li>)}</ul>
+            </div>
+          )}
+
+          {/* Dashboard Logic */}
           {activePage === "Dashboard" && selectedFirm && 
             banks.filter(b => String(b.firm || b.Firm || "").toLowerCase() === selectedFirm.toLowerCase()).map((b, i) => (
               <div key={i} className="card ledger-card">
                 <div className="dashboard-bank-row" onClick={() => setExpanded(expanded === b.account ? null : b.account)}>
-                  <div className="bank-info-main">
-                    <span className="expand-icon">{expanded === b.account ? '▼' : '▶'}</span>
-                    <span className="bank-label">🏦 {b.name}</span>
-                    <span className="acc-label">({b.account})</span>
-                  </div>
-                  <div className="bank-balance-main">
-                    <b className="bal-amt">₹{getBalance(b.account).toLocaleString('en-IN')}</b>
-                  </div>
+                   <span>{expanded === b.account ? '▼' : '▶'} 🏦 {b.name} ({b.account})</span>
+                   <b>₹{getBalance(b.account).toLocaleString('en-IN')}</b>
                 </div>
-
                 {expanded === b.account && (
                   <div className="ledger-container">
-                    <div className="export-bar">
-                      <button className="btn-pdf" onClick={() => exportPDF(b.account)}>📄 PDF Report</button>
-                    </div>
                     <table className="ledger-table">
-                      <thead>
-                        <tr><th>Date</th><th>Particulars</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr>
-                      </thead>
+                      <thead><tr><th>Date</th><th>Remark</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr></thead>
                       <tbody>
                         {getLedger(b.account).map((l, idx) => (
                           <tr key={idx}>
                             <td>{l.date}</td><td>{l.remark}</td>
                             <td className="txt-green">₹{l.receipt}</td>
                             <td className="txt-red">₹{l.payment}</td>
-                            <td><b>₹{l.balance}</b></td>
+                            <td>₹{l.balance}</td>
                           </tr>
                         ))}
                       </tbody>
