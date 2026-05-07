@@ -1,44 +1,92 @@
 :root {
-  --navy: #0f172a;
-  --blue-pro: #2563eb;
-  --green-rec: #16a34a;
-  --red-pay: #dc2626;
-  --bg-slate: #f8fafc;
+  --primary-navy: #0f172a;
+  --accent-blue: #2563eb;
+  --success-green: #16a34a;
+  --danger-red: #dc2626;
+  --text-slate: #64748b;
 }
 
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-slate); }
+/* login page design */
+.login-page {
+  background: var(--primary-navy);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
 
-.dashboard-container { display: flex; min-height: 100vh; }
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
 
-/* Sidebar */
-.sidebar { width: 260px; background: var(--navy); color: white; padding: 25px; position: sticky; top: 0; height: 100vh; }
-.sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid #334155; padding-bottom: 15px; }
-.nav-item { padding: 12px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-.nav-item.active { background: var(--blue-pro); font-weight: bold; }
+.login-card h1 { color: #1e293b; font-size: 24px; margin-bottom: 30px; }
 
-/* Main Area */
-.main-stage { flex: 1; padding: 30px; position: relative; padding-bottom: 80px; }
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
 
-/* Top Header with Date/Time */
-.top-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; }
-.user-info-box { text-align: right; }
-.user-name { font-weight: 800; color: var(--navy); font-size: 16px; text-transform: uppercase; }
-.date-time { font-family: monospace; color: #64748b; font-size: 13px; }
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-/* Cards & Tables */
-.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-.pro-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.pro-table th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 12px; color: var(--navy); border-bottom: 2px solid #e2e8f0; }
-.pro-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.login-footer {
+  margin-top: 40px;
+  color: #94a3b8;
+  font-size: 13px;
+}
 
-/* Arrows */
-.receipt-down { color: var(--green-rec); font-weight: bold; }
-.payment-up { color: var(--red-pay); font-weight: bold; }
+/* Dashboard Sidebar & Header */
+.dashboard-layout { display: flex; height: 100vh; }
 
-/* Footer */
-.footer-bottom-left { position: fixed; bottom: 15px; left: 15px; font-size: 12px; color: #64748b; z-index: 100; }
-.bank-closed-row { background-color: #fee2e2 !important; color: #991b1b !important; }
+.sidebar {
+  width: 260px;
+  background: var(--primary-navy);
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
 
-/* Forms */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-.form-grid input, .form-grid select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; background: #f8fafc; }
+
+.top-bar {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  text-align: right;
+}
+
+.user-name { font-weight: bold; color: #1e293b; font-size: 16px; }
+.clock-box { color: var(--text-slate); font-size: 13px; font-family: monospace; }
+
+.footer-dev {
+  position: fixed;
+  bottom: 15px;
+  left: 275px;
+  font-size: 12px;
+  color: var(--text-slate);
+}
+
+/* Icons for Receipt/Payment */
+.receipt-amt { color: var(--success-green); font-weight: bold; }
+.payment-amt { color: var(--danger-red); font-weight: bold; }
+.bank-closed { background: #fee2e2 !important; color: #b91c1c; }
