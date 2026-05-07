@@ -4,7 +4,6 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
 
-// --- Login Screen ---
 function LoginScreen() {
   const handleLogin = (e) => {
     e.preventDefault();
@@ -14,17 +13,15 @@ function LoginScreen() {
   return (
     <div className="login-screen">
       <div className="login-card">
-        <div className="login-logo">🏢</div>
-        <h1>BANKING PRO</h1>
-        <form className="login-form" onSubmit={handleLogin}>
-          <input name="email" type="email" placeholder="Email Address" required />
-          <input name="pass" type="password" placeholder="Password" required />
-          <button type="submit" className="login-submit">AUTHORIZE LOGIN</button>
+        <div className="login-logo" style={{fontSize: '50px'}}>🏢</div>
+        <h1 style={{color: '#1a237e', marginBottom: '30px'}}>BANKING PRO</h1>
+        <form onSubmit={handleLogin} style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+          <input name="email" type="email" placeholder="Email" style={{padding: '12px', borderRadius: '8px', border: '1px solid #ddd'}} required />
+          <input name="pass" type="password" placeholder="Password" style={{padding: '12px', borderRadius: '8px', border: '1px solid #ddd'}} required />
+          <button type="submit" style={{padding: '12px', background: '#1a237e', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold'}}>LOGIN</button>
         </form>
-        <div className="login-footer">
-          Developed by:<br/>
-          <strong>SOFTVIEW TECHNOLOGIES</strong><br/>
-          📞 +91 7972084304
+        <div className="login-footer" style={{marginTop: '30px', fontSize: '12px', color: '#666'}}>
+          Developed by: <strong style={{color: '#1a237e'}}>SOFTVIEW TECHNOLOGIES</strong>
         </div>
       </div>
     </div>
@@ -34,16 +31,14 @@ function LoginScreen() {
 export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("");
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => { clearInterval(timer); unsubscribe(); };
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -60,70 +55,53 @@ export default function App() {
     <div className="app-shell">
       <div className="sidebar">
         <div className="sidebar-brand">BANKING PRO</div>
-        <div className="nav-links">
-          {['Dashboard', 'Firm Master', 'Bank Master', 'User Master'].map(tab => (
-            <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-              {tab}
-            </div>
-          ))}
-        </div>
+        {['Dashboard', 'Firm Master', 'Bank Master', 'User Master'].map(tab => (
+          <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+            {tab}
+          </div>
+        ))}
         <div className="sidebar-footer">
           <span className="softview-name">SOFTVIEW TECHNOLOGIES</span><br/>
-          <span className="contact-pill">📞 +91 7972084304</span>
+          📞 +91 7972084304
         </div>
       </div>
 
       <div className="main-stage">
         <div className="top-nav">
-          <div className="user-welcome">Welcome, <strong>{user.email.toUpperCase()}</strong></div>
-          <div className="live-clock">{currentTime.toLocaleDateString('en-GB')} | {currentTime.toLocaleTimeString()}</div>
+          <div>Welcome, <strong>{user.email}</strong></div>
           <button className="btn-logout" onClick={() => signOut(auth)}>Logout</button>
         </div>
 
         <div className="content-area">
-          {activeTab === "Dashboard" && (
-            <div className="fade-in">
+          {activeTab === "Dashboard" ? (
+            <div>
               <div className="filter-card">
-                <label className="filter-label">SELECT FIRM HERE:</label>
+                <label>SELECT FIRM:</label>
                 <select className="pro-select" value={selectedFirm} onChange={(e) => setSelectedFirm(e.target.value)}>
-                  <option value="">-- Choose Firm --</option>
+                  <option value="">-- Choose --</option>
                   {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                 </select>
               </div>
-
-              {selectedFirm ? (
+              {selectedFirm && (
                 <div className="card-premium">
                   <table className="pro-table">
-                    <thead><tr><th>Bank Name</th><th>Branch</th><th>Current Bal.</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Bank</th><th>Branch</th><th>Balance</th><th>Action</th></tr></thead>
                     <tbody>
                       {banks.filter(b => b.firmName === selectedFirm).map(b => (
                         <tr key={b.id}>
-                          <td>{b.bankName}</td><td>{b.branch}</td><td className="txt-success">₹ {b.balance}</td>
+                          <td>{b.bankName}</td><td>{b.branch}</td><td style={{color: 'green', fontWeight: 'bold'}}>₹ {b.balance}</td>
                           <td><button className="btn-ledger">Ledger</button></td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              ) : <div className="empty-state">Please select a firm to view reports.</div>}
+              )}
             </div>
-          )}
-
-          {activeTab !== "Dashboard" && (
-            <div className="card-premium" style={{padding: '30px'}}>
-              <h3>{activeTab} Details</h3>
-              <table className="pro-table">
-                <thead>
-                  {activeTab === "Firm Master" && <tr><th>Firm Name</th><th>Address</th></tr>}
-                  {activeTab === "Bank Master" && <tr><th>Firm</th><th>Bank</th><th>A/c No</th></tr>}
-                  {activeTab === "User Master" && <tr><th>Name</th><th>Email</th></tr>}
-                </thead>
-                <tbody>
-                  {activeTab === "Firm Master" && firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.address}</td></tr>)}
-                  {activeTab === "Bank Master" && banks.map(b => <tr key={b.id}><td>{b.firmName}</td><td>{b.bankName}</td><td>{b.accNo}</td></tr>)}
-                  {activeTab === "User Master" && usersList.map(u => <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td></tr>)}
-                </tbody>
-              </table>
+          ) : (
+            <div className="card-premium" style={{padding: '20px'}}>
+              <h2>{activeTab}</h2>
+              <p>Data loading from Firebase...</p>
             </div>
           )}
         </div>
