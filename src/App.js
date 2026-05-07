@@ -6,25 +6,23 @@ import { collection, onSnapshot } from "firebase/firestore";
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Refresh check ke liye
+  const [loading, setLoading] = useState(true); // Refresh check logic
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [activePage, setActivePage] = useState("Dashboard");
-  const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    // Ye function check karega ki user logged in hai ya nahi
+    // Ye function refresh hone par sabse pehle chalta hai
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) {
         setUser(u);
       } else {
         setUser(null);
+        // Agar refresh par session nahi mila, toh user null ho jayega
       }
-      setLoading(false); // Verification khatam
+      setLoading(false); // Check khatam, ab UI dikhao
     });
-    
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => { unsub(); clearInterval(timer); };
+    return () => unsub();
   }, []);
 
   const handleLogin = async (e) => {
@@ -32,53 +30,58 @@ export default function App() {
     try {
       await signInWithEmailAndPassword(auth, email, pass);
     } catch (err) {
-      alert("Invalid Credentials! Dubara koshish karein.");
+      alert("Unauthorized Access! Sahi details bhariye.");
     }
   };
 
-  // Jab tak loading ho, tab tak screen khali rahegi (Refresh security)
-  if (loading) return <div className="loader-container">Verifying Security...</div>;
+  // 1. Refresh hone par sabse pehle ye dikhega (Security Gate)
+  if (loading) {
+    return (
+      <div className="security-gate">
+        <div className="spinner"></div>
+        <p>Verifying Secure Connection...</p>
+      </div>
+    );
+  }
 
-  // Agar user nahi hai, toh sirf Login Page dikhega
+  // 2. Agar login nahi hai, toh sirf Login Screen (Back/Refresh block)
   if (!user) {
     return (
-      <div className="login-screen">
-        <form className="login-panel" onSubmit={handleLogin}>
-          <div className="logo-area">🏦</div>
-          <h2>SOFTVIEW BANKING</h2>
-          <p>Dignified Financial Management</p>
-          <input type="email" placeholder="Admin Email" required onChange={(e) => setEmail(e.target.value)} />
+      <div className="login-overlay">
+        <form className="login-box" onSubmit={handleLogin}>
+          <div className="icon">🛡️</div>
+          <h2>ADMIN PORTAL</h2>
+          <p>Please login to continue</p>
+          <input type="email" placeholder="Email Address" required onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" required onChange={(e) => setPass(e.target.value)} />
-          <button type="submit">LOGIN TO PORTAL</button>
+          <button type="submit">LOGIN</button>
         </form>
       </div>
     );
   }
 
-  // Login hone ke baad Dashboard
+  // 3. Authenticated Dashboard
   return (
-    <div className="app-container">
-      <div className="sidebar">
-        <h2>BANKING SYSTEM</h2>
-        <div className={`nav-item ${activePage === "Dashboard" ? "active" : ""}`} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
-        <div className={`nav-item ${activePage === "Firm Master" ? "active" : ""}`} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
-        <button className="logout-btn" onClick={() => signOut(auth)}>LOGOUT</button>
+    <div className="dashboard-wrapper">
+      <div className="sidebar-pro">
+        <h2 className="brand-name">SOFTVIEW</h2>
+        <div className={`menu-item ${activePage === "Dashboard" ? "active" : ""}`} onClick={() => setActivePage("Dashboard")}>📊 Dashboard</div>
+        <div className={`menu-item ${activePage === "Firm Master" ? "active" : ""}`} onClick={() => setActivePage("Firm Master")}>🏢 Firm Master</div>
+        <div className="logout-zone">
+          <button onClick={() => signOut(auth)}>LOGOUT</button>
+        </div>
       </div>
       
-      <div className="main-content">
-        <header>
-          <span className="page-title">{activePage}</span>
-          <span className="user-label">{user.email}</span>
-        </header>
-        
-        <div className="content-body">
-          {/* Dashboard/Master content yahan ayega */}
-          <div className="card">Abhi design set ho raha hai...</div>
+      <div className="main-stage">
+        <div className="top-bar">
+          <h3>{activePage}</h3>
+          <span className="user-mail">{user.email}</span>
         </div>
-
-        <div className="professional-footer">
-          <div className="clock-box">{time.toLocaleString()}</div>
-          <div className="dev-tag">Developed by Softview Technologies | 7972084304</div>
+        <div className="page-content">
+          <div className="card">
+            <h4>Welcome to Professional Dashboard</h4>
+            <p>System is secured with real-time session tracking.</p>
+          </div>
         </div>
       </div>
     </div>

@@ -1,50 +1,38 @@
-.login-screen {
-  background: #1a2a44; /* Professional Navy Blue */
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Security Gate / Loader */
+.security-gate {
+  height: 100vh; background: #1a2a44; display: flex; 
+  flex-direction: column; justify-content: center; align-items: center;
+  color: white; font-family: sans-serif;
 }
 
-.login-panel {
-  background: white;
-  padding: 40px;
-  border-radius: 15px;
-  width: 350px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-  text-align: center;
+/* Professional Login Overlay */
+.login-overlay {
+  background: #0f172a; height: 100vh; display: flex; 
+  justify-content: center; align-items: center;
 }
 
-.logo-area { font-size: 50px; margin-bottom: 10px; }
-.login-panel h2 { color: #1a2a44; margin: 10px 0; letter-spacing: 1px; }
-.login-panel p { color: #666; font-size: 14px; margin-bottom: 30px; }
-
-.login-panel input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-sizing: border-box;
+.login-box {
+  background: white; padding: 40px; border-radius: 12px; width: 340px;
+  text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
-.login-panel button {
-  width: 100%;
-  padding: 12px;
-  background: #2a5298;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: 0.3s;
+.login-box .icon { font-size: 40px; margin-bottom: 15px; }
+.login-box h2 { color: #1e293b; margin: 0; font-weight: 800; }
+.login-box p { color: #64748b; margin-bottom: 30px; }
+
+.login-box input {
+  width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0;
+  border-radius: 6px; box-sizing: border-box;
 }
 
-.login-panel button:hover { background: #1a2a44; }
-
-/* Loader */
-.loader-container {
-  height: 100vh; display: flex; justify-content: center; 
-  align-items: center; font-family: sans-serif; color: #1a2a44;
+.login-box button {
+  width: 100%; padding: 12px; background: #2563eb; color: white;
+  border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
 }
+
+/* Dashboard Sidebar */
+.sidebar-pro {
+  width: 260px; background: #1e293b; color: white; height: 100vh; padding: 25px;
+}
+.menu-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; }
+.menu-item.active { background: #3b82f6; }
