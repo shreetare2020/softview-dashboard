@@ -1,42 +1,50 @@
-:root {
-  --navy: #1a2a44;
-  --blue-accent: #2a5298;
-  --bg-light: #f4f7f6;
-  --white: #ffffff;
+.login-screen {
+  background: #1a2a44; /* Professional Navy Blue */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-body { font-family: 'Inter', sans-serif; background: var(--bg-light); margin: 0; }
-
-/* Dashboard Container */
-.app-layout { display: flex; min-height: 100vh; }
-
-/* Sidebar: Dignified Navy */
-.sidebar { 
-  width: 260px; background: var(--navy); color: white; padding: 25px; 
-  position: fixed; height: 100vh; 
+.login-panel {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  width: 350px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  text-align: center;
 }
-.sidebar h2 { font-size: 1.1rem; border-bottom: 1px solid #34495e; padding-bottom: 20px; margin-bottom: 25px; }
 
-.nav-link { 
-  padding: 12px 15px; margin: 8px 0; border-radius: 8px; cursor: pointer; 
-  transition: 0.3s; color: #cbd5e1; 
+.logo-area { font-size: 50px; margin-bottom: 10px; }
+.login-panel h2 { color: #1a2a44; margin: 10px 0; letter-spacing: 1px; }
+.login-panel p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+.login-panel input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
-.nav-link:hover, .nav-link.active { background: var(--blue-accent); color: white; }
 
-/* Main Content */
-.main-body { flex: 1; margin-left: 260px; padding: 30px; }
-
-/* Card & Table Styling */
-.card { background: var(--white); border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th { background: #f8fafc; padding: 12px; text-align: left; color: var(--navy); font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
-
-/* Footer info right bottom */
-.footer-right { 
-  position: fixed; bottom: 15px; right: 25px; text-align: right; 
-  line-height: 1.4; pointer-events: none;
+.login-panel button {
+  width: 100%;
+  padding: 12px;
+  background: #2a5298;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: 0.3s;
 }
-.clock-text { font-weight: bold; color: var(--navy); font-size: 14px; }
-.dev-text { font-size: 11px; color: #94a3b8; }
+
+.login-panel button:hover { background: #1a2a44; }
+
+/* Loader */
+.loader-container {
+  height: 100vh; display: flex; justify-content: center; 
+  align-items: center; font-family: sans-serif; color: #1a2a44;
+}
