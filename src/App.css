@@ -1,74 +1,39 @@
 :root {
-  --primary: #1a2a44; /* Dark Navy Blue */
-  --secondary: #2a5298; /* Professional Blue */
-  --bg-light: #f4f7f6;
-  --text-dark: #333;
-  --border-color: #e0e4e8;
+  --navy: #1a2a44;
+  --blue: #2a5298;
+  --light-bg: #f4f7f6;
+  --white: #ffffff;
 }
 
-body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-light); }
+body { font-family: 'Segoe UI', sans-serif; background: var(--light-bg); margin: 0; }
 
-/* SIDEBAR */
-.sidebar { background: var(--primary); color: white; padding: 25px; min-height: 100vh; }
-.sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid #34495e; padding-bottom: 15px; margin-bottom: 20px; }
-.nav-links div { padding: 12px; margin: 5px 0; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-.nav-links div:hover, .nav-links div.active { background: var(--secondary); }
-
-/* MAIN CONTENT */
-.main { flex: 1; padding: 30px; }
-.header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; color: var(--secondary); font-weight: 600; }
-
-/* PROFESSIONAL TABLES */
-.card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border-color); }
-.table-container { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-th { background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; padding: 12px; border-bottom: 2px solid var(--border-color); text-align: left; }
-td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; color: #555; }
-tr:hover { background-color: #fcfcfc; }
-
-/* STATUS COLORS */
-.txt-green { color: #27ae60; font-weight: 600; }
-.txt-red { color: #e74c3c; font-weight: 600; }
-.bal-amt { color: var(--primary); font-size: 18px; }
-/* Footer & Clock Styling */
-.footer-info {
-  position: fixed;
-  bottom: 10px;
-  right: 20px;
-  text-align: right;
-  font-size: 12px;
-  color: #666;
-  z-index: 100;
+/* Login Page Professional Look */
+.loginPage { 
+  display: flex; justify-content: center; align-items: center; 
+  height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+}
+.loginCard { 
+  background: var(--white); padding: 40px; border-radius: 12px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center;
+}
+.loginCard h2 { color: var(--navy); margin-bottom: 25px; font-weight: 600; }
+.loginCard input { 
+  width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; 
+  border-radius: 6px; box-sizing: border-box;
+}
+.loginCard button { 
+  width: 100%; padding: 12px; background: var(--navy); color: white; 
+  border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;
 }
 
-.clockBox {
-  font-weight: bold;
-  color: #1a2a44;
-  margin-bottom: 2px;
-}
+/* Sidebar & Table Styles */
+.sidebar { width: 260px; background: var(--navy); color: white; min-height: 100vh; padding: 20px; }
+.nav-item { padding: 12px; cursor: pointer; border-radius: 5px; margin: 5px 0; transition: 0.3s; }
+.nav-item.active { background: var(--blue); font-weight: bold; }
 
-/* Form Styling */
-.master-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-}
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+th { background: #f8f9fa; padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; color: var(--navy); }
+td { padding: 15px; border-bottom: 1px solid #eee; }
 
-.master-form input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  flex: 1;
-}
-
-.btn-add {
-  background: #27ae60;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-}
+/* Footer info */
+.footer-right { position: fixed; bottom: 15px; right: 25px; text-align: right; color: #666; font-size: 12px; }
