@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from "./firebase"; 
-import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { LayoutDashboard, Building2, Landmark, Users, LogOut, ShieldCheck, Clock, Calendar, ChevronDown, ArrowUp, ArrowDown, Settings, Edit3, Trash2, XCircle, FileText, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import './App.css';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -14,6 +18,10 @@ export default function App() {
   const [expandedBank, setExpandedBank] = useState(null);
   const [time, setTime] = useState(new Date());
   const [form, setForm] = useState({});
+  const [newPass, setNewPass] = useState("");
+
+  // Role Permissions
+  const userRole = usersList.find(u => u.uEmail === user?.email)?.role || 'Viewer';
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -26,216 +34,266 @@ export default function App() {
     return () => { clearInterval(timer); unsub(); };
   }, [user]);
 
+  const handleSave = async (coll) => {
+    if (userRole === 'Viewer') return alert("Access Denied!");
+    try {
+      await addDoc(collection(db, coll), { ...form, createdAt: new Date(), status: 'Open' });
+      setForm({}); alert("Data Saved Successfully!");
+    } catch (e) { alert("Error Saving Data!"); }
+  };
+
+  const handleEdit = async (coll, id, data) => {
+    if (userRole !== 'Admin') return alert("Only Admin can Edit!");
+    const newVal = prompt("Enter New Name/Value:", data);
+    if (newVal) await updateDoc(doc(db, coll, id), { name: newVal });
+  };
+
+  const handleDelete = async (coll, id) => {
+    if (userRole !== 'Admin') return alert("Only Admin can Delete!");
+    if (window.confirm("Are you sure?")) await deleteDoc(doc(db, coll, id));
+  };
+
+  const handleClose = async (coll, id) => {
+    if (userRole !== 'Admin') return alert("Only Admin can Close!");
+    const cDate = prompt("Enter Closing Date (DD/MM/YYYY):");
+    if (cDate) await updateDoc(doc(db, coll, id), { closeDate: cDate, status: 'Closed' });
+  };
+
+  // EXPORT LOGIC
+  const exportExcel = (data, name) => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, `${name}.xlsx`);
+  };
+
+  const exportPDF = (data, title) => {
+    const doc = new jsPDF();
+    doc.text(title, 20, 10);
+    doc.autoTable({ body: data });
+    doc.save(`${title}.pdf`);
+  };
+
   if (!user) return <LoginScreen />;
 
-  // Logic for Dashboard Visibility
   const filteredBanks = banks.filter(b => {
-    const firmMatch = selectedFirm === "All" || b.linkedFirm === selectedFirm;
-    const hasBalance = parseFloat(b.balance) !== 0;
-    return firmMatch && hasBalance;
+    const matchFirm = selectedFirm === "All" || b.linkedFirm === selectedFirm;
+    const isVisible = b.status === 'Open' || (b.status === 'Closed' && parseFloat(b.balance) !== 0);
+    return matchFirm && isVisible;
   });
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: '#f4f7f6', position: 'fixed', top: 0, left: 0, fontFamily: "'Poppins', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       
-      {/* SIDEBAR - ROYAL DARK BLUE */}
-      <aside style={{ width: '300px', background: '#0a0e2e', color: 'white', display: 'flex', flexDirection: 'column', boxShadow: '5px 0 25px rgba(0,0,0,0.3)', zIndex: 10 }}>
-        <div style={{ padding: '40px 25px', borderBottom: '1px solid rgba(212,175,55,0.2)' }}>
-          <h1 style={{ color: '#d4af37', margin: 0, fontSize: '20px', letterSpacing: '1px', fontWeight: '800' }}>BANKING PRO</h1>
-          <p style={{ fontSize: '10px', color: '#94a3b8', margin: '5px 0 0' }}>EXECUTIVE VERSION 2.0</p>
+      {/* SIDEBAR */}
+      <aside className="executive-sidebar">
+        <div className="sidebar-header">
+          <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '18px' }}>BANKING PRO</h1>
+          <p style={{ fontSize: '9px', color: '#94a3b8' }}>EXECUTIVE VERSION 2.0</p>
         </div>
 
-        <nav style={{ flex: 1, paddingTop: '30px' }}>
-          {[
-            { id: 'Dashboard', icon: <LayoutDashboard size={20}/> },
-            { id: 'Firm Master', icon: <Building2 size={20}/> },
-            { id: 'Bank Master', icon: <Landmark size={20}/> },
-            { id: 'User Master', icon: <Users size={20}/> },
-            { id: 'Setting', icon: <Settings size={20}/> }
-          ].map(item => (
-            <div key={item.id} onClick={() => setActiveTab(item.id)} style={{
-              padding: '18px 30px', display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer',
-              background: activeTab === item.id ? 'linear-gradient(90deg, rgba(212,175,55,0.2), transparent)' : 'transparent',
-              color: activeTab === item.id ? '#d4af37' : '#94a3b8',
-              borderLeft: activeTab === item.id ? '4px solid #d4af37' : '4px solid transparent',
-              transition: '0.3s'
-            }}> {item.icon} <span style={{ fontWeight: activeTab === item.id ? 'bold' : '500' }}>{item.id}</span></div>
-          ))}
+        <nav style={{ flex: 1, paddingTop: '20px' }}>
+          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}><LayoutDashboard size={18}/> Dashboard</div>
+          <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => setActiveTab('Firm Master')}><Building2 size={18}/> Firm Master</div>
+          <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => setActiveTab('Bank Master')}><Landmark size={18}/> Bank Master</div>
+          <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => setActiveTab('User Master')}><Users size={18}/> User Master</div>
+          <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => setActiveTab('Setting')}><Settings size={18}/> Setting</div>
         </nav>
 
-        {/* BRANDING EXTREME LEFT BOTTOM */}
-        <div style={{ padding: '30px 25px', background: '#070a1f' }}>
-          <p style={{ fontSize: '10px', color: '#64748b', margin: 0, textTransform: 'uppercase' }}>Developed by</p>
-          <p style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '14px', margin: '2px 0' }}>SOFTVIEW TECHNOLOGIES</p>
-          <p style={{ color: '#94a3b8', fontSize: '12px' }}>+91 7972084304</p>
+        <div className="sidebar-header" style={{ borderTop: '1px solid rgba(212,175,55,0.3)', borderBottom: 'none' }}>
+          <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Developed by</p>
+          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '12px' }}>SOFTVIEW TECHNOLOGIES<br/>+91 7972084304</p>
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        
-        {/* TOP HEADER - CLOCK & LOGOUT */}
-        <header style={{ height: '85px', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-          <div style={{ color: '#0a0e2e', fontWeight: 'bold', fontSize: '18px' }}>{activeTab}</div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+      {/* MAIN CONTENT */}
+      <main className="main-content">
+        <header className="luxury-header">
+          <div style={{ fontWeight: '900', color: 'var(--dark-blue)' }}>{activeTab.toUpperCase()}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#0a0e2e', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Clock size={16} color="#d4af37"/> {time.toLocaleTimeString()}
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>{time.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+              <div style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--dark-blue)' }}><Clock size={14} color="var(--gold)"/> {time.toLocaleTimeString()}</div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}><Calendar size={12}/> {time.toLocaleDateString()}</div>
             </div>
-            <div style={{ width: '1px', height: '30px', background: '#ddd' }}></div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#0a0e2e' }}>{user?.email?.split('@')[0].toUpperCase()}</span>
-              <button onClick={() => signOut(auth)} style={{ padding: '8px 15px', background: '#fff1f1', color: '#ff4d4d', border: '1px solid #ff4d4d', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <LogOut size={14}/> LOGOUT
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{user.email.split('@')[0]}</span>
+              <button className="btn-gold" style={{ padding: '5px 10px', background: '#ffefef', color: 'red', border: '1px solid red' }} onClick={() => signOut(auth)}>Logout</button>
             </div>
           </div>
         </header>
 
-        <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        <div style={{ padding: '30px', overflowY: 'auto' }}>
           
-          {/* 1. DASHBOARD WITH FILTERS */}
+          {/* DASHBOARD SECTION */}
           {activeTab === "Dashboard" && (
-            <div style={{ animation: 'fadeIn 0.5s ease' }}>
-              <div style={{ background: 'white', padding: '25px', borderRadius: '15px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
-                <label style={{ fontWeight: 'bold', color: '#0a0e2e' }}>SELECT FIRM HERE:</label>
-                <select onChange={(e) => setSelectedFirm(e.target.value)} style={{ padding: '10px 20px', borderRadius: '10px', border: '2px solid #f0f2f5', outline: 'none', minWidth: '200px' }}>
-                  <option value="All">All Firms</option>
+            <div>
+              <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <label style={{ fontWeight: 'bold' }}>Select Firm:</label>
+                <select className="btn-gold" style={{ background: 'white' }} onChange={(e) => setSelectedFirm(e.target.value)}>
+                  <option value="All">All Firm</option>
                   {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                 </select>
               </div>
 
-              <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 15px 50px rgba(0,0,0,0.05)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead style={{ background: '#0a0e2e', color: '#d4af37' }}>
-                    <tr>
-                      <th style={{ padding: '20px', textAlign: 'left' }}>BANK NAME</th>
-                      <th style={{ padding: '20px', textAlign: 'left' }}>BANK A/C NO.</th>
-                      <th style={{ padding: '20px', textAlign: 'right' }}>CLOSING BALANCE</th>
-                      <th style={{ padding: '20px', textAlign: 'center' }}>ACTION</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBanks.map(b => (
-                      <React.Fragment key={b.id}>
-                        <tr style={{ borderBottom: '1px solid #eee', background: b.closeDate ? '#fff8f8' : 'white' }}>
-                          <td style={{ padding: '20px', fontWeight: 'bold' }}>
-                            {b.bankName} {b.closeDate && <span style={{fontSize: '10px', color: 'red', marginLeft: '10px'}}>(CLOSED)</span>}
-                          </td>
-                          <td style={{ padding: '20px' }}>{b.accNo}</td>
-                          <td style={{ padding: '20px', textAlign: 'right', fontWeight: '900', color: '#0a0e2e' }}>₹ {b.balance} Cr/Dr</td>
-                          <td style={{ padding: '20px', textAlign: 'center' }}>
-                            <button onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37' }}>
-                              <ChevronDown size={24}/>
-                            </button>
-                          </td>
-                        </tr>
-                        {expandedBank === b.id && (
-                          <tr>
-                            <td colSpan="4" style={{ background: '#fcfdfd', padding: '30px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <table className="royal-table">
+                <thead>
+                  <tr><th>Bank Name</th><th>A/c No.</th><th>Closing Balance</th><th>Ledger</th></tr>
+                </thead>
+                <tbody>
+                  {filteredBanks.map(b => (
+                    <React.Fragment key={b.id}>
+                      <tr style={{ background: b.status === 'Closed' ? '#fff5f5' : 'white' }}>
+                        <td>{b.bankName} {b.status === 'Closed' && <span className="status-closed">(CLOSED - {b.closeDate})</span>}</td>
+                        <td>{b.accNo}</td>
+                        <td style={{ fontWeight: '900' }}>₹ {b.balance} Cr/Dr</td>
+                        <td><ChevronDown style={{ cursor: 'pointer' }} onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}/></td>
+                      </tr>
+                      {expandedBank === b.id && (
+                        <tr>
+                          <td colSpan="4">
+                            <div className="ledger-box">
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#0a0e2e', color: '#d4af37', border: 'none' }}>Daily</button>
-                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#f0f2f5', border: 'none' }}>Monthly</button>
-                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#f0f2f5', border: 'none' }}>Period</button>
+                                  <button className="btn-gold" style={{ fontSize: '10px' }}>Daily</button>
+                                  <button className="btn-gold" style={{ fontSize: '10px' }}>Monthly</button>
+                                  <button className="btn-gold" style={{ fontSize: '10px' }}>Period</button>
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                  <button style={{ background: '#217346', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', display: 'flex', gap: '5px' }}><Download size={14}/> Excel</button>
-                                  <button style={{ background: '#e11d48', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', display: 'flex', gap: '5px' }}><FileText size={14}/> PDF</button>
+                                  <button onClick={() => exportExcel([{Date: '01/01', Particular: 'Test', Amt: '100'}], 'Ledger')} style={{ background: 'green', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px' }}>Excel</button>
+                                  <button onClick={() => exportPDF([['01/01', 'Test', '100']], 'Account Ledger')} style={{ background: 'red', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px' }}>PDF</button>
                                 </div>
                               </div>
-                              <table style={{ width: '100%', background: 'white', border: '1px solid #eee' }}>
-                                <thead style={{ background: '#f8fafc' }}>
+                              <table style={{ width: '100%', fontSize: '12px' }}>
+                                <thead>
                                   <tr><th>Date</th><th>Particular</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr>
                                 </thead>
                                 <tbody>
                                   <tr>
-                                    <td>08-May-26</td>
-                                    <td>Office Rent</td>
-                                    <td>-</td>
-                                    <td style={{ color: 'red' }}>₹ 50,000 <ArrowUp size={12} inline/></td>
-                                    <td>₹ 4,50,000</td>
+                                    <td>08/05/2026</td><td>Cash Deposit</td>
+                                    <td style={{ color: 'var(--receipt-green)' }}>5000 <ArrowDown size={10}/></td>
+                                    <td>-</td><td>5000</td>
                                   </tr>
                                   <tr>
-                                    <td>08-May-26</td>
-                                    <td>Service Fee</td>
-                                    <td style={{ color: 'green' }}>₹ 1,20,000 <ArrowDown size={12} inline/></td>
-                                    <td>-</td>
-                                    <td>₹ 5,70,000</td>
+                                    <td>08/05/2026</td><td>Vendor Pay</td><td>-</td>
+                                    <td style={{ color: 'var(--payment-red)' }}>2000 <ArrowUp size={10}/></td>
+                                    <td>3000</td>
                                   </tr>
                                 </tbody>
                               </table>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* 2. FIRM MASTER */}
-          {activeTab === "Firm Master" && (
-             <div style={{ animation: 'fadeIn 0.5s ease' }}>
-                <div style={{ background: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', borderTop: '5px solid #d4af37' }}>
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-                      <input placeholder="Firm Name" style={inputStyle} onChange={e => setForm({...form, name: e.target.value})} />
-                      <input placeholder="GST No" style={inputStyle} onChange={e => setForm({...form, gst: e.target.value})} />
-                      <input placeholder="Office Address" style={inputStyle} onChange={e => setForm({...form, address: e.target.value})} />
-                   </div>
-                   <button onClick={() => addDoc(collection(db, "firms"), form)} style={goldBtn}>SAVE FIRM MASTER</button>
-                </div>
-                
-                <h3 style={{ margin: '40px 0 20px', color: '#0a0e2e' }}>Firm History</h3>
-                <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead style={{ background: '#f8fafc' }}>
-                      <tr><th style={thStyle}>Firm Name</th><th style={thStyle}>GST</th><th style={thStyle}>Address</th><th style={thStyle}>Actions</th></tr>
-                    </thead>
-                    <tbody>
-                      {firms.map(f => (
-                        <tr key={f.id} style={{ borderBottom: '1px solid #eee' }}>
-                          <td style={tdStyle}>{f.name}</td>
-                          <td style={tdStyle}>{f.gst}</td>
-                          <td style={tdStyle}>{f.address}</td>
-                          <td style={tdStyle}>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                              <Edit3 size={18} color="#d4af37" style={{ cursor: 'pointer' }} />
-                              <Trash2 size={18} color="#ff4d4d" style={{ cursor: 'pointer' }} />
-                              <XCircle size={18} color="#64748b" style={{ cursor: 'pointer' }} title="Close Firm" />
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-             </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          {/* 3. USER MASTER */}
-          {activeTab === "User Master" && (
-            <div style={{ animation: 'fadeIn 0.5s ease' }}>
-              <div style={{ background: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', borderTop: '5px solid #d4af37' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                  <input placeholder="User Code" style={inputStyle} />
-                  <input placeholder="User Name" style={inputStyle} />
-                  <input placeholder="User Email" style={inputStyle} />
-                  <input placeholder="Mobile" style={inputStyle} />
-                  <select style={inputStyle}>
-                    <option>Select Role</option>
-                    <option>Admin</option>
-                    <option>Operator</option>
-                    <option>Viewer</option>
+          {/* FIRM MASTER */}
+          {activeTab === "Firm Master" && (
+            <div>
+              <div className="ledger-box" style={{ background: 'white' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                  <input placeholder="Firm Name" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, name: e.target.value})} />
+                  <input placeholder="GST No" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, gst: e.target.value})} />
+                  <input placeholder="Office Address" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, address: e.target.value})} />
+                </div>
+                <button className="btn-gold" style={{ width: '100%', marginTop: '15px' }} onClick={() => handleSave("firms")}>SAVE FIRM MASTER</button>
+              </div>
+
+              <h3 style={{ fontSize: '14px', marginTop: '20px' }}>Firm History</h3>
+              <table className="royal-table">
+                <thead><tr><th>Name</th><th>GST</th><th>Address</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {firms.map(f => (
+                    <tr key={f.id} style={{ background: f.status === 'Closed' ? '#fff5f5' : 'white' }}>
+                      <td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td>
+                      <td>{f.status}</td>
+                      <td>
+                        <Edit3 size={16} onClick={() => handleEdit('firms', f.id, f.name)} style={{ cursor: 'pointer', marginRight: '10px' }}/>
+                        <XCircle size={16} color="orange" onClick={() => handleClose('firms', f.id)} style={{ cursor: 'pointer', marginRight: '10px' }}/>
+                        <Trash2 size={16} color="red" onClick={() => handleDelete('firms', f.id)} style={{ cursor: 'pointer' }}/>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* BANK MASTER */}
+          {activeTab === "Bank Master" && (
+            <div>
+               <div className="ledger-box" style={{ background: 'white' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                  <input placeholder="Bank Name" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, bankName: e.target.value})} />
+                  <input placeholder="Branch" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, branch: e.target.value})} />
+                  <input placeholder="A/c No" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, accNo: e.target.value})} />
+                  <input placeholder="IFSC" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, ifsc: e.target.value})} />
+                  <input placeholder="Opening Bal" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, balance: e.target.value})} />
+                  <select className="btn-gold" style={{ background: 'white' }} onChange={e => setForm({...form, type: e.target.value})}><option>Dr/Cr</option><option>Dr</option><option>Cr</option></select>
+                  <select className="btn-gold" style={{ background: 'white' }} onChange={e => setForm({...form, linkedFirm: e.target.value})}>
+                    <option>Link to Firm</option>
+                    {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                   </select>
                 </div>
-                <button style={goldBtn}>SAVE USER MASTER</button>
+                <button className="btn-gold" style={{ width: '100%', marginTop: '15px' }} onClick={() => handleSave("banks")}>SAVE BANK MASTER</button>
               </div>
+              <h3 style={{ fontSize: '14px', marginTop: '20px' }}>Bank History</h3>
+              <table className="royal-table">
+                <thead><tr><th>Bank</th><th>A/c No</th><th>IFSC</th><th>Firm</th><th>Bal</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {banks.map(b => (
+                    <tr key={b.id} style={{ background: b.status === 'Closed' ? '#fff5f5' : 'white' }}>
+                      <td>{b.bankName}</td><td>{b.accNo}</td><td>{b.ifsc}</td><td>{b.linkedFirm}</td>
+                      <td>{b.balance} {b.type}</td>
+                      <td>
+                        <Edit3 size={16} onClick={() => {}} style={{ cursor: 'pointer', marginRight: '10px' }}/>
+                        <XCircle size={16} color="orange" onClick={() => handleClose('banks', b.id)} style={{ cursor: 'pointer', marginRight: '10px' }}/>
+                        <Trash2 size={16} color="red" onClick={() => handleDelete('banks', b.id)} style={{ cursor: 'pointer' }}/>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* USER MASTER */}
+          {activeTab === "User Master" && (
+            <div>
+              <div className="ledger-box" style={{ background: 'white' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                  <input placeholder="Code" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, code: e.target.value})} />
+                  <input placeholder="Name" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, uName: e.target.value})} />
+                  <input placeholder="Email" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, uEmail: e.target.value})} />
+                  <input placeholder="Mobile" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={e => setForm({...form, uMobile: e.target.value})} />
+                  <select className="btn-gold" style={{ background: 'white' }} onChange={e => setForm({...form, role: e.target.value})}>
+                    <option>Role</option><option>Admin</option><option>Operator</option><option>Viewer</option>
+                  </select>
+                </div>
+                <button className="btn-gold" style={{ width: '100%', marginTop: '15px' }} onClick={() => handleSave("users")}>SAVE USER MASTER</button>
+              </div>
+              <table className="royal-table" style={{marginTop: '20px'}}>
+                <thead><tr><th>Code</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {usersList.map(u => (
+                    <tr key={u.id}><td>{u.code}</td><td>{u.uName}</td><td>{u.uEmail}</td><td>{u.role}</td>
+                    <td><Trash2 size={16} color="red" onClick={() => handleDelete('users', u.id)}/></td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* SETTING SECTION */}
+          {activeTab === "Setting" && (
+            <div style={{ maxWidth: '400px', background: 'white', padding: '40px', borderRadius: '20px' }}>
+              <h3>Change Password</h3>
+              <input type="password" placeholder="New Password" className="btn-gold" style={{ background: 'white', width: '100%', marginBottom: '20px' }} onChange={e => setNewPass(e.target.value)} />
+              <button className="btn-gold" style={{ width: '100%' }} onClick={() => updatePassword(auth.currentUser, newPass).then(() => alert("Password Updated!"))}>Update</button>
             </div>
           )}
 
@@ -245,38 +303,28 @@ export default function App() {
   );
 }
 
-// PREMIUM LOGIN SCREEN
 function LoginScreen() {
   const [e, setE] = useState(""); const [p, setP] = useState("");
-  const login = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Invalid Access!")); };
-  
+  const handleLogin = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Access Denied")); };
   return (
-    <div style={{ height: '100vh', width: '100vw', background: '#0a0e2e', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ background: 'white', padding: '60px', borderRadius: '30px', textAlign: 'center', width: '450px', boxShadow: '0 25px 80px rgba(0,0,0,0.5)', border: '1px solid rgba(212,175,55,0.3)' }}>
-        <div style={{ width: '80px', height: '80px', background: '#0a0e2e', borderRadius: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 30px', border: '2px solid #d4af37' }}>
-          <ShieldCheck size={40} color="#d4af37" />
+    <div className="login-container">
+      <div className="login-box">
+        <div style={{ width: '60px', height: '60px', background: 'var(--dark-blue)', borderRadius: '15px', margin: '0 auto 20px', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px solid var(--gold)' }}>
+          <ShieldCheck color="var(--gold)" size={35}/>
         </div>
-        <h2 style={{ color: '#0a0e2e', margin: '0 0 10px', fontSize: '26px', fontWeight: '900' }}>BANKING PRO</h2>
-        <p style={{ color: '#d4af37', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '40px' }}>SECURE ACCESS PORTAL</p>
-        
-        <form onSubmit={login} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <input type="email" placeholder="LOGIN ID" style={inputStyle} required onChange={v => setE(v.target.value)} />
-          <input type="password" placeholder="PASSWORD" style={inputStyle} required onChange={v => setP(v.target.value)} />
-          <button type="submit" style={{ padding: '18px', background: '#0a0e2e', color: '#d4af37', fontWeight: '900', border: '1px solid #d4af37', borderRadius: '15px', cursor: 'pointer', fontSize: '16px', marginTop: '10px' }}>LOG IN TO SYSTEM</button>
+        <h2>BANKING PRO</h2>
+        <p style={{ color: 'var(--gold)', fontSize: '10px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '30px' }}>EXECUTIVE LOGIN</p>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <input type="email" placeholder="Login ID" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={v => setE(v.target.value)} required />
+          <input type="password" placeholder="Password" className="btn-gold" style={{ background: 'white', textAlign: 'left' }} onChange={v => setP(v.target.value)} required />
+          <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '10px' }}>LOG IN</button>
         </form>
-        
-        <div style={{ marginTop: '50px', borderTop: '1px solid #eee', paddingTop: '30px' }}>
-          <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Developed by</p>
-          <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#0a0e2e', margin: '5px 0' }}>SOFTVIEW TECHNOLOGIES</p>
-          <p style={{ fontSize: '12px', color: '#d4af37' }}>+91 7972084304</p>
+        <div style={{ marginTop: '40px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+          <p style={{ fontSize: '10px', color: '#94a3b8' }}>Developed by</p>
+          <p style={{ fontWeight: 'bold', fontSize: '13px', color: 'var(--dark-blue)' }}>SOFTVIEW TECHNOLOGIES</p>
+          <p style={{ color: 'var(--gold)', fontSize: '11px' }}>+91 7972084304</p>
         </div>
       </div>
     </div>
   );
 }
-
-// STYLES
-const inputStyle = { padding: '15px', borderRadius: '12px', border: '2px solid #f0f2f5', outline: 'none', fontSize: '14px', background: '#fcfdfd' };
-const goldBtn = { width: '100%', padding: '18px', background: '#0a0e2e', color: '#d4af37', fontWeight: '900', border: '1px solid #d4af37', borderRadius: '12px', cursor: 'pointer', marginTop: '20px' };
-const thStyle = { padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '12px', textTransform: 'uppercase' };
-const tdStyle = { padding: '15px', fontSize: '14px', color: '#0a0e2e', fontWeight: '500' };
