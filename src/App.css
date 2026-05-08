@@ -1,29 +1,47 @@
-.app-shell { display: flex; height: 100vh; background: #f0f2f5; font-family: sans-serif; }
-.sidebar { width: 240px; background: #0a0e2e; color: white; padding: 20px; }
-.sidebar-logo { font-size: 20px; font-weight: bold; margin-bottom: 30px; color: #ffca28; }
-.nav-item { padding: 12px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; }
-.nav-item.active { background: #1a237e; border-left: 4px solid #ffca28; }
-.main-stage { flex: 1; padding: 25px; position: relative; overflow-y: auto; }
+:root {
+  --navy: #0a0e2e;
+  --gold: #d4af37;
+  --light-gold: #f4cf6e;
+  --white: #ffffff;
+}
 
-.stats-header { display: flex; gap: 15px; margin-bottom: 20px; }
-.stat-pill { background: white; padding: 10px 20px; border-radius: 50px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+body { margin: 0; font-family: 'Inter', sans-serif; background: #f0f2f5; }
 
-.master-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+/* LOGIN PAGE - DARK BLUE & GOLD */
+.login-page { height: 100vh; background: linear-gradient(135deg, #0a0e2e 0%, #1a237e 100%); display: flex; justify-content: center; align-items: center; }
+.login-container { background: rgba(255, 255, 255, 0.05); padding: 50px; border-radius: 20px; border: 1px solid var(--gold); text-align: center; color: white; width: 400px; backdrop-filter: blur(10px); }
+.login-brand h1 { color: var(--gold); letter-spacing: 4px; margin-bottom: 5px; }
+.login-form input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--gold); background: transparent; color: white; box-sizing: border-box;}
+.login-form button { width: 100%; padding: 15px; background: var(--gold); color: var(--navy); font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+.login-footer { margin-top: 30px; font-size: 11px; color: #aaa; }
 
-.btn-save { background: #0a0e2e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-.data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-.data-table th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
-.data-table td { padding: 12px; border-bottom: 1px solid #eee; }
-.icon-del { color: #d32f2f; cursor: pointer; }
+/* INTERNAL LUXURY LAYOUT */
+.luxury-app { display: flex; height: 100vh; }
+.sidebar { width: 260px; background: var(--navy); color: white; padding: 30px 0; display: flex; flex-direction: column; }
+.sidebar-brand { padding: 0 30px 40px; text-align: center; }
+.logo-gold { font-size: 24px; font-weight: bold; color: var(--gold); letter-spacing: 2px; }
+.premium-tag { font-size: 10px; color: var(--light-gold); letter-spacing: 1px; }
 
-.fixed-footer-right { position: fixed; bottom: 10px; right: 20px; text-align: right; z-index: 1000; }
-.sv-dev { font-size: 9px; color: #666; }
-.sv-name { font-size: 11px; font-weight: bold; color: #0a0e2e; }
-.sv-num { font-size: 10px; color: #d32f2f; font-weight: bold; }
+.nav-link { padding: 15px 30px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; color: #cbd5e1; }
+.nav-link.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-left: 5px solid var(--gold); }
+.sidebar-footer { margin-top: auto; padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; }
 
-.login-box { height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0e2e; }
-.login-card { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; }
-.login-card input { width: 90%; margin-bottom: 10px; padding: 12px; }
-.login-card button { width: 100%; padding: 12px; background: #0a0e2e; color: white; border: none; border-radius: 6px; }
+/* MAIN CONTENT */
+.main-content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; }
+.premium-header { padding: 20px 40px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.u-name { font-weight: bold; color: var(--navy); display: block; }
+.u-clock { font-size: 12px; color: #64748b; }
+
+.luxury-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 3px solid var(--gold); }
+.luxury-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.luxury-table th { background: var(--navy); color: var(--gold); padding: 15px; text-align: left; }
+.luxury-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+
+.gold-text { color: #b45309; font-weight: bold; }
+.btn-gold-save { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 12px 30px; border-radius: 8px; cursor: pointer; }
+.icon-gold { color: var(--gold); cursor: pointer; margin-right: 10px; }
+
+.green-text { color: green; font-weight: bold; }
+.red-text { color: red; font-weight: bold; }
+.mt-20 { margin-top: 20px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
