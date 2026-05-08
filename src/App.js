@@ -4,6 +4,11 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
 import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firestore";
 
+// Export Libraries
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from 'xlsx';
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [dateTime, setDateTime] = useState(new Date());
@@ -13,7 +18,7 @@ export default function App() {
   const [usersList, setUsersList] = useState([]);
   const [form, setForm] = useState({});
   const [selectedFirm, setSelectedFirm] = useState("All");
-  const [expandedBank, setExpandedBank] = useState(null); // Point 7: Ledger Expand
+  const [expandedBank, setExpandedBank] = useState(null);
   const [newPass, setNewPass] = useState("");
 
   useEffect(() => {
@@ -22,27 +27,57 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    onAuthStateChanged(auth, (u) => setUser(u));
     if (user) {
       onSnapshot(collection(db, "firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
       onSnapshot(collection(db, "banks"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
       onSnapshot(collection(db, "users"), s => setUsersList(s.docs.map(d => ({id: d.id, ...d.data()}))));
     }
-    return () => unsub();
   }, [user]);
+
+  // --- PREMIUM PDF EXPORT LOGIC ---
+  const exportPDF = (bankData) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.setTextColor(10, 14, 46); // Deep Blue
+    doc.text("BANK TRANSACTION LEDGER", 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Bank: ${bankData.bankName} | A/c: ${bankData.accNo}`, 14, 28);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 33);
+
+    doc.autoTable({
+      startY: 40,
+      head: [['Date', 'Particulars', 'Debit (Dr)', 'Credit (Cr)', 'Balance']],
+      body: [
+        ['08/05/2026', 'Opening Balance', '-', bankData.balance, bankData.balance],
+        // Future transactions will map here
+      ],
+      headStyles: { fillColor: [10, 14, 46], textColor: [255, 202, 40] }, // Blue & Gold
+      alternateRowStyles: { fillColor: [240, 242, 245] },
+      margin: { top: 40 }
+    });
+    doc.save(`${bankData.bankName}_Ledger.pdf`);
+  };
+
+  // --- COLORFUL EXCEL EXPORT LOGIC ---
+  const exportExcel = (bankData) => {
+    const data = [
+      ["BANK TRANSACTION LEDGER"],
+      [`Bank Name: ${bankData.bankName}`, `Account No: ${bankData.accNo}`],
+      ["Date", "Particulars", "Debit", "Credit", "Balance"],
+      ["08/05/2026", "Opening Balance", 0, bankData.balance, bankData.balance]
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+    XLSX.writeFile(wb, `${bankData.bankName}_Report.xlsx`);
+  };
 
   const handleSave = async (coll) => {
     await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
-    setForm({}); alert("Saved!");
-  };
-
-  const handlePasswordChange = async () => {
-    if(!newPass) return alert("Enter new password");
-    try {
-      await updatePassword(auth.currentUser, newPass);
-      alert("Password updated successfully!");
-      setNewPass("");
-    } catch (err) { alert(err.message); }
+    setForm({}); alert("Data Saved Successfully!");
   };
 
   if (!user) return <LoginScreen />;
@@ -65,7 +100,6 @@ export default function App() {
           <div className="clock-msg">{dateTime.toLocaleDateString('en-GB')} | {dateTime.toLocaleTimeString()}</div>
         </div>
 
-        {/* Dashboard with Expandable Ledger & Export Buttons */}
         {activeTab === "Dashboard" && (
           <div className="premium-card">
             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'20px'}}>
@@ -85,24 +119,23 @@ export default function App() {
                       <td style={{color:'green', fontWeight:'bold'}}>₹ {b.balance} CR</td>
                       <td>
                         <button className="btn-save" style={{padding:'5px 15px'}} onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}>
-                          {expandedBank === b.id ? "Close Ledger" : "Expand Ledger"}
+                          {expandedBank === b.id ? "Hide" : "Expand Ledger"}
                         </button>
                       </td>
                     </tr>
-                    {/* Point 7, 8, 9: Expanded Ledger Section */}
                     {expandedBank === b.id && (
                       <tr>
-                        <td colSpan="4" style={{background:'#f9f9f9', padding:'20px'}}>
+                        <td colSpan="4" style={{background:'#f9f9f9', padding:'20px', border:'1px solid #ddd'}}>
                           <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px'}}>
-                            <h4 style={{color:'var(--blue)'}}>Detailed Transaction History: {b.bankName}</h4>
+                            <h4 style={{color:'#0a0e2e'}}>Transaction History for {b.bankName}</h4>
                             <div>
-                              <button style={{background:'#1D6F42', color:'white', padding:'8px 15px', border:'none', borderRadius:'5px', marginRight:'10px', cursor:'pointer'}}>Export Excel</button>
-                              <button style={{background:'#E11D48', color:'white', padding:'8px 15px', border:'none', borderRadius:'5px', cursor:'pointer'}}>Export PDF</button>
+                              <button onClick={() => exportExcel(b)} style={{background:'#1D6F42', color:'white', padding:'8px 15px', border:'none', borderRadius:'5px', marginRight:'10px', cursor:'pointer', fontWeight:'bold'}}>Excel Export</button>
+                              <button onClick={() => exportPDF(b)} style={{background:'#E11D48', color:'white', padding:'8px 15px', border:'none', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}}>PDF Export</button>
                             </div>
                           </div>
                           <table className="list-table" style={{background:'white'}}>
-                            <thead><tr style={{background:'#eee'}}><th style={{color:'#333'}}>Date</th><th style={{color:'#333'}}>Narration</th><th style={{color:'#333'}}>Debit</th><th style={{color:'#333'}}>Credit</th></tr></thead>
-                            <tbody><tr><td>08/05/2026</td><td>Opening Balance</td><td>-</td><td>₹ {b.balance}</td></tr></tbody>
+                            <thead><tr style={{background:'#0a0e2e'}}><th style={{color:'#ffca28'}}>Date</th><th style={{color:'#ffca28'}}>Particulars</th><th style={{color:'#ffca28'}}>Dr</th><th style={{color:'#ffca28'}}>Cr</th><th style={{color:'#ffca28'}}>Balance</th></tr></thead>
+                            <tbody><tr><td>08/05/2026</td><td>Opening Balance</td><td>0</td><td>{b.balance}</td><td>{b.balance}</td></tr></tbody>
                           </table>
                         </td>
                       </tr>
@@ -114,22 +147,36 @@ export default function App() {
           </div>
         )}
 
-        {/* Settings: Password Change Facility */}
-        {activeTab === "Settings" && (
+        {/* --- BANK MASTER SECTION --- */}
+        {activeTab === "Bank Master" && (
           <div className="premium-card">
-            <h3 style={{marginBottom:'20px'}}>Account Settings</h3>
-            <div className="master-form-grid" style={{maxWidth:'400px'}}>
-              <label>Update New Password:</label>
-              <input type="password" placeholder="New Password" value={newPass} onChange={e => setNewPass(e.target.value)} />
-              <button className="btn-save" onClick={handlePasswordChange}>UPDATE PASSWORD</button>
+            <h3>Bank Master</h3>
+            <div className="master-form-grid">
+              <input placeholder="Bank Name" value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
+              <input placeholder="Branch" value={form.branch || ''} onChange={e => setForm({...form, branch: e.target.value})} />
+              <input placeholder="A/c No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
+              <input placeholder="IFSC" value={form.ifsc || ''} onChange={e => setForm({...form, ifsc: e.target.value})} />
+              <input placeholder="Balance" value={form.balance || ''} onChange={e => setForm({...form, balance: e.target.value})} />
+              <select onChange={e => setForm({...form, firmLink: e.target.value})}>
+                <option>Select Firm</option>
+                {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+              </select>
             </div>
+            <button className="btn-save" onClick={() => handleSave("banks")}>SAVE BANK</button>
           </div>
         )}
 
-        {/* Master Tabs (Firm, Bank, User) - Keep your existing code for these sections here */}
-        {activeTab === "Firm Master" && ( /* ... keep firm master code ... */ <div className="premium-card">Firm Master Content</div>)}
-        {activeTab === "Bank Master" && ( /* ... keep bank master code ... */ <div className="premium-card">Bank Master Content</div>)}
-        {activeTab === "User Master" && ( /* ... keep user master code ... */ <div className="premium-card">User Master Content</div>)}
+        {/* --- FIRM & USER MASTERS (Add your logic here) --- */}
+
+        {activeTab === "Settings" && (
+          <div className="premium-card">
+            <h3>Change Password</h3>
+            <div className="master-form-grid" style={{maxWidth:'300px'}}>
+              <input type="password" placeholder="New Password" value={newPass} onChange={e => setNewPass(e.target.value)} />
+              <button className="btn-save" onClick={() => { updatePassword(auth.currentUser, newPass).then(()=>alert("Done!")); }}>UPDATE</button>
+            </div>
+          </div>
+        )}
 
         <div className="footer-branding">
           <div className="sv-title">Developed by: SOFTVIEW TECHNOLOGIES</div>
@@ -147,11 +194,10 @@ function LoginScreen() {
     <div className="login-screen">
       <div className="login-card">
         <h1>BANKING PRO</h1>
-        <p>a Project by Softview Technologies</p>
         <form onSubmit={(ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p); }}>
           <input placeholder="Email" onChange={ev => setE(ev.target.value)} required />
           <input type="password" placeholder="Password" onChange={ev => setP(ev.target.value)} required />
-          <button type="submit">LOGIN TO SYSTEM</button>
+          <button type="submit">LOGIN</button>
         </form>
       </div>
     </div>
