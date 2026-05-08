@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
-import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, XCircle } from 'lucide-react';
+import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, Clock } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -37,16 +37,17 @@ export default function App() {
 
   const handleSave = async (coll) => {
     if (userRole === "Viewer") return alert("No Rights!");
-    if (userRole === "Operator" && coll === "User Master") return alert("Admin Only!");
-    await addDoc(collection(db, coll), { ...form, status: 'Active' });
-    setForm({}); alert("Saved Successfully!");
-  };
-
-  const handlePassChange = () => {
-    updatePassword(auth.currentUser, newPass).then(() => alert("Password Changed!")).catch(e => alert(e.message));
+    await addDoc(collection(db, coll), { ...form, status: 'Open' });
+    setForm({}); alert("Data Saved!");
   };
 
   if (!user) return <LoginScreen />;
+
+  // Dashboard Logic
+  const dashboardData = banks.filter(b => {
+    const firmMatch = selectedFirm === "All" || b.linkedFirm === selectedFirm;
+    return firmMatch && (b.status === 'Open' || parseFloat(b.balance || 0) !== 0);
+  });
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
@@ -77,13 +78,37 @@ export default function App() {
               <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{user.email} ({userRole})</div>
               <div style={{ fontSize: '11px', color: 'var(--gold)' }}>{time.toLocaleTimeString()}</div>
             </div>
-            <button className="btn-gold" style={{ background: '#ffefef', color: 'red' }} onClick={() => signOut(auth)}>Logout</button>
+            <button className="btn-gold" style={{ background: '#ffefef', color: 'red' }} onClick={() => signOut(auth)}><LogOut size={16}/></button>
           </div>
         </header>
 
         <div style={{ padding: '30px' }}>
           
-          {/* 1. FIRM MASTER */}
+          {/* 1. DASHBOARD */}
+          {activeTab === "Dashboard" && (
+            <div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{fontWeight:'bold'}}>Select Firm Here: </label>
+                <select className="btn-gold" style={{background:'white', marginLeft:'10px'}} onChange={(e) => setSelectedFirm(e.target.value)}>
+                  <option value="All">All Firms</option>
+                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                </select>
+              </div>
+              <table className="royal-table">
+                <thead><tr><th>Bank Name</th><th>Bank A/c No.</th><th style={{textAlign:'right'}}>Bank Closing Balance</th><th>Ledger</th></tr></thead>
+                <tbody>
+                  {dashboardData.map(b => (
+                    <tr key={b.id}>
+                      <td>{b.bankName}</td><td>{b.accNo}</td><td style={{textAlign:'right'}}>₹ {b.balance} {b.type}</td>
+                      <td style={{textAlign:'center'}}><ChevronDown style={{color:'var(--gold)', cursor:'pointer'}} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 2. FIRM MASTER */}
           {activeTab === "Firm Master" && (
             <div>
               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'15px', background:'white', padding:'20px'}}>
@@ -99,41 +124,42 @@ export default function App() {
             </div>
           )}
 
-          {/* 2. BANK MASTER */}
+          {/* 3. BANK MASTER */}
           {activeTab === "Bank Master" && (
             <div>
               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
                 <input placeholder="Bank Name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, bankName: e.target.value})} />
                 <input placeholder="Bank Branch" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, branch: e.target.value})} />
-                <input placeholder="A/c No" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, accNo: e.target.value})} />
-                <input placeholder="IFSC Code" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, ifsc: e.target.value})} />
-                <input placeholder="Opening Balance" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, balance: e.target.value})} />
-                <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, type: e.target.value})}><option>Dr/Cr</option><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
-                <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>SAVE BANK</button>
+                <input placeholder="Bank a/c no." className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, accNo: e.target.value})} />
+                <input placeholder="Bank Ifsc code" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, ifsc: e.target.value})} />
+                <input placeholder="Bank Opening Balance" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, balance: e.target.value})} />
+                <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, type: e.target.value})}><option>dr/cr</option><option value="dr">dr</option><option value="cr">cr</option></select>
+                <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, linkedFirm: e.target.value})}><option>Link Firm</option>{firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}</select>
+                <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>SAVE BANK MASTER</button>
               </div>
             </div>
           )}
 
-          {/* 3. USER MASTER */}
+          {/* 4. USER MASTER */}
           {activeTab === "User Master" && (
             <div>
               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
-                <input placeholder="User Code" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, code: e.target.value})} />
-                <input placeholder="User Name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uName: e.target.value})} />
-                <input placeholder="User Email" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uEmail: e.target.value})} />
-                <input placeholder="Mobile" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, mobile: e.target.value})} />
+                <input placeholder="User code" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, code: e.target.value})} />
+                <input placeholder="user name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uName: e.target.value})} />
+                <input placeholder="user email" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uEmail: e.target.value})} />
+                <input placeholder="mobile" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, mobile: e.target.value})} />
                 <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, role: e.target.value})}><option>Select Role</option><option value="Admin">Admin</option><option value="Operator">Operator</option><option value="Viewer">Viewer</option></select>
-                <button className="btn-gold" onClick={() => handleSave("User Master")}>SAVE USER</button>
+                <button className="btn-gold" onClick={() => handleSave("User Master")}>SAVE USER MASTER</button>
               </div>
             </div>
           )}
 
-          {/* 4. SETTING */}
+          {/* 5. SETTING */}
           {activeTab === "Setting" && (
             <div className="ledger-box" style={{background:'white', padding:'40px', width:'400px'}}>
-              <h3 style={{color:'var(--dark-blue)'}}>Change Password</h3>
-              <input type="password" placeholder="New Password" className="btn-gold" style={{background:'#f8fafc', width:'100%', marginBottom:'20px'}} onChange={e => setNewPass(e.target.value)} />
-              <button className="btn-gold" style={{width:'100%'}} onClick={handlePassChange}>UPDATE PASSWORD</button>
+              <h3>Change Password</h3>
+              <input type="password" placeholder="Enter New Password" className="btn-gold" style={{background:'#f8fafc', width:'100%', marginBottom:'20px'}} onChange={e => setNewPass(e.target.value)} />
+              <button className="btn-gold" style={{width:'100%'}} onClick={() => updatePassword(auth.currentUser, newPass).then(() => alert("Success")).catch(e => alert(e.message))}>UPDATE</button>
             </div>
           )}
 
@@ -149,11 +175,11 @@ function LoginScreen() {
   return (
     <div style={{height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0a192f'}}>
       <form onSubmit={h} style={{background:'white', padding:'50px', borderRadius:'15px', width:'400px', borderTop:'5px solid #d4af37'}}>
-        <h2 style={{textAlign:'center', color:'#0a192f'}}>BANKING PRO</h2>
+        <h2 style={{textAlign:'center', color:'#0a192f', marginBottom:'30px'}}>BANKING PRO</h2>
         <input type="email" placeholder="Login ID" className="btn-gold" style={{width:'100%', marginBottom:'15px', background:'#f8fafc'}} onChange={v => setE(v.target.value)} />
         <input type="password" placeholder="Password" className="btn-gold" style={{width:'100%', marginBottom:'25px', background:'#f8fafc'}} onChange={v => setP(v.target.value)} />
         <button type="submit" className="btn-gold" style={{width:'100%', padding:'15px'}}>LOG IN</button>
-        <p style={{textAlign:'center', fontSize:'11px', marginTop:'20px', color:'#94a3b8'}}>Developed by Softview Technologies</p>
+        <p style={{textAlign:'center', fontSize:'11px', marginTop:'20px', color:'#94a3b8'}}>Developed by Softview Technologies<br/>7972084304</p>
       </form>
     </div>
   );
