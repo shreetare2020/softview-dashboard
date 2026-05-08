@@ -1,147 +1,55 @@
-/* GLOBAL SETTINGS */
-:root { 
-  --navy: #0a0e2e; 
-  --gold: #d4af37; 
-  --bg-light: #f1f5f9; 
-}
+:root { --navy: #0a0e2e; --gold: #d4af37; --bg: #f8fafc; --white: #ffffff; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: var(--bg-light); overflow: hidden; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; }
 
-/* LAYOUT CONTAINER */
-.app-layout { 
-  display: flex; 
-  height: 100vh; 
-  width: 100vw; 
-}
+/* LOGIN PAGE */
+.login-page { height: 100vh; width: 100vw; background: radial-gradient(circle, #1a1f4d 0%, #0a0e2e 100%); display: flex; justify-content: center; align-items: center; }
+.login-container { background: rgba(255, 255, 255, 0.03); padding: 60px; border-radius: 24px; border: 1px solid rgba(212, 175, 55, 0.3); text-align: center; width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.login-container h1 { color: var(--gold); font-size: 36px; letter-spacing: 4px; margin-bottom: 10px; }
+.premium-subtitle { color: var(--gold); opacity: 0.7; font-size: 11px; letter-spacing: 3px; margin-bottom: 40px; }
+.login-form input { padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; margin-bottom: 20px; width: 100%; }
+.btn-authorize { background: var(--gold); color: var(--navy); padding: 16px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; }
+.login-footer-branding { margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 10px; }
 
-/* SIDEBAR - FIXED LOOK */
-.app-sidebar { 
-  width: 260px; 
-  min-width: 260px; 
-  background: var(--navy); 
-  color: white; 
-  display: flex; 
-  flex-direction: column; 
-  height: 100vh;
-}
-
+/* INTERNAL LAYOUT */
+.app-layout { display: flex; height: 100vh; width: 100vw; }
+.app-sidebar { width: 260px; min-width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; }
 .sb-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.gold-text { color: var(--gold); margin: 0; letter-spacing: 2px; }
-.sb-sub { font-size: 10px; color: var(--gold); opacity: 0.7; }
-
+.gold-text { color: var(--gold); letter-spacing: 2px; }
 .sb-nav { flex: 1; padding: 20px 0; }
-.nav-btn { 
-  padding: 15px 25px; 
-  display: flex; 
-  align-items: center; 
-  gap: 12px; 
-  cursor: pointer; 
-  color: #94a3b8; 
-  transition: 0.3s;
-}
+.nav-btn { padding: 15px 25px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+.nav-btn.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-right: 4px solid var(--gold); }
+.sb-branding { padding: 25px; background: rgba(0,0,0,0.2); text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+.sv-main { font-size: 12px; color: var(--gold); font-weight: bold; margin: 5px 0; }
+.sv-small { font-size: 9px; color: #64748b; }
 
-.nav-btn:hover, .nav-btn.active { 
-  background: rgba(212, 175, 55, 0.1); 
-  color: var(--gold); 
-  border-right: 4px solid var(--gold); 
-}
+/* MAIN CONTENT */
+.app-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.app-header { background: white; padding: 0 40px; height: 80px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+.header-title { font-weight: 900; font-size: 22px; color: var(--navy); }
+.header-meta { display: flex; align-items: center; gap: 30px; }
+.admin-info { text-align: right; }
+.admin-info .name { display: block; font-weight: 800; color: var(--navy); font-size: 14px; }
+.admin-info .clock { font-size: 11px; color: #64748b; font-family: monospace; }
+.logout-btn { background: #fff1f2; color: #e11d48; border: 1px solid #fecaca; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
-.sb-branding { 
-  padding: 25px; 
-  background: rgba(0,0,0,0.3); 
-  text-align: center; 
-  border-top: 1px solid rgba(255,255,255,0.05); 
-}
-.sv-main { font-size: 11px; color: var(--gold); font-weight: bold; margin: 5px 0; }
-.sv-small { font-size: 8px; color: #64748b; }
+/* DASHBOARD CARDS */
+.app-body { flex: 1; padding: 30px; overflow-y: auto; background: #f8fafc; }
+.luxury-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-top: 5px solid var(--gold); }
+.filter-row { margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; }
+.filter-row select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
 
-/* MAIN CONTENT AREA */
-.app-main { 
-  flex: 1; 
-  display: flex; 
-  flex-direction: column; 
-  height: 100vh;
-  overflow: hidden; 
-}
+/* TABLE & LEDGER */
+.master-table { width: 100%; border-collapse: collapse; }
+.master-table th { text-align: left; padding: 18px; background: #f1f5f9; font-size: 12px; color: #475569; text-transform: uppercase; }
+.master-table td { padding: 18px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.gold-amt { color: #b45309; font-weight: 900; }
+.v-btn { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 8px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px; }
 
-.app-header { 
-  background: white; 
-  padding: 15px 40px; 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  border-bottom: 1px solid #e2e8f0; 
-  min-height: 70px;
-}
-
-.header-title { font-weight: 800; font-size: 20px; color: var(--navy); }
-.header-meta { display: flex; align-items: center; gap: 20px; }
-.admin-info { text-align: right; border-right: 1px solid #ddd; padding-right: 15px; }
-.admin-info .name { display: block; font-weight: 800; color: var(--navy); }
-.admin-info .clock { font-size: 11px; color: #64748b; }
-
-.logout-gold { 
-  background: #fff1f2; 
-  color: #e11d48; 
-  border: 1px solid #fecaca; 
-  padding: 8px 15px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  font-weight: 600; 
-  display: flex; 
-  align-items: center; 
-  gap: 5px;
-}
-
-/* INTERNAL CONTENT BODY */
-.app-body { 
-  flex: 1; 
-  padding: 30px; 
-  overflow-y: auto; 
-  background: #f8fafc;
-}
-
-.luxury-card { 
-  background: white; 
-  padding: 25px; 
-  border-radius: 12px; 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
-  border-top: 4px solid var(--gold); 
-}
-
-/* TABLES */
-.master-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.master-table th { 
-  text-align: left; 
-  padding: 15px; 
-  background: #f8fafc; 
-  border-bottom: 2px solid #e2e8f0; 
-  color: #475569; 
-  font-size: 13px;
-}
-.master-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-.gold-amt { color: #b45309; font-weight: 800; }
-.v-btn { 
-  background: var(--navy); 
-  color: var(--gold); 
-  border: 1px solid var(--gold); 
-  padding: 6px 12px; 
-  border-radius: 4px; 
-  cursor: pointer; 
-}
-
-/* LOGIN PAGE (PREMIUM) */
-.login-page {
-  height: 100vh; width: 100vw; background: var(--navy);
-  display: flex; justify-content: center; align-items: center;
-}
-.login-container {
-  background: rgba(255, 255, 255, 0.03); padding: 50px;
-  border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.3);
-  text-align: center; width: 400px;
-}
-.login-container h1 { color: var(--gold); letter-spacing: 3px; margin-bottom: 20px; }
-.login-form { display: flex; flex-direction: column; gap: 15px; }
-.login-form input { padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #444; color: white; border-radius: 5px; }
-.btn-authorize { background: var(--gold); color: var(--navy); padding: 12px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+/* LEDGER PANE */
+.ledger-pane { background: #fdfdfd; padding: 20px; border-radius: 10px; border: 1px dashed var(--gold); margin-top: 10px; }
+.pane-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.txt-g { color: #16a34a; font-weight: 700; display: flex; align-items: center; }
+.txt-r { color: #dc2626; font-weight: 700; display: flex; align-items: center; }
+.tool-btn { padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-left: 10px; border: 1px solid #ddd; background: white; font-size: 12px; }

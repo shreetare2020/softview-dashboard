@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { auth, db } from "./firebase"; 
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firestore";
-import { Trash2, FileSpreadsheet, FileText, Settings, LayoutDashboard, Building2, Landmark, Users, LogOut } from 'lucide-react';
-import * as XLSX from 'xlsx';
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import { collection, onSnapshot, addDoc, doc, deleteDoc, query, where } from "firebase/firestore";
+import { Trash2, FileSpreadsheet, FileText, Settings, LayoutDashboard, Building2, Landmark, Users, LogOut, ChevronDown, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -17,8 +14,8 @@ export default function App() {
   const [usersList, setUsersList] = useState([]);
   const [form, setForm] = useState({});
   const [expandedBank, setExpandedBank] = useState(null);
+  const [firmFilter, setFirmFilter] = useState("All");
 
-  // Time aur Auth Connection
   useEffect(() => {
     const timer = setInterval(() => setDateTime(new Date()), 1000);
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
@@ -33,37 +30,21 @@ export default function App() {
   const handleSave = async (coll) => {
     try {
       await addDoc(collection(db, coll), { ...form, createdAt: new Date() });
-      setForm({}); alert("Successfully Saved!");
+      setForm({}); alert("Data Saved Successfully!");
     } catch (e) { alert("Error saving data"); }
   };
 
-  const handleDelete = async (coll, id) => {
-    if(window.confirm("Confirm Delete?")) await deleteDoc(doc(db, coll, id));
-  };
-
-  // Export Logic
-  const exportToExcel = (b) => {
-    const ws = XLSX.utils.json_to_sheet([{ Bank: b.bankName, Account: b.accNo, Balance: b.balance }]);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-    XLSX.writeFile(wb, `${b.bankName}_Ledger.xlsx`);
-  };
-
-  const exportToPDF = (b) => {
-    const doc = new jsPDF();
-    doc.text(`Bank Ledger: ${b.bankName}`, 14, 15);
-    doc.autoTable({ head: [['Bank', 'A/c No', 'Balance']], body: [[b.bankName, b.accNo, b.balance]] });
-    doc.save(`${b.bankName}_Ledger.pdf`);
-  };
+  const filteredBanks = firmFilter === "All" ? banks : banks.filter(b => b.firmLink === firmFilter);
 
   if (!user) return <LoginScreen />;
 
   return (
     <div className="app-layout">
-      {/* SIDEBAR FIXED */}
+      {/* LEFT SIDEBAR */}
       <aside className="app-sidebar">
         <div className="sb-header">
           <h2 className="gold-text">BANKING PRO</h2>
-          <p className="sb-sub">EXECUTIVE EDITION</p>
+          <p className="sb-sub">EXECUTIVE SECURE ACCESS</p>
         </div>
         <nav className="sb-nav">
           <div className={activeTab === "Dashboard" ? "nav-btn active" : "nav-btn"} onClick={() => setActiveTab("Dashboard")}><LayoutDashboard size={18}/> Dashboard</div>
@@ -79,42 +60,60 @@ export default function App() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
+      {/* RIGHT CONTENT AREA */}
       <main className="app-main">
         <header className="app-header">
           <div className="header-title">{activeTab}</div>
           <div className="header-meta">
             <div className="admin-info">
-              <span className="name">ADMIN</span>
-              <span className="clock">{dateTime.toLocaleString()}</span>
+              <span className="name">SHREEKANT RATHI</span>
+              <span className="clock">{dateTime.toLocaleDateString()} | {dateTime.toLocaleTimeString()}</span>
             </div>
-            <button className="logout-gold" onClick={() => signOut(auth)}><LogOut size={16}/> Logout</button>
+            <button className="logout-btn" onClick={() => signOut(auth)}><LogOut size={16}/> Logout</button>
           </div>
         </header>
 
         <section className="app-body">
+          {/* DASHBOARD WITH FIRM FILTER & LEDGER */}
           {activeTab === "Dashboard" && (
             <div className="luxury-card">
+              <div className="filter-row">
+                <label>Filter by Firm:</label>
+                <select onChange={(e) => setFirmFilter(e.target.value)}>
+                  <option value="All">All Firms Summary</option>
+                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                </select>
+              </div>
               <table className="master-table">
-                <thead><tr><th>Bank</th><th>A/c No</th><th>Balance</th><th>Action</th></tr></thead>
+                <thead><tr><th>Bank Name</th><th>Account Number</th><th>Closing Balance</th><th>Action</th></tr></thead>
                 <tbody>
-                  {banks.map(b => (
+                  {filteredBanks.map(b => (
                     <React.Fragment key={b.id}>
-                      <tr>
+                      <tr className="main-row">
                         <td>{b.bankName}</td><td>{b.accNo}</td>
                         <td className="gold-amt">₹ {b.balance} Cr.</td>
-                        <td><button className="v-btn" onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}>View Ledger</button></td>
+                        <td><button className="v-btn" onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}><ChevronDown size={14}/> View Ledger</button></td>
                       </tr>
                       {expandedBank === b.id && (
                         <tr className="ledger-row"><td colSpan="4">
                           <div className="ledger-pane">
-                            <div className="pane-tools">
-                                <button className="tool-btn exl" onClick={() => exportToExcel(b)}><FileSpreadsheet size={14}/> Excel</button>
-                                <button className="tool-btn pdf" onClick={() => exportToPDF(b)}><FileText size={14}/> PDF</button>
+                            <div className="pane-header">
+                              <h4>Transaction Ledger</h4>
+                              <div className="pane-tools">
+                                <button className="tool-btn exl"><FileSpreadsheet size={14}/> Excel</button>
+                                <button className="tool-btn pdf"><FileText size={14}/> PDF</button>
+                              </div>
                             </div>
                             <table className="inner-table">
                               <thead><tr><th>Date</th><th>Particulars</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr></thead>
-                              <tbody><tr><td>08/05/2026</td><td>Opening Balance</td><td className="txt-g">₹ {b.balance}</td><td>₹ 0</td><td>₹ {b.balance}</td></tr></tbody>
+                              <tbody>
+                                <tr>
+                                  <td>08/05/2026</td><td>Opening Balance</td>
+                                  <td><span className="txt-g"><ArrowDownLeft size={12}/> ₹ {b.balance}</span></td>
+                                  <td><span className="txt-r"><ArrowUpRight size={12}/> ₹ 0</span></td>
+                                  <td>₹ {b.balance} Cr.</td>
+                                </tr>
+                              </tbody>
                             </table>
                           </div>
                         </td></tr>
@@ -126,55 +125,49 @@ export default function App() {
             </div>
           )}
 
+          {/* FIRM MASTER */}
           {activeTab === "Firm Master" && (
             <div className="luxury-card">
-              <h3>Register New Firm</h3>
+              <h3>Firm Registration</h3>
               <div className="form-grid">
-                <input placeholder="Firm Name" value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} />
-                <input placeholder="GST Number" value={form.gst || ''} onChange={e => setForm({...form, gst: e.target.value})} />
-                <input placeholder="Full Address" value={form.address || ''} onChange={e => setForm({...form, address: e.target.value})} />
+                <input placeholder="Firm Name" onChange={e => setForm({...form, name: e.target.value})} />
+                <input placeholder="GST No." onChange={e => setForm({...form, gst: e.target.value})} />
+                <input placeholder="Full Address" onChange={e => setForm({...form, address: e.target.value})} />
               </div>
               <button className="save-btn" onClick={() => handleSave("firms")}>SAVE FIRM</button>
               <table className="master-table mt-20">
-                <thead><tr><th>Firm Name</th><th>GST</th><th>Action</th></tr></thead>
-                <tbody>{firms.map(f => (<tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td><Trash2 className="del" size={16} onClick={() => handleDelete("firms", f.id)}/></td></tr>))}</tbody>
+                <thead><tr><th>Name</th><th>GST No.</th><th>Address</th><th>Action</th></tr></thead>
+                <tbody>{firms.map(f => (<tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td><Trash2 size={16} className="del-icon"/></td></tr>))}</tbody>
               </table>
             </div>
           )}
 
+          {/* BANK MASTER */}
           {activeTab === "Bank Master" && (
             <div className="luxury-card">
-              <h3>Link Bank Account</h3>
+              <h3>Bank Management</h3>
               <div className="form-grid">
-                <input placeholder="Bank Name" value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
-                <input placeholder="A/c No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
-                <input placeholder="Opening Balance" value={form.balance || ''} onChange={e => setForm({...form, balance: e.target.value})} />
-                <select value={form.firmLink || ''} onChange={e => setForm({...form, firmLink: e.target.value})}>
-                  <option value="">Select Firm</option>
+                <input placeholder="Bank Name" onChange={e => setForm({...form, bankName: e.target.value})} />
+                <input placeholder="Branch" onChange={e => setForm({...form, branch: e.target.value})} />
+                <input placeholder="Account No." onChange={e => setForm({...form, accNo: e.target.value})} />
+                <select onChange={e => setForm({...form, firmLink: e.target.value})}>
+                  <option>Select Firm</option>
                   {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                 </select>
               </div>
-              <button className="save-btn" onClick={() => handleSave("banks")}>SAVE BANK</button>
-              <table className="master-table mt-20">
-                <thead><tr><th>Bank</th><th>A/c No</th><th>Firm</th><th>Action</th></tr></thead>
-                <tbody>{banks.map(b => (<tr key={b.id}><td>{b.bankName}</td><td>{b.accNo}</td><td>{b.firmLink}</td><td><Trash2 className="del" size={16} onClick={() => handleDelete("banks", b.id)}/></td></tr>))}</tbody>
-              </table>
+              <button className="save-btn" onClick={() => handleSave("banks")}>LINK BANK</button>
             </div>
           )}
 
-          {activeTab === "User Master" && (
+          {/* SETTINGS (CHANGE PASSWORD) */}
+          {activeTab === "Settings" && (
             <div className="luxury-card">
-              <h3>System User Management</h3>
+              <h3>Account Settings</h3>
               <div className="form-grid">
-                <input placeholder="User Name" value={form.uName || ''} onChange={e => setForm({...form, uName: e.target.value})} />
-                <input placeholder="User Email" value={form.uEmail || ''} onChange={e => setForm({...form, uEmail: e.target.value})} />
-                <input type="password" placeholder="Set Password" value={form.uPass || ''} onChange={e => setForm({...form, uPass: e.target.value})} />
+                <input type="password" placeholder="New Password" />
+                <input type="password" placeholder="Confirm Password" />
               </div>
-              <button className="save-btn" onClick={() => handleSave("users")}>CREATE USER</button>
-              <table className="master-table mt-20">
-                <thead><tr><th>Name</th><th>Email</th><th>Action</th></tr></thead>
-                <tbody>{usersList.map(u => (<tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td><td><Trash2 className="del" size={16} onClick={() => handleDelete("users", u.id)}/></td></tr>))}</tbody>
-              </table>
+              <button className="save-btn">UPDATE PASSWORD</button>
             </div>
           )}
         </section>
@@ -188,19 +181,19 @@ function LoginScreen() {
   const [pass, setPass] = useState("");
   const handleLogin = (e) => {
     e.preventDefault();
-    signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Login Error: " + err.message));
+    signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Access Denied"));
   };
   return (
     <div className="login-page">
       <div className="login-container">
         <h1>BANKING PRO</h1>
-        <p className="premium-subtitle">EXECUTIVE ACCESS</p>
+        <p className="premium-subtitle">EXECUTIVE SECURE ACCESS</p>
         <form className="login-form" onSubmit={handleLogin}>
-          <input type="email" placeholder="Email Address" onChange={e => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" onChange={e => setPass(e.target.value)} required />
-          <button type="submit" className="btn-authorize">ACCESS SYSTEM</button>
+          <input type="email" placeholder="Registered Email" onChange={e => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Security Password" onChange={e => setPass(e.target.value)} required />
+          <button type="submit" className="btn-authorize">AUTHORIZE LOGIN</button>
         </form>
-        <div className="login-footer-branding">Developed by <strong>SOFTVIEW TECHNOLOGIES</strong></div>
+        <div className="login-footer-branding">Powered by <strong>SOFTVIEW TECHNOLOGIES</strong></div>
       </div>
     </div>
   );
