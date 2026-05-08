@@ -3,7 +3,7 @@ import './App.css';
 import { auth, db } from "./firebase"; 
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firestore";
-import { Trash2, Edit } from 'lucide-react'; // Icons ke liye
+import { Trash2 } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -24,12 +24,13 @@ export default function App() {
   }, [user]);
 
   const handleSave = async (coll) => {
+    if (!form.name && !form.bankName && !form.uName) { alert("Please fill details"); return; }
     await addDoc(collection(db, coll), { ...form, createdAt: new Date() });
-    setForm({}); alert("Data Saved Successfully!");
+    setForm({}); alert("Data Saved!");
   };
 
   const handleDelete = async (coll, id) => {
-    if(window.confirm("Delete karein?")) await deleteDoc(doc(db, coll, id));
+    if(window.confirm("Are you sure you want to delete?")) await deleteDoc(doc(db, coll, id));
   };
 
   if (!user) return <LoginScreen />;
@@ -47,11 +48,11 @@ export default function App() {
       </div>
 
       <div className="main-stage">
-        {/* Master History Counters */}
+        {/* History Counters - Points fulfilled */}
         <div className="stats-row">
-          <div className="stat-card">Total Firms: {firms.length}</div>
-          <div className="stat-card">Total Banks: {banks.length}</div>
-          <div className="stat-card">Total Users: {usersList.length}</div>
+          <div className="stat-card">Firms: {firms.length}</div>
+          <div className="stat-card">Banks: {banks.length}</div>
+          <div className="stat-card">Users: {usersList.length}</div>
         </div>
 
         {activeTab === "Firm Master" && (
@@ -63,16 +64,12 @@ export default function App() {
               <input placeholder="Address of Firm" value={form.address || ''} onChange={e => setForm({...form, address: e.target.value})} />
             </div>
             <button className="btn-save" onClick={() => handleSave("firms")}>SAVE FIRM</button>
-            
-            <table className="list-table mt-20">
-              <thead><tr><th>Firm Name</th><th>Address</th><th>Action</th></tr></thead>
-              <tbody>
-                {firms.map(f => (
-                  <tr key={f.id}><td>{f.name}</td><td>{f.address}</td>
-                  <td><Trash2 className="icon-del" onClick={() => handleDelete("firms", f.id)} /></td></tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="list-container">
+              <table className="list-table">
+                <thead><tr><th>Name</th><th>Address</th><th>Action</th></tr></thead>
+                <tbody>{firms.map(f => (<tr key={f.id}><td>{f.name}</td><td>{f.address}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("firms", f.id)} /></td></tr>))}</tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -81,23 +78,20 @@ export default function App() {
             <h3>Bank Master</h3>
             <div className="master-form-grid">
               <input placeholder="Bank Name" value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
-              <input placeholder="Branch" value={form.branch || ''} onChange={e => setForm({...form, branch: e.target.value})} />
-              <input placeholder="A/c No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
-              <select onChange={e => setForm({...form, firmLink: e.target.value})}>
-                <option>Select Firm</option>
+              <input placeholder="Bank Branch" value={form.branch || ''} onChange={e => setForm({...form, branch: e.target.value})} />
+              <input placeholder="Account No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
+              <select value={form.firmLink || ''} onChange={e => setForm({...form, firmLink: e.target.value})}>
+                <option value="">Select Firm</option>
                 {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
               </select>
             </div>
             <button className="btn-save" onClick={() => handleSave("banks")}>SAVE BANK</button>
-            <table className="list-table mt-20">
-              <thead><tr><th>Bank</th><th>Branch</th><th>Action</th></tr></thead>
-              <tbody>
-                {banks.map(b => (
-                  <tr key={b.id}><td>{b.bankName}</td><td>{b.branch}</td>
-                  <td><Trash2 className="icon-del" onClick={() => handleDelete("banks", b.id)} /></td></tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="list-container">
+              <table className="list-table">
+                <thead><tr><th>Bank</th><th>Branch</th><th>Action</th></tr></thead>
+                <tbody>{banks.map(b => (<tr key={b.id}><td>{b.bankName}</td><td>{b.branch}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("banks", b.id)} /></td></tr>))}</tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -112,26 +106,43 @@ export default function App() {
               <input type="password" placeholder="Password" value={form.uPass || ''} onChange={e => setForm({...form, uPass: e.target.value})} />
             </div>
             <button className="btn-save" onClick={() => handleSave("users")}>SAVE USER</button>
-            <table className="list-table mt-20">
-              <thead><tr><th>Name</th><th>Email</th><th>Action</th></tr></thead>
-              <tbody>
-                {usersList.map(u => (
-                  <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td>
-                  <td><Trash2 className="icon-del" onClick={() => handleDelete("users", u.id)} /></td></tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="list-container">
+              <table className="list-table">
+                <thead><tr><th>Name</th><th>Mobile</th><th>Action</th></tr></thead>
+                <tbody>{usersList.map(u => (<tr key={u.id}><td>{u.uName}</td><td>{u.uMob}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("users", u.id)} /></td></tr>))}</tbody>
+              </table>
+            </div>
           </div>
         )}
 
-        {/* YE FOOTER FIXED RAHEGA - MOVE NAHI HOGA */}
-        <div className="footer-fixed-right">
-          <div className="sv-text">Developed by:</div>
-          <div className="sv-brand">SOFTVIEW TECHNOLOGIES</div>
-          <div className="sv-mob">+91 7972084304</div>
+        {/* Dashboard contents... same as before */}
+
+        {/* Fixed Footer - Move nahi hoga */}
+        <div className="footer-branding-fixed">
+          <div className="sv-small">Developed by:</div>
+          <div className="sv-main">SOFTVIEW TECHNOLOGIES</div>
+          <div className="sv-contact">+91 7972084304</div>
         </div>
       </div>
     </div>
   );
 }
-// LoginScreen function yahan niche same rahega...
+
+// LOGIN SCREEN RESTORED
+function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <h1 style={{color: '#0a0e2e', marginBottom: '5px'}}>BANKING PRO</h1>
+        <p style={{fontSize: '12px', marginBottom: '20px'}}>A Project by Softview Technologies</p>
+        <form onSubmit={(e) => { e.preventDefault(); signInWithEmailAndPassword(auth, email, pass); }}>
+          <input placeholder="Email" style={{width: '100%', padding: '12px', marginBottom: '10px'}} onChange={e => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Password" style={{width: '100%', padding: '12px', marginBottom: '15px'}} onChange={e => setPass(e.target.value)} required />
+          <button type="submit" className="btn-save" style={{width: '100%', background: '#0a0e2e'}}>LOGIN TO SYSTEM</button>
+        </form>
+      </div>
+    </div>
+  );
+}
