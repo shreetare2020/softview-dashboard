@@ -1,34 +1,63 @@
-:root { --navy: #0a0e2e; --gold: #d4af37; --bg: #f4f7fa; --white: #ffffff; }
+:root { --navy: #0a0e2e; --gold: #d4af37; --white: #ffffff; }
 
-/* SIDEBAR BRANDING UPDATE */
-.sb-branding-premium { padding: 35px 25px; background: rgba(0,0,0,0.4); text-align: center; }
-.gold-divider { height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin-bottom: 20px; }
-.premium-label { font-size: 9px; color: #64748b; letter-spacing: 2px; margin-bottom: 8px; font-weight: 800; }
-.sv-brand { color: var(--gold); font-size: 16px; font-weight: 900; letter-spacing: 1px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(212,175,55,0.3); }
-.sv-contact { font-size: 11px; color: #94a3b8; font-family: monospace; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f0f2f5; overflow: hidden; }
 
-/* DASHBOARD PREMIUM LOOK */
-.luxury-card-main { background: white; padding: 40px; border-radius: 25px; box-shadow: 0 25px 60px rgba(0,0,0,0.05); border-left: 8px solid var(--gold); }
-.premium-filter-bar { background: #f8fafc; padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #e2e8f0; }
-.luxury-select { padding: 12px 25px; border-radius: 10px; border: 2px solid var(--navy); font-weight: 800; color: var(--navy); background: white; }
+/* FIXING THE BROKEN LAYOUT */
+.main-wrapper { display: flex; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; }
 
-/* LUXURY TABLE */
-.luxury-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-.luxury-table th { background: var(--navy); color: var(--gold); padding: 20px; font-size: 12px; letter-spacing: 2px; text-align: left; }
-.luxury-table td { background: #fff; padding: 20px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-.gold-balance { color: #b45309; font-weight: 900; font-size: 18px; }
+/* SIDEBAR - DARK & RIGID */
+.sidebar-gold { width: 280px; background: var(--navy); color: white; display: flex; flex-direction: column; z-index: 10; box-shadow: 5px 0 20px rgba(0,0,0,0.3); }
+.sidebar-brand { padding: 45px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.gold-text { color: var(--gold); letter-spacing: 3px; font-weight: 900; }
+.version-text { font-size: 10px; color: var(--gold); opacity: 0.7; letter-spacing: 2px; margin-top: 5px; }
 
-/* BUTTONS UPDATE */
-.luxury-view-btn { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 10px; }
-.ex-btn { padding: 10px 18px; border-radius: 8px; font-weight: 800; font-size: 11px; cursor: pointer; border: none; margin-left: 10px; }
-.ex-btn.excel { background: #107c41; color: white; }
-.ex-btn.pdf { background: #c0392b; color: white; }
+.sidebar-menu { flex: 1; padding: 25px 0; }
+.menu-item { padding: 18px 30px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+.menu-item.active { background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent); color: var(--gold); border-right: 4px solid var(--gold); }
 
-/* HEADER UPDATE */
-.header-main-title { font-weight: 900; color: var(--navy); font-size: 28px; }
-.header-label { font-size: 10px; color: var(--gold); font-weight: 900; letter-spacing: 3px; display: block; }
-.logout-premium { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+/* BRANDING BOX - LUXURY STYLE */
+.branding-box { padding: 35px 25px; background: rgba(0,0,0,0.4); text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+.divider-line { height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin-bottom: 20px; }
+.small-label { font-size: 9px; color: #64748b; letter-spacing: 2px; margin-bottom: 5px; font-weight: 800; }
+.sv-title { color: var(--gold); font-size: 16px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; }
+.sv-phone { font-size: 11px; color: #94a3b8; font-family: monospace; }
 
-/* LOGIN UPDATE */
-.luxury-login-page { height: 100vh; background: #0a0e2e; display: flex; align-items: center; justify-content: center; }
-.version-tag { color: var(--gold); font-size: 11px; letter-spacing: 4px; font-weight: 900; margin-bottom: 30px; }
+/* CONTENT AREA */
+.content-gold { flex: 1; display: flex; flex-direction: column; background: #f8fafc; position: relative; }
+.main-header { height: 90px; background: var(--white); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 1px solid #e2e8f0; }
+.portal-tag { font-size: 10px; color: var(--gold); font-weight: 900; text-transform: uppercase; letter-spacing: 3px; }
+.tab-title { font-size: 26px; color: var(--navy); font-weight: 900; }
+
+.header-right { display: flex; align-items: center; gap: 30px; }
+.admin-status { text-align: right; border-right: 1px solid #ddd; padding-right: 25px; }
+.status-name { font-weight: 900; font-size: 13px; color: var(--navy); display: block; }
+.status-time { font-size: 11px; color: #64748b; font-family: monospace; }
+.btn-logout { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 8px; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+
+/* PANELS & TABLES */
+.scroll-content { flex: 1; padding: 40px; overflow-y: auto; }
+.luxury-panel { background: var(--white); border-radius: 20px; padding: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); border-top: 6px solid var(--gold); }
+.filter-executive { margin-bottom: 30px; background: #f1f5f9; padding: 20px; border-radius: 12px; }
+.gold-select { padding: 10px 20px; border-radius: 8px; border: 2px solid var(--navy); font-weight: 800; outline: none; }
+
+.executive-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+.executive-table th { background: var(--navy); color: var(--gold); padding: 15px; text-align: left; font-size: 11px; letter-spacing: 2px; }
+.executive-table td { background: #fff; padding: 18px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+.gold-amt { color: #b45309; font-weight: 900; font-size: 17px; }
+.btn-ledger { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 8px 15px; border-radius: 6px; font-weight: 800; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+
+/* LEDGER BOX */
+.ledger-box { background: #fafbfc; border: 1px dashed var(--gold); padding: 25px; border-radius: 15px; margin-top: 10px; }
+.ledger-top { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 900; color: var(--navy); }
+.ex-excel { background: #107c41; color: white; padding: 8px 15px; border-radius: 6px; border: none; font-weight: 800; margin-right: 10px; cursor: pointer; }
+.ex-pdf { background: #c0392b; color: white; padding: 8px 15px; border-radius: 6px; border: none; font-weight: 800; cursor: pointer; }
+
+/* LOGIN RIGID FIX */
+.login-luxury-bg { height: 100vh; width: 100vw; background: radial-gradient(circle, #1a1f4d 0%, #0a0e2e 100%); display: flex; align-items: center; justify-content: center; position: fixed; }
+.login-card-gold { background: rgba(255,255,255,0.03); padding: 60px; border-radius: 30px; border: 1px solid rgba(212,175,55,0.3); text-align: center; width: 450px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+.gold-title { color: var(--gold); font-size: 38px; font-weight: 900; letter-spacing: 4px; }
+.v-tag { color: var(--gold); font-size: 11px; font-weight: 900; letter-spacing: 4px; margin: 15px 0 40px 0; }
+.login-form-gold input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; margin-bottom: 20px; }
+.login-btn { width: 100%; padding: 16px; background: var(--gold); color: var(--navy); border: none; border-radius: 12px; font-weight: 900; cursor: pointer; }
+.login-foot { margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 11px; }
