@@ -1,27 +1,30 @@
-:root { --navy: #0a0e2e; --gold: #d4af37; --white: #ffffff; }
+:root { --navy: #0a0e2e; --gold: #d4af37; --white: #fff; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f0f2f5; font-family: sans-serif; overflow: hidden; }
+body { background: #f4f7f9; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-.layout-container { display: flex; height: 100vh; width: 100vw; }
+.portal-frame { display: flex; height: 100vh; width: 100vw; position: fixed; }
+.sidebar-luxury { width: 280px; background: var(--navy); display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid rgba(212,175,55,0.2); }
+.side-logo { padding: 40px 20px; text-align: center; color: var(--gold); }
 
-.side-bar { width: 260px; background: var(--navy); display: flex; flex-direction: column; flex-shrink: 0; }
-.nav-link { padding: 15px 25px; color: #94a3b8; cursor: pointer; display: flex; gap: 10px; }
-.nav-link.active { color: var(--gold); background: rgba(255,255,255,0.05); border-right: 4px solid var(--gold); }
+.nav-btn { padding: 18px 30px; color: #94a3b8; display: flex; gap: 15px; cursor: pointer; }
+.nav-btn.active { color: var(--gold); background: rgba(212,175,55,0.1); border-right: 4px solid var(--gold); font-weight: bold; }
 
-.main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.view-header { height: 70px; background: white; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+.main-viewport { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-header { height: 80px; background: white; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
 
-.view-body { flex: 1; padding: 30px; overflow-y: auto; }
-.data-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.scroll-panel { flex: 1; padding: 35px; overflow-y: auto; }
+.master-card { background: white; padding: 30px; border-radius: 15px; border-top: 5px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-/* OVERLAP FIX */
-.data-table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
-.data-table th, .data-table td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* FORM & TABLE FIX */
+.pro-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 25px 0; }
+.full-width { grid-column: 1 / -1; } /* Address field take full width */
+.pro-form-grid input, .pro-form-grid select { padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; width: 100%; }
+.input-with-icon { position: relative; display: flex; align-items: center; }
+.input-with-icon svg { position: absolute; left: 15px; color: #94a3b8; }
+.input-with-icon input { padding-left: 45px; }
+.btn-save-gold { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
-.form-grid input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
-.btn-save { background: var(--navy); color: var(--gold); border: none; border-radius: 8px; padding: 10px; cursor: pointer; }
-
-.ledger-box { background: #f9f9f9; padding: 20px; border: 1px dashed var(--gold); margin-top: 10px; border-radius: 10px; }
-.ledger-table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-.ledger-table th { background: var(--navy); color: var(--gold); padding: 8px; font-size: 12px; }
+.table-container { width: 100%; overflow-x: auto; margin-top: 25px; }
+.luxury-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+.luxury-table th { background: #f8fafc; padding: 15px; text-align: left; font-size: 11px; color: #64748b; border-bottom: 2px solid #eee; }
+.luxury-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
