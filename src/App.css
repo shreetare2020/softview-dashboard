@@ -1,114 +1,42 @@
-/* --- Global Variables --- */
-:root {
-  --navy: #0a0e2e;
-  --premium-navy: #151a3c;
-  --gold: #d4af37;
-  --light-gold: #f4cf6e;
-  --bg-light: #f8fafc;
-  --white: #ffffff;
-}
+:root { --navy: #0a0e2e; --gold: #d4af37; --bg: #f8fafc; }
 
-body { margin: 0; font-family: 'Inter', 'Segoe UI', sans-serif; overflow: hidden; }
+body { margin: 0; padding: 0; overflow: hidden; font-family: 'Inter', sans-serif; }
 
-/* --- 1. PREMIUM EXECUTIVE LOGIN PAGE --- */
-.login-page { 
-  height: 100vh; 
-  /* Sober Radial Gradient */
-  background: radial-gradient(circle at center, #1e293b 0%, #0a0e2e 100%); 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-}
+.main-layout { display: flex; height: 100vh; width: 100vw; background: var(--bg); }
 
-.login-container { 
-  background: rgba(255, 255, 255, 0.03); 
-  padding: 60px 50px; 
-  border-radius: 20px; 
-  /* Golden Frame with Glow */
-  border: 1px solid rgba(212, 175, 55, 0.4); 
-  box-shadow: 0 15px 50px rgba(0,0,0,0.5), 0 0 15px rgba(212, 175, 55, 0.1);
-  backdrop-filter: blur(15px);
-  text-align: center; 
-  color: white; 
-  width: 400px; 
-}
+/* SIDEBAR REPAIR */
+.sidebar-container { width: 260px; min-width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+.sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.gold-txt { color: var(--gold); margin: 0; letter-spacing: 2px; }
+.premium-tag { font-size: 10px; color: var(--gold); opacity: 0.7; }
 
-.login-brand h1 { 
-  color: var(--gold); 
-  letter-spacing: 5px; 
-  font-weight: 800;
-  margin-bottom: 5px; 
-  margin-top: 0;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-}
+.sidebar-nav { flex: 1; padding: 20px 0; }
+.nav-item { padding: 15px 25px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+.nav-item:hover, .nav-item.active { background: rgba(212,175,55,0.1); color: var(--gold); border-right: 4px solid var(--gold); }
 
-.premium-subtitle {
-  color: var(--light-gold);
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 35px;
-  display: block;
-  opacity: 0.8;
-}
+.sidebar-branding-bottom { padding: 25px; background: rgba(0,0,0,0.3); text-align: center; border-top: 1px solid rgba(212,175,55,0.1); }
+.sv-dev { font-size: 8px; color: #64748b; margin: 0; }
+.sv-name { font-size: 11px; color: var(--gold); font-weight: bold; margin: 5px 0; }
+.sv-num { font-size: 10px; color: #475569; }
 
-.login-form input { 
-  width: 100%; 
-  padding: 18px; 
-  margin: 12px 0; 
-  border-radius: 10px; 
-  border: 1px solid rgba(212, 175, 55, 0.3); 
-  background: rgba(0, 0, 0, 0.2); 
-  color: white; 
-  font-size: 14px;
-  box-sizing: border-box; 
-  transition: 0.3s;
-}
+/* MAIN CONTENT REPAIR */
+.view-stage { flex: 1; display: flex; flex-direction: column; width: 100%; overflow: hidden; }
+.executive-header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+.tab-name { font-weight: 800; font-size: 20px; color: var(--navy); }
 
-.login-form input:focus {
-  border-color: var(--gold);
-  background: rgba(0, 0, 0, 0.3);
-  outline: none;
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
-}
+.header-meta { display: flex; align-items: center; gap: 25px; }
+.user-info-box { text-align: right; }
+.u-name { display: block; font-weight: 700; color: var(--navy); }
+.u-clock { font-size: 11px; color: #64748b; }
 
-.btn-authorize { 
-  width: 100%; 
-  padding: 18px; 
-  background: var(--gold); 
-  color: var(--navy); 
-  font-weight: 800; 
-  border: none; 
-  border-radius: 10px; 
-  cursor: pointer; 
-  margin-top: 25px; 
-  font-size: 15px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: 0.3s;
-}
+.logout-premium-btn { background: #fff1f2; color: #e11d48; border: 1px solid #fecaca; padding: 8px 18px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
-.btn-authorize:hover {
-  background: var(--light-gold);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+.content-scroll { flex: 1; padding: 30px; overflow-y: auto; }
+.gold-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-top: 4px solid var(--gold); }
 
-.login-footer-branding { 
-  margin-top: 40px; 
-  font-size: 11px; 
-  color: #888; 
-  letter-spacing: 1px;
-}
-
-.login-footer-branding strong { color: #ccc; }
-
-/* --- 2. INTERNAL LUXURY LAYOUT (Firms/Banks Tabs) --- */
-/* (InoTabs ka code pehle wale fix mein included hai, wide width ke saath) */
-.luxury-app { display: flex; height: 100vh; width: 100vw; background: #f0f2f5; }
-.sidebar { width: 260px; background: var(--navy); color: white; padding: 30px 0; display: flex; flex-direction: column; }
-.logo-area { padding: 0 30px 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.nav-link { padding: 15px 30px; cursor: pointer; color: #cbd5e1; display: flex; align-items: center; gap: 12px; }
-.nav-link.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-left: 5px solid var(--gold); }
-.main-content { flex: 1; padding: 30px; overflow-y: auto; }
-.premium-card { background: white; padding: 30px; border-radius: 15px; border-top: 4px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+/* Table Cleanup */
+.bank-table { width: 100%; border-collapse: collapse; }
+.bank-table th { text-align: left; padding: 15px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-size: 13px; color: #475569; }
+.bank-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+.gold-amount { font-weight: 800; color: #b45309; }
+.v-btn { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 6px 15px; border-radius: 4px; cursor: pointer; }
