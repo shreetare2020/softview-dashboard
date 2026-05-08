@@ -1,30 +1,52 @@
-:root { --navy: #0a0e2e; --gold: #d4af37; --white: #fff; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f4f7f9; font-family: 'Inter', sans-serif; overflow: hidden; }
+/* Fix for Blank Login Screen */
+.auth-box-overlay {
+  height: 100vh;
+  width: 100vw;
+  background: #0a0e2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0; left: 0; z-index: 9999;
+}
 
-.portal-frame { display: flex; height: 100vh; width: 100vw; position: fixed; }
-.sidebar-luxury { width: 280px; background: var(--navy); display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid rgba(212,175,55,0.2); }
-.side-logo { padding: 40px 20px; text-align: center; color: var(--gold); }
+.login-card-rigid {
+  background: white;
+  padding: 50px;
+  border-radius: 20px;
+  text-align: center;
+  width: 400px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
 
-.nav-btn { padding: 18px 30px; color: #94a3b8; display: flex; gap: 15px; cursor: pointer; }
-.nav-btn.active { color: var(--gold); background: rgba(212,175,55,0.1); border-right: 4px solid var(--gold); font-weight: bold; }
+.login-card-rigid h2 { margin: 15px 0 5px; color: #0a0e2e; letter-spacing: 2px; }
+.login-card-rigid p { color: #d4af37; font-size: 11px; font-weight: bold; margin-bottom: 30px; }
 
-.main-viewport { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.top-header { height: 80px; background: white; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
+.login-card-rigid input {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9f9f9;
+}
 
-.scroll-panel { flex: 1; padding: 35px; overflow-y: auto; }
-.master-card { background: white; padding: 30px; border-radius: 15px; border-top: 5px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; }
+.login-card-rigid button {
+  width: 100%;
+  padding: 15px;
+  background: #0a0e2e;
+  color: #d4af37;
+  border: 1px solid #d4af37;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
 
-/* FORM & TABLE FIX */
-.pro-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 25px 0; }
-.full-width { grid-column: 1 / -1; } /* Address field take full width */
-.pro-form-grid input, .pro-form-grid select { padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; width: 100%; }
-.input-with-icon { position: relative; display: flex; align-items: center; }
-.input-with-icon svg { position: absolute; left: 15px; color: #94a3b8; }
-.input-with-icon input { padding-left: 45px; }
-.btn-save-gold { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+/* Fix for Table Overlap */
+.table-wrapper { width: 100%; overflow-x: auto; margin-top: 20px; }
+.prime-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+.prime-table th, .prime-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
 
-.table-container { width: 100%; overflow-x: auto; margin-top: 25px; }
-.luxury-table { width: 100%; border-collapse: collapse; min-width: 900px; }
-.luxury-table th { background: #f8fafc; padding: 15px; text-align: left; font-size: 11px; color: #64748b; border-bottom: 2px solid #eee; }
-.luxury-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+/* Firm Master Address Full Width */
+.span-all { grid-column: 1 / -1; }
+.form-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
