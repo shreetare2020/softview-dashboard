@@ -1,32 +1,29 @@
-.footer-fixed-right {
-  position: fixed;
-  bottom: 10px;
-  right: 15px;
-  text-align: right;
-  z-index: 9999;
-  pointer-events: none; /* Isse clicks disturb nahi honge */
-}
+.app-shell { display: flex; height: 100vh; background: #f0f2f5; font-family: sans-serif; }
+.sidebar { width: 240px; background: #0a0e2e; color: white; padding: 20px; }
+.sidebar-logo { font-size: 20px; font-weight: bold; margin-bottom: 30px; color: #ffca28; }
+.nav-item { padding: 12px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; }
+.nav-item.active { background: #1a237e; border-left: 4px solid #ffca28; }
+.main-stage { flex: 1; padding: 25px; position: relative; overflow-y: auto; }
 
-.sv-text { font-size: 9px; color: #666; }
-.sv-brand { font-size: 11px; font-weight: bold; color: #0a0e2e; }
-.sv-mob { font-size: 10px; color: #d32f2f; font-weight: bold; }
+.stats-header { display: flex; gap: 15px; margin-bottom: 20px; }
+.stat-pill { background: white; padding: 10px 20px; border-radius: 50px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
 
-.stats-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
+.master-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
 
-.stat-card {
-  background: #f0f4ff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  border-left: 4px solid #0a0e2e;
-}
+.btn-save { background: #0a0e2e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+.data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+.data-table th { background: #f8f9fa; text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
+.data-table td { padding: 12px; border-bottom: 1px solid #eee; }
+.icon-del { color: #d32f2f; cursor: pointer; }
 
-.icon-del {
-  color: #E11D48;
-  cursor: pointer;
-  width: 18px;
-}
+.fixed-footer-right { position: fixed; bottom: 10px; right: 20px; text-align: right; z-index: 1000; }
+.sv-dev { font-size: 9px; color: #666; }
+.sv-name { font-size: 11px; font-weight: bold; color: #0a0e2e; }
+.sv-num { font-size: 10px; color: #d32f2f; font-weight: bold; }
+
+.login-box { height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0e2e; }
+.login-card { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; }
+.login-card input { width: 90%; margin-bottom: 10px; padding: 12px; }
+.login-card button { width: 100%; padding: 12px; background: #0a0e2e; color: white; border: none; border-radius: 6px; }

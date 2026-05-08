@@ -3,7 +3,7 @@ import './App.css';
 import { auth, db } from "./firebase"; 
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firestore";
-import { Trash2 } from 'lucide-react';
+import { Trash2, PlusCircle } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -24,13 +24,12 @@ export default function App() {
   }, [user]);
 
   const handleSave = async (coll) => {
-    if (!form.name && !form.bankName && !form.uName) { alert("Please fill details"); return; }
     await addDoc(collection(db, coll), { ...form, createdAt: new Date() });
-    setForm({}); alert("Data Saved!");
+    setForm({}); alert("Saved!");
   };
 
   const handleDelete = async (coll, id) => {
-    if(window.confirm("Are you sure you want to delete?")) await deleteDoc(doc(db, coll, id));
+    if(window.confirm("Delete this record?")) await deleteDoc(doc(db, coll, id));
   };
 
   if (!user) return <LoginScreen />;
@@ -48,57 +47,52 @@ export default function App() {
       </div>
 
       <div className="main-stage">
-        {/* History Counters - Points fulfilled */}
-        <div className="stats-row">
-          <div className="stat-card">Firms: {firms.length}</div>
-          <div className="stat-card">Banks: {banks.length}</div>
-          <div className="stat-card">Users: {usersList.length}</div>
+        <div className="stats-header">
+          <div className="stat-pill">Firms: {firms.length}</div>
+          <div className="stat-pill">Banks: {banks.length}</div>
+          <div className="stat-pill">Users: {usersList.length}</div>
         </div>
 
         {activeTab === "Firm Master" && (
-          <div className="premium-card">
-            <h3>Firm Master</h3>
-            <div className="master-form-grid">
+          <div className="master-card">
+            <h3><PlusCircle size={18}/> Firm Master</h3>
+            <div className="grid-3">
               <input placeholder="Firm Name" value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} />
               <input placeholder="GST No" value={form.gst || ''} onChange={e => setForm({...form, gst: e.target.value})} />
               <input placeholder="Address of Firm" value={form.address || ''} onChange={e => setForm({...form, address: e.target.value})} />
             </div>
             <button className="btn-save" onClick={() => handleSave("firms")}>SAVE FIRM</button>
-            <div className="list-container">
-              <table className="list-table">
-                <thead><tr><th>Name</th><th>Address</th><th>Action</th></tr></thead>
-                <tbody>{firms.map(f => (<tr key={f.id}><td>{f.name}</td><td>{f.address}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("firms", f.id)} /></td></tr>))}</tbody>
-              </table>
-            </div>
+            <table className="data-table">
+              <thead><tr><th>Name</th><th>GST</th><th>Address</th><th>Action</th></tr></thead>
+              <tbody>{firms.map(f => (<tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("firms", f.id)} /></td></tr>))}</tbody>
+            </table>
           </div>
         )}
 
         {activeTab === "Bank Master" && (
-          <div className="premium-card">
-            <h3>Bank Master</h3>
-            <div className="master-form-grid">
+          <div className="master-card">
+            <h3><PlusCircle size={18}/> Bank Master</h3>
+            <div className="grid-3">
               <input placeholder="Bank Name" value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
               <input placeholder="Bank Branch" value={form.branch || ''} onChange={e => setForm({...form, branch: e.target.value})} />
-              <input placeholder="Account No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
+              <input placeholder="A/c No" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
               <select value={form.firmLink || ''} onChange={e => setForm({...form, firmLink: e.target.value})}>
-                <option value="">Select Firm</option>
+                <option value="">Link to Firm</option>
                 {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
               </select>
             </div>
             <button className="btn-save" onClick={() => handleSave("banks")}>SAVE BANK</button>
-            <div className="list-container">
-              <table className="list-table">
-                <thead><tr><th>Bank</th><th>Branch</th><th>Action</th></tr></thead>
-                <tbody>{banks.map(b => (<tr key={b.id}><td>{b.bankName}</td><td>{b.branch}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("banks", b.id)} /></td></tr>))}</tbody>
-              </table>
-            </div>
+            <table className="data-table">
+              <thead><tr><th>Bank</th><th>Branch</th><th>A/c No</th><th>Action</th></tr></thead>
+              <tbody>{banks.map(b => (<tr key={b.id}><td>{b.bankName}</td><td>{b.branch}</td><td>{b.accNo}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("banks", b.id)} /></td></tr>))}</tbody>
+            </table>
           </div>
         )}
 
         {activeTab === "User Master" && (
-          <div className="premium-card">
-            <h3>User Master</h3>
-            <div className="master-form-grid">
+          <div className="master-card">
+            <h3><PlusCircle size={18}/> User Master</h3>
+            <div className="grid-3">
               <input placeholder="User Code" value={form.uCode || ''} onChange={e => setForm({...form, uCode: e.target.value})} />
               <input placeholder="User Name" value={form.uName || ''} onChange={e => setForm({...form, uName: e.target.value})} />
               <input placeholder="User Email" value={form.uEmail || ''} onChange={e => setForm({...form, uEmail: e.target.value})} />
@@ -106,41 +100,36 @@ export default function App() {
               <input type="password" placeholder="Password" value={form.uPass || ''} onChange={e => setForm({...form, uPass: e.target.value})} />
             </div>
             <button className="btn-save" onClick={() => handleSave("users")}>SAVE USER</button>
-            <div className="list-container">
-              <table className="list-table">
-                <thead><tr><th>Name</th><th>Mobile</th><th>Action</th></tr></thead>
-                <tbody>{usersList.map(u => (<tr key={u.id}><td>{u.uName}</td><td>{u.uMob}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("users", u.id)} /></td></tr>))}</tbody>
-              </table>
-            </div>
+            <table className="data-table">
+              <thead><tr><th>Code</th><th>Name</th><th>Mobile</th><th>Action</th></tr></thead>
+              <tbody>{usersList.map(u => (<tr key={u.id}><td>{u.uCode}</td><td>{u.uName}</td><td>{u.uMob}</td><td><Trash2 className="icon-del" onClick={() => handleDelete("users", u.id)} /></td></tr>))}</tbody>
+            </table>
           </div>
         )}
 
-        {/* Dashboard contents... same as before */}
+        {activeTab === "Dashboard" && <div className="master-card"><h3>Dashboard Live</h3><p>Select a firm to view ledgers.</p></div>}
 
-        {/* Fixed Footer - Move nahi hoga */}
-        <div className="footer-branding-fixed">
-          <div className="sv-small">Developed by:</div>
-          <div className="sv-main">SOFTVIEW TECHNOLOGIES</div>
-          <div className="sv-contact">+91 7972084304</div>
+        <div className="fixed-footer-right">
+          <div className="sv-dev">Developed by:</div>
+          <div className="sv-name">SOFTVIEW TECHNOLOGIES</div>
+          <div className="sv-num">+91 7972084304</div>
         </div>
       </div>
     </div>
   );
 }
 
-// LOGIN SCREEN RESTORED
 function LoginScreen() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   return (
-    <div className="login-screen">
+    <div className="login-box">
       <div className="login-card">
-        <h1 style={{color: '#0a0e2e', marginBottom: '5px'}}>BANKING PRO</h1>
-        <p style={{fontSize: '12px', marginBottom: '20px'}}>A Project by Softview Technologies</p>
+        <h2>BANKING PRO</h2>
         <form onSubmit={(e) => { e.preventDefault(); signInWithEmailAndPassword(auth, email, pass); }}>
-          <input placeholder="Email" style={{width: '100%', padding: '12px', marginBottom: '10px'}} onChange={e => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" style={{width: '100%', padding: '12px', marginBottom: '15px'}} onChange={e => setPass(e.target.value)} required />
-          <button type="submit" className="btn-save" style={{width: '100%', background: '#0a0e2e'}}>LOGIN TO SYSTEM</button>
+          <input placeholder="Email" onChange={e => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Password" onChange={e => setPass(e.target.value)} required />
+          <button type="submit">LOGIN</button>
         </form>
       </div>
     </div>
