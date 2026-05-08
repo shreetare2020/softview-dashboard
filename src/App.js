@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from "./firebase"; // Aapka existing firebase setup
+import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, query, where } from "firebase/firestore";
-import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, ArrowUp, ArrowDown, Download, FileText } from 'lucide-react';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
+import { LayoutDashboard, Building2, Landmark, Users, Clock, ChevronDown, Edit3, Trash2, Settings, ArrowUp, ArrowDown } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -12,26 +12,40 @@ export default function App() {
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
   const [selectedFirm, setSelectedFirm] = useState("All");
-  const [expandedBank, setExpandedBank] = useState(null);
   const [time, setTime] = useState(new Date());
+  const [form, setForm] = useState({});
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       if (u) {
-        // Role check from User Master
+        // 🛠️ Role Check: 'User Master' collection se hi uthayega
         onSnapshot(collection(db, "User Master"), (snap) => {
           const match = snap.docs.find(d => d.data().uEmail === u.email);
           if (match) setUserRole(match.data().role);
         });
-        // Data Load
+
+        // 📊 Data Fetching: 'Firms' aur 'Bank Master' nodes se
         onSnapshot(collection(db, "Firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
         onSnapshot(collection(db, "Bank Master"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
       }
     });
     return () => { clearInterval(timer); unsub(); };
   }, [user]);
+
+  // Security Logic
+  const handleSave = async (coll) => {
+    if (userRole === "Viewer") return alert("Only Admin/Operator can Add!");
+    try { await addDoc(collection(db, coll), { ...form, status: 'Open' }); setForm({}); alert("Saved!"); } 
+    catch (e) { alert("Error!"); }
+  };
+
+  const handleEdit = async (coll, id, currentName) => {
+    if (userRole !== "Admin") return alert("Only Admin can Edit!");
+    const newVal = prompt("Edit Name:", currentName);
+    if (newVal) await updateDoc(doc(db, coll, id), { name: newVal, bankName: newVal });
+  };
 
   if (!user) return <LoginScreen />;
 
@@ -42,76 +56,56 @@ export default function App() {
   });
 
   return (
-    <div style={{ display: 'flex' }}>
-      {/* LEFT SIDEBAR WITH BRANDING */}
+    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      {/* SIDEBAR */}
       <aside className="executive-sidebar">
-        <div style={{ padding: '30px 20px' }}>
-          <h1 style={{ color: 'var(--gold)', fontSize: '22px', margin: 0 }}>BANKING PRO</h1>
-          <p style={{ color: '#64748b', fontSize: '10px' }}>EXECUTIVE VERSION 2.0</p>
-        </div>
-
+        <div style={{ padding: '25px' }}><h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '18px' }}>BANKING PRO</h1></div>
         <nav style={{ flex: 1 }}>
-          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}><LayoutDashboard size={20}/> Dashboard</div>
-          {userRole !== 'Viewer' && (
+          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}><LayoutDashboard size={18}/> Dashboard</div>
+          {userRole !== "Viewer" && (
             <>
-              <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => setActiveTab('Firm Master')}><Building2 size={20}/> Firm Master</div>
-              <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => setActiveTab('Bank Master')}><Landmark size={20}/> Bank Master</div>
+              <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => setActiveTab('Firm Master')}><Building2 size={18}/> Firm Master</div>
+              <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => setActiveTab('Bank Master')}><Landmark size={18}/> Bank Master</div>
             </>
           )}
-          {userRole === 'Admin' && <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => setActiveTab('User Master')}><Users size={20}/> User Master</div>}
-          <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => setActiveTab('Setting')}><Settings size={20}/> Setting</div>
+          {userRole === "Admin" && <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => setActiveTab('User Master')}><Users size={18}/> User Master</div>}
         </nav>
-
-        <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.2)' }}>
-          <p style={{ color: '#64748b', fontSize: '9px', marginBottom: '5px' }}>DEVELOPED BY</p>
-          <p style={{ color: 'var(--gold)', fontSize: '12px', fontWeight: 'bold' }}>SOFTVIEW TECHNOLOGIES<br/>+91 7972084304</p>
+        <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
+          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}>SOFTVIEW TECHNOLOGIES</p>
         </div>
       </aside>
 
-      {/* MAIN PANEL */}
-      <main style={{ marginLeft: '260px', width: 'calc(100% - 260px)', minHeight: '100vh' }}>
+      {/* MAIN CONTENT */}
+      <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
         <header className="luxury-header">
-          <div style={{ fontWeight: 'bold', letterSpacing: '1px' }}>{activeTab.toUpperCase()}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{user.email.split('@')[0]} ({userRole})</div>
-              <div style={{ fontSize: '11px', color: 'var(--gold)' }}>{time.toLocaleDateString()} | {time.toLocaleTimeString()}</div>
-            </div>
-            <button onClick={() => signOut(auth)} className="btn-gold" style={{ padding: '8px 15px', background: '#ffefef', color: 'red' }}><LogOut size={16}/></button>
+          <div style={{ fontWeight: 'bold' }}>{activeTab.toUpperCase()} <span style={{fontSize:'10px', color:'var(--gold)'}}>({userRole})</span></div>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <div style={{ textAlign: 'right', fontSize: '12px' }}>{time.toLocaleTimeString()}</div>
+            <button className="btn-gold" style={{ padding: '5px 15px', background:'#ffefef', color:'red' }} onClick={() => signOut(auth)}>Logout</button>
           </div>
         </header>
 
-        <div style={{ padding: '40px' }}>
+        <div style={{ padding: '30px' }}>
           {activeTab === "Dashboard" && (
             <div>
-              <div style={{ marginBottom: '30px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <label style={{ fontWeight: 'bold', color: 'var(--dark-blue)' }}>Select Firm:</label>
-                <select className="btn-gold" style={{ background: 'white' }} onChange={(e) => setSelectedFirm(e.target.value)}>
-                  <option value="All">All Firms</option>
-                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
-                </select>
-              </div>
-
+              <select className="btn-gold" style={{ background: 'white', marginBottom: '20px' }} onChange={(e) => setSelectedFirm(e.target.value)}>
+                <option value="All">All Firms</option>
+                {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+              </select>
               <table className="royal-table">
-                <thead>
-                  <tr><th>Bank Name</th><th>A/c No.</th><th style={{textAlign:'right'}}>Closing Balance</th><th style={{textAlign:'center'}}>Ledger View</th></tr>
-                </thead>
+                <thead><tr><th>Bank Name</th><th>A/c No</th><th style={{textAlign:'right'}}>Balance</th><th>View</th></tr></thead>
                 <tbody>
                   {dashboardData.map(b => (
-                    <tr key={b.id} style={{ background: b.status === 'Closed' ? '#f8fafc' : 'white' }}>
-                      <td style={{ fontWeight: '600' }}>{b.bankName} {b.status === 'Closed' && <span className="status-closed">(CLOSED)</span>}</td>
-                      <td>{b.accNo}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold' }}>₹ {b.balance} {b.type}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <ChevronDown style={{ cursor: 'pointer', color: 'var(--gold)' }} onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)}/>
-                      </td>
+                    <tr key={b.id}>
+                      <td>{b.bankName}</td><td>{b.accNo}</td><td style={{textAlign:'right'}}>₹ {b.balance}</td>
+                      <td style={{textAlign:'center'}}><ChevronDown style={{color:'var(--gold)'}} /></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-          {/* ... Other Masters (Firm, Bank, User) will follow similar luxury design ... */}
+          {/* Add other master UIs here if needed... */}
         </div>
       </main>
     </div>
@@ -119,17 +113,16 @@ export default function App() {
 }
 
 function LoginScreen() {
+  const [e, setE] = useState(""); const [p, setP] = useState("");
+  const h = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Login Failed")); };
   return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--dark-blue)' }}>
-      <div style={{ background: 'white', padding: '50px', borderRadius: '15px', width: '400px', borderTop: '5px solid var(--gold)' }}>
-        <h2 style={{ textAlign: 'center', color: 'var(--dark-blue)', marginBottom: '30px' }}>BANKING PRO</h2>
-        <input type="text" placeholder="Login ID" className="btn-gold" style={{ width: '100%', marginBottom: '15px', background: '#f8fafc', textAlign: 'left' }} />
-        <input type="password" placeholder="Password" className="btn-gold" style={{ width: '100%', marginBottom: '25px', background: '#f8fafc', textAlign: 'left' }} />
-        <button className="btn-gold" style={{ width: '100%', padding: '15px' }}>LOG IN</button>
-        <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>
-          Developed by Softview Technologies<br/>7972084304
-        </div>
-      </div>
+    <div style={{height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0a192f'}}>
+      <form onSubmit={h} style={{background:'white', padding:'40px', borderRadius:'15px', width:'350px', borderTop:'5px solid #d4af37'}}>
+        <h2 style={{textAlign:'center', color:'#0a192f'}}>BANKING PRO</h2>
+        <input type="email" placeholder="Email" className="btn-gold" style={{width:'100%', marginBottom:'15px', background:'#f8fafc', textAlign:'left'}} onChange={v => setE(v.target.value)} />
+        <input type="password" placeholder="Password" className="btn-gold" style={{width:'100%', marginBottom:'20px', background:'#f8fafc', textAlign:'left'}} onChange={v => setP(v.target.value)} />
+        <button type="submit" className="btn-gold" style={{width:'100%'}}>LOG IN</button>
+      </form>
     </div>
   );
 }
