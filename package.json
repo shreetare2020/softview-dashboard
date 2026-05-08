@@ -2,7 +2,6 @@
   "name": "my-dashboard",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
   "dependencies": {
     "firebase": "^10.8.0",
     "jspdf": "^2.5.1",
@@ -12,8 +11,6 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "react-scripts": "5.0.1",
-    "sweetalert2": "^11.10.5",
-    "web-vitals": "^2.1.4",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz"
   },
   "scripts": {
@@ -21,23 +18,5 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }
