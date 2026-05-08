@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from "./firebase";
-import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
-import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, Clock, Download, FileText, XCircle } from 'lucide-react';
+import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, Clock, Download, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -21,7 +21,6 @@ export default function App() {
   const [time, setTime] = useState(new Date());
   const [form, setForm] = useState({});
   const [editId, setEditId] = useState(null);
-  const [newPass, setNewPass] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -50,25 +49,22 @@ export default function App() {
       } else {
         await addDoc(collection(db, coll), { ...form, createdAt: new Date() });
       }
-      setForm({}); alert("Successfully Updated!");
+      setForm({}); alert("Data Secured!");
     } catch (e) { alert(e.message); }
   };
 
   const handleDelete = async (coll, id) => {
     if (userRole !== "Admin") return alert("Admin Only!");
-    if (window.confirm("Are you sure?")) await deleteDoc(doc(db, coll, id));
+    if (window.confirm("Delete Forever?")) await deleteDoc(doc(db, coll, id));
   };
 
-  const exportExcel = (b) => {
-    const ws = XLSX.utils.json_to_sheet([{ Date: "Opening", Particulars: "B/F", Balance: b.balance }]);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-    XLSX.writeFile(wb, `${b.bankName}.xlsx`);
-  };
+  const startEdit = (item) => { setForm(item); setEditId(item.id); };
 
   if (!user) return <LoginScreen />;
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      {/* SIDEBAR */}
       <aside className="executive-sidebar">
         <div style={{ padding: '25px' }}>
           <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '20px' }}>BANKING PRO</h1>
@@ -82,23 +78,24 @@ export default function App() {
           <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => setActiveTab('Setting')}><Settings size={18}/> Setting</div>
         </nav>
         <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
-          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}>Support: 7972084304</p>
+          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}>DEVELOPED BY:<br/>SOFTVIEW TECHNOLOGIES</p>
         </div>
       </aside>
 
-      <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
+      <main style={{ flex: 1, marginLeft: '260px', background: '#f8fafc', overflowY: 'auto' }}>
+        {/* HEADER WITH NAME, CLOCK, DATE */}
         <header className="luxury-header" style={{display:'flex', justifyContent:'space-between', padding:'15px 30px', background:'white', borderBottom:'1px solid #e2e8f0'}}>
           <div style={{ fontWeight: 'bold', fontSize:'18px' }}>{activeTab.toUpperCase()}</div>
           <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
             <div style={{ textAlign: 'right', borderRight: '1px solid #ddd', paddingRight: '15px' }}>
-                <div style={{ fontSize: '14px', fontWeight: '900', color: '#0a192f' }}><Clock size={14} style={{verticalAlign:'middle'}}/> {time.toLocaleTimeString()}</div>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>{time.toLocaleDateString()}</div>
+              <div style={{ fontSize: '14px', fontWeight: '900', color: '#0a192f' }}><Clock size={14} style={{verticalAlign:'middle'}}/> {time.toLocaleTimeString()}</div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>{time.toLocaleDateString()}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{currentUserName || user.email}</div>
               <div style={{ fontSize: '11px', color: 'var(--gold)' }}>{userRole}</div>
             </div>
-            <button className="btn-gold" style={{ background: '#ffefef', color: 'red', border:'none', cursor:'pointer', padding:'8px' }} onClick={() => signOut(auth)}><LogOut size={18}/></button>
+            <button className="btn-gold" style={{ background: '#ffefef', color: 'red', border:'none', padding:'8px' }} onClick={() => signOut(auth)}><LogOut size={18}/></button>
           </div>
         </header>
 
@@ -110,25 +107,25 @@ export default function App() {
                 {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
               </select>
               <table className="royal-table">
-                <thead><tr><th>Bank Name</th><th>A/c No.</th><th style={{textAlign:'right'}}>Balance</th><th style={{textAlign:'center'}}>Ledger</th></tr></thead>
+                <thead><tr><th>Bank Name</th><th>A/c No.</th><th style={{textAlign:'right'}}>Balance</th><th>Ledger</th></tr></thead>
                 <tbody>
                   {banks.filter(b => selectedFirm === "All" || b.linkedFirm === selectedFirm).map(b => (
                     <React.Fragment key={b.id}>
                       <tr onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)} style={{cursor:'pointer'}}>
-                        <td>{b.bankName}</td><td>{b.accNo}</td><td style={{textAlign:'right'}}>₹ {b.balance} {b.type}</td>
-                        <td style={{textAlign:'center'}}><ChevronDown size={18} style={{color:'var(--gold)', transform: expandedBank === b.id ? 'rotate(180deg)' : 'none'}}/></td>
+                        <td>{b.bankName}</td><td>{b.accNo}</td><td style={{textAlign:'right'}}>₹ {b.balance}</td>
+                        <td style={{textAlign:'center'}}><ChevronDown size={18} style={{color:'var(--gold)'}}/></td>
                       </tr>
                       {expandedBank === b.id && (
                         <tr>
                           <td colSpan="4" style={{padding:'20px', background:'#f1f5f9'}}>
-                             <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
-                               <button onClick={() => exportExcel(b)} className="btn-gold" style={{padding:'5px 15px'}}><Download size={14}/> Excel</button>
-                               <button onClick={() => {}} className="btn-gold" style={{padding:'5px 15px'}}><FileText size={14}/> PDF</button>
-                             </div>
-                             <table className="royal-table" style={{background:'white'}}>
-                               <thead><tr><th>Date</th><th>Particulars</th><th>Dr</th><th>Cr</th><th>Balance</th></tr></thead>
-                               <tbody><tr><td>Opening</td><td>B/F</td><td>-</td><td>-</td><td>₹ {b.balance} {b.type}</td></tr></tbody>
-                             </table>
+                            <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
+                              <button className="btn-gold"><Download size={14}/> Excel</button>
+                              <button className="btn-gold"><FileText size={14}/> PDF</button>
+                            </div>
+                            <table className="royal-table" style={{background:'white'}}>
+                              <thead><tr><th>Date</th><th>Particulars</th><th>Balance</th></tr></thead>
+                              <tbody><tr><td>Opening</td><td>B/F</td><td>₹ {b.balance}</td></tr></tbody>
+                            </table>
                           </td>
                         </tr>
                       )}
@@ -139,21 +136,48 @@ export default function App() {
             </div>
           )}
 
+          {activeTab === "Firm Master" && (
+            <div>
+              <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'10px', background:'white', padding:'20px'}}>
+                <input placeholder="Firm Name" className="btn-gold" value={form.name || ''} onChange={e => setForm({...form, name: e.target.value})} />
+                <input placeholder="GST No" className="btn-gold" value={form.gst || ''} onChange={e => setForm({...form, gst: e.target.value})} />
+                <button className="btn-gold" onClick={() => handleSave("Firms")}>{editId ? "UPDATE" : "SAVE"}</button>
+              </div>
+              <table className="royal-table" style={{marginTop:'20px'}}>
+                <thead><tr><th>Firm Name</th><th>GST</th><th>Actions</th></tr></thead>
+                <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td><Edit3 size={16} onClick={() => startEdit(f)}/><Trash2 size={16} onClick={() => handleDelete("Firms", f.id)} style={{color:'red', marginLeft:'10px'}}/></td></tr>)}</tbody>
+              </table>
+            </div>
+          )}
+
           {activeTab === "Bank Master" && (
-             <div>
-               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
-                  <input placeholder="Bank Name" className="btn-gold" style={{background:'white'}} value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
-                  <input placeholder="A/c No" className="btn-gold" style={{background:'white'}} value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
-                  <input placeholder="Opening Bal" className="btn-gold" style={{background:'white'}} value={form.balance || ''} onChange={e => setForm({...form, balance: e.target.value})} />
-                  <select className="btn-gold" style={{background:'white'}} value={form.status || ''} onChange={e => setForm({...form, status: e.target.value})}><option value="Open">Open</option><option value="Closed">Closed</option></select>
-                  <input type="date" className="btn-gold" style={{background:'white'}} value={form.closeDate || ''} onChange={e => setForm({...form, closeDate: e.target.value})} />
-                  <button className="btn-gold" onClick={() => handleSave("Bank Master")}>{editId ? "UPDATE" : "SAVE"}</button>
-               </div>
-               <table className="royal-table" style={{marginTop:'20px'}}>
-                 <thead><tr><th>Bank</th><th>A/c No</th><th>Status</th><th>Actions</th></tr></thead>
-                 <tbody>{banks.map(b => <tr key={b.id}><td>{b.bankName}</td><td>{b.accNo}</td><td>{b.status}</td><td><Edit3 size={16} onClick={() => {setForm(b); setEditId(b.id);}}/><Trash2 size={16} onClick={() => handleDelete("Bank Master", b.id)} style={{marginLeft:'10px', color:'red'}}/></td></tr>)}</tbody>
-               </table>
-             </div>
+            <div>
+              <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'10px', background:'white', padding:'20px'}}>
+                <input placeholder="Bank Name" className="btn-gold" value={form.bankName || ''} onChange={e => setForm({...form, bankName: e.target.value})} />
+                <input placeholder="A/c No" className="btn-gold" value={form.accNo || ''} onChange={e => setForm({...form, accNo: e.target.value})} />
+                <select className="btn-gold" value={form.status || 'Open'} onChange={e => setForm({...form, status: e.target.value})}><option value="Open">Open</option><option value="Closed">Closed</option></select>
+                <input type="date" className="btn-gold" value={form.closeDate || ''} onChange={e => setForm({...form, closeDate: e.target.value})} />
+                <button className="btn-gold" onClick={() => handleSave("Bank Master")}>{editId ? "UPDATE" : "SAVE"}</button>
+              </div>
+              <table className="royal-table" style={{marginTop:'20px'}}>
+                <thead><tr><th>Bank</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>{banks.map(b => <tr key={b.id}><td>{b.bankName}</td><td>{b.status}</td><td><Edit3 size={16} onClick={() => startEdit(b)}/><Trash2 size={16} onClick={() => handleDelete("Bank Master", b.id)} style={{color:'red', marginLeft:'10px'}}/></td></tr>)}</tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === "User Master" && (
+            <div>
+              <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'10px', background:'white', padding:'20px'}}>
+                <input placeholder="Name" className="btn-gold" value={form.uName || ''} onChange={e => setForm({...form, uName: e.target.value})} />
+                <input placeholder="Email" className="btn-gold" value={form.uEmail || ''} onChange={e => setForm({...form, uEmail: e.target.value})} />
+                <button className="btn-gold" onClick={() => handleSave("User Master")}>{editId ? "UPDATE" : "SAVE"}</button>
+              </div>
+              <table className="royal-table" style={{marginTop:'20px'}}>
+                <thead><tr><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
+                <tbody>{usersList.map(u => <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td><td><Edit3 size={16} onClick={() => startEdit(u)}/><Trash2 size={16} onClick={() => handleDelete("User Master", u.id)} style={{color:'red', marginLeft:'10px'}}/></td></tr>)}</tbody>
+              </table>
+            </div>
           )}
         </div>
         <p style={{textAlign:'center', fontSize:'10px', color:'#94a3b8', padding:'20px'}}>Developed by Softview Technologies</p>
