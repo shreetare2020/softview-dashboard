@@ -4,21 +4,17 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^13.5.0",
-    "firebase": "^12.12.1",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.7",
-    "lucide-react": "^1.14.0",
+    "firebase": "^10.8.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.15.0",
+    "react-router-dom": "^6.22.0",
     "react-scripts": "5.0.1",
-    "sweetalert2": "^11.26.24",
+    "sweetalert2": "^11.10.5",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz"
   },
   "scripts": {
     "start": "react-scripts start",

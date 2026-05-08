@@ -34,6 +34,26 @@
 .list-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
 /* Footer Lock (Point 4) */
-.footer-branding { position: fixed; bottom: 20px; right: 30px; text-align: right; }
-.sv-title { color: var(--blue); font-size: 22px; font-weight: 900; }
-.sv-mob { color: #f97316; font-weight: 700; font-size: 17px; }
+.footer-branding {
+  position: fixed;
+  bottom: 8px; /* Sabse niche */
+  right: 12px; /* Bilkul kone mein */
+  text-align: right;
+  font-size: 10px; /* Ekdam chota size */
+  color: #555;
+  background: rgba(255, 255, 255, 0.8); /* Halki transparent background */
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 9999;
+}
+
+.sv-title {
+  font-weight: 700;
+  color: #0a0e2e; /* Deep Blue */
+  text-transform: uppercase;
+}
+
+.sv-mob {
+  color: #d32f2f; /* Professional Red */
+  font-weight: bold;
+}
