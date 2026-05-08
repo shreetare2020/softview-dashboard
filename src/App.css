@@ -1,97 +1,75 @@
-/* App.css - Premium Luxury Theme */
 :root {
-  --dark-blue: #0a0e2e;
+  --dark-blue: #0a192f;
   --gold: #d4af37;
-  --gold-light: #f3da91;
-  --white: #ffffff;
-  --receipt-green: #22c55e;
-  --payment-red: #ef4444;
-  --bg: #f4f7f6;
+  --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f9e29c 50%, #b8860b 100%);
+  --soft-white: #f8fafc;
 }
 
 body {
+  background-color: var(--soft-white);
+  font-family: 'Segoe UI', Roboto, sans-serif;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--bg);
 }
 
-.login-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: radial-gradient(circle, #1a2a4a 0%, #0a0e2e 100%);
-}
-
-.login-box {
-  background: white;
-  padding: 50px;
-  border-radius: 20px;
-  width: 400px;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  border: 2px solid var(--gold);
-}
-
-.login-box h2 { color: var(--dark-blue); font-weight: 900; letter-spacing: 2px; }
-
-.executive-sidebar {
-  width: 280px;
+.luxury-header {
   background: var(--dark-blue);
   color: white;
-  height: 100vh;
+  padding: 15px 30px;
   display: flex;
-  flex-direction: column;
-  box-shadow: 5px 0 20px rgba(0,0,0,0.2);
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--gold);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.sidebar-header {
-  padding: 30px 20px;
-  border-bottom: 1px solid rgba(212,175,55,0.3);
-  text-align: center;
+.executive-sidebar {
+  background: var(--dark-blue);
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  border-right: 1px solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-item {
-  padding: 18px 25px;
+  padding: 15px 25px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
-  gap: 15px;
-  cursor: pointer;
-  transition: 0.3s;
-  color: #94a3b8;
+  gap: 12px;
   border-left: 4px solid transparent;
 }
 
 .nav-item:hover, .nav-item.active {
-  background: rgba(212,175,55,0.1);
+  background: rgba(212, 175, 55, 0.1);
   color: var(--gold);
   border-left: 4px solid var(--gold);
 }
 
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.btn-gold {
+  background: var(--gold-gradient);
+  color: var(--dark-blue);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.luxury-header {
-  height: 80px;
-  background: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 40px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
+.btn-gold:hover { transform: translateY(-2px); }
 
 .royal-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 15px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
 .royal-table th {
@@ -99,42 +77,8 @@ body {
   color: var(--gold);
   padding: 15px;
   text-align: left;
-  font-size: 13px;
-  text-transform: uppercase;
 }
 
-.royal-table td {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
+.royal-table td { padding: 12px 15px; border-bottom: 1px solid #eee; }
 
-.btn-gold {
-  background: var(--dark-blue);
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  padding: 12px 25px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btn-gold:hover {
-  background: var(--gold);
-  color: var(--dark-blue);
-}
-
-.status-closed {
-  color: var(--payment-red);
-  font-weight: bold;
-  font-size: 11px;
-}
-
-.ledger-box {
-  background: #fcfcfc;
-  padding: 20px;
-  margin-top: 10px;
-  border: 1px dashed var(--gold);
-  border-radius: 10px;
-}
+.status-closed { color: #ef4444; font-weight: bold; font-size: 10px; }
