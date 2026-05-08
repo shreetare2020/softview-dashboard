@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from "./firebase"; 
 import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firestore";
-import { LayoutDashboard, Building2, Landmark, Users, LogOut, ShieldCheck, Clock, Calendar, Phone } from 'lucide-react';
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
+import { LayoutDashboard, Building2, Landmark, Users, LogOut, ShieldCheck, Clock, Calendar, ChevronDown, ArrowUp, ArrowDown, Settings, Edit3, Trash2, XCircle, FileText, Download } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const [banks, setBanks] = useState([]);
   const [firms, setFirms] = useState([]);
+  const [banks, setBanks] = useState([]);
   const [usersList, setUsersList] = useState([]);
-  const [form, setForm] = useState({});
+  const [selectedFirm, setSelectedFirm] = useState("All");
+  const [expandedBank, setExpandedBank] = useState(null);
   const [time, setTime] = useState(new Date());
+  const [form, setForm] = useState({});
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -24,127 +26,257 @@ export default function App() {
     return () => { clearInterval(timer); unsub(); };
   }, [user]);
 
-  const handleSave = async (coll) => {
-    try {
-      await addDoc(collection(db, coll), { ...form, createdAt: new Date() });
-      setForm({}); alert("Successfully Saved!");
-    } catch (e) { alert("Error Saving Data!"); }
-  };
-
   if (!user) return <LoginScreen />;
 
+  // Logic for Dashboard Visibility
+  const filteredBanks = banks.filter(b => {
+    const firmMatch = selectedFirm === "All" || b.linkedFirm === selectedFirm;
+    const hasBalance = parseFloat(b.balance) !== 0;
+    return firmMatch && hasBalance;
+  });
+
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: '#f0f2f5', position: 'fixed', top: 0, left: 0, fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: '#f4f7f6', position: 'fixed', top: 0, left: 0, fontFamily: "'Poppins', sans-serif" }}>
       
-      {/* SIDEBAR - LUXURY NAVY BLUE */}
-      <aside style={{ width: '280px', background: '#0a0e2e', color: 'white', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div style={{ padding: '40px 20px', textAlign: 'center', borderBottom: '1px solid #1a1e3e' }}>
-          <h1 style={{ color: '#d4af37', margin: 0, fontSize: '22px', letterSpacing: '2px' }}>BANKING PRO</h1>
-          <p style={{ fontSize: '10px', color: '#64748b', marginTop: '5px' }}>EXECUTIVE VERSION 2.0</p>
+      {/* SIDEBAR - ROYAL DARK BLUE */}
+      <aside style={{ width: '300px', background: '#0a0e2e', color: 'white', display: 'flex', flexDirection: 'column', boxShadow: '5px 0 25px rgba(0,0,0,0.3)', zIndex: 10 }}>
+        <div style={{ padding: '40px 25px', borderBottom: '1px solid rgba(212,175,55,0.2)' }}>
+          <h1 style={{ color: '#d4af37', margin: 0, fontSize: '20px', letterSpacing: '1px', fontWeight: '800' }}>BANKING PRO</h1>
+          <p style={{ fontSize: '10px', color: '#94a3b8', margin: '5px 0 0' }}>EXECUTIVE VERSION 2.0</p>
         </div>
-        <nav style={{ flex: 1, paddingTop: '20px' }}>
+
+        <nav style={{ flex: 1, paddingTop: '30px' }}>
           {[
             { id: 'Dashboard', icon: <LayoutDashboard size={20}/> },
             { id: 'Firm Master', icon: <Building2 size={20}/> },
             { id: 'Bank Master', icon: <Landmark size={20}/> },
-            { id: 'User Master', icon: <Users size={20}/> }
+            { id: 'User Master', icon: <Users size={20}/> },
+            { id: 'Setting', icon: <Settings size={20}/> }
           ].map(item => (
             <div key={item.id} onClick={() => setActiveTab(item.id)} style={{
-              padding: '18px 30px', display: 'flex', gap: '15px', cursor: 'pointer',
-              background: activeTab === item.id ? 'rgba(212,175,55,0.15)' : 'transparent',
+              padding: '18px 30px', display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer',
+              background: activeTab === item.id ? 'linear-gradient(90deg, rgba(212,175,55,0.2), transparent)' : 'transparent',
               color: activeTab === item.id ? '#d4af37' : '#94a3b8',
-              borderRight: activeTab === item.id ? '4px solid #d4af37' : 'none',
-              fontWeight: activeTab === item.id ? 'bold' : 'normal'
-            }}>{item.icon} {item.id}</div>
+              borderLeft: activeTab === item.id ? '4px solid #d4af37' : '4px solid transparent',
+              transition: '0.3s'
+            }}> {item.icon} <span style={{ fontWeight: activeTab === item.id ? 'bold' : '500' }}>{item.id}</span></div>
           ))}
         </nav>
-        {/* BRANDING FIXED AT BOTTOM */}
-        <div style={{ padding: '25px', textAlign: 'center', borderTop: '1px solid #1a1e3e', background: '#070a1f' }}>
-          <p style={{ color: '#d4af37', fontWeight: 'bold', margin: 0, fontSize: '14px' }}>SOFTVIEW TECHNOLOGIES</p>
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>+91 7972084304</span>
+
+        {/* BRANDING EXTREME LEFT BOTTOM */}
+        <div style={{ padding: '30px 25px', background: '#070a1f' }}>
+          <p style={{ fontSize: '10px', color: '#64748b', margin: 0, textTransform: 'uppercase' }}>Developed by</p>
+          <p style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '14px', margin: '2px 0' }}>SOFTVIEW TECHNOLOGIES</p>
+          <p style={{ color: '#94a3b8', fontSize: '12px' }}>+91 7972084304</p>
         </div>
       </aside>
 
-      {/* MAIN VIEW */}
+      {/* MAIN CONTENT AREA */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* HEADER WITH CLOCK & DATE */}
-        <header style={{ height: '80px', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px', borderBottom: '1px solid #e1e4e8' }}>
-          <h2 style={{ margin: 0, color: '#0a0e2e', textTransform: 'uppercase' }}>{activeTab}</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-             <div style={{ textAlign: 'right', color: '#0a0e2e', fontWeight: 'bold' }}>
-                <div style={{ fontSize: '16px' }}><Clock size={14} style={{ marginRight: '5px' }}/>{time.toLocaleTimeString()}</div>
-                <div style={{ fontSize: '12px', color: '#64748b' }}><Calendar size={12}/> {time.toLocaleDateString()}</div>
-             </div>
-             <button onClick={() => signOut(auth)} style={{ padding: '10px 20px', background: '#ff4d4d', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>LOGOUT</button>
+        
+        {/* TOP HEADER - CLOCK & LOGOUT */}
+        <header style={{ height: '85px', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+          <div style={{ color: '#0a0e2e', fontWeight: 'bold', fontSize: '18px' }}>{activeTab}</div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#0a0e2e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Clock size={16} color="#d4af37"/> {time.toLocaleTimeString()}
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>{time.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+            </div>
+            <div style={{ width: '1px', height: '30px', background: '#ddd' }}></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#0a0e2e' }}>{user?.email?.split('@')[0].toUpperCase()}</span>
+              <button onClick={() => signOut(auth)} style={{ padding: '8px 15px', background: '#fff1f1', color: '#ff4d4d', border: '1px solid #ff4d4d', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <LogOut size={14}/> LOGOUT
+              </button>
+            </div>
           </div>
         </header>
 
         <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-          {/* DASHBOARD - NO BLANK ISSUE */}
+          
+          {/* 1. DASHBOARD WITH FILTERS */}
           {activeTab === "Dashboard" && (
-            <div style={{ background: 'white', padding: '30px', borderRadius: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', borderTop: '5px solid #d4af37' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead style={{ background: '#f8fafc' }}>
-                  <tr><th style={{ padding: '15px', textAlign: 'left' }}>BANK NAME</th><th style={{ padding: '15px', textAlign: 'left' }}>A/C NO</th><th style={{ padding: '15px', textAlign: 'right' }}>BALANCE</th></tr>
-                </thead>
-                <tbody>
-                  {banks.map(b => (
-                    <tr key={b.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '15px' }}>{b.bankName}</td><td style={{ padding: '15px' }}>{b.accNo}</td>
-                      <td style={{ padding: '15px', textAlign: 'right', fontWeight: '900' }}>₹ {b.balance} Cr.</td>
+            <div style={{ animation: 'fadeIn 0.5s ease' }}>
+              <div style={{ background: 'white', padding: '25px', borderRadius: '15px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+                <label style={{ fontWeight: 'bold', color: '#0a0e2e' }}>SELECT FIRM HERE:</label>
+                <select onChange={(e) => setSelectedFirm(e.target.value)} style={{ padding: '10px 20px', borderRadius: '10px', border: '2px solid #f0f2f5', outline: 'none', minWidth: '200px' }}>
+                  <option value="All">All Firms</option>
+                  {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                </select>
+              </div>
+
+              <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 15px 50px rgba(0,0,0,0.05)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ background: '#0a0e2e', color: '#d4af37' }}>
+                    <tr>
+                      <th style={{ padding: '20px', textAlign: 'left' }}>BANK NAME</th>
+                      <th style={{ padding: '20px', textAlign: 'left' }}>BANK A/C NO.</th>
+                      <th style={{ padding: '20px', textAlign: 'right' }}>CLOSING BALANCE</th>
+                      <th style={{ padding: '20px', textAlign: 'center' }}>ACTION</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredBanks.map(b => (
+                      <React.Fragment key={b.id}>
+                        <tr style={{ borderBottom: '1px solid #eee', background: b.closeDate ? '#fff8f8' : 'white' }}>
+                          <td style={{ padding: '20px', fontWeight: 'bold' }}>
+                            {b.bankName} {b.closeDate && <span style={{fontSize: '10px', color: 'red', marginLeft: '10px'}}>(CLOSED)</span>}
+                          </td>
+                          <td style={{ padding: '20px' }}>{b.accNo}</td>
+                          <td style={{ padding: '20px', textAlign: 'right', fontWeight: '900', color: '#0a0e2e' }}>₹ {b.balance} Cr/Dr</td>
+                          <td style={{ padding: '20px', textAlign: 'center' }}>
+                            <button onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37' }}>
+                              <ChevronDown size={24}/>
+                            </button>
+                          </td>
+                        </tr>
+                        {expandedBank === b.id && (
+                          <tr>
+                            <td colSpan="4" style={{ background: '#fcfdfd', padding: '30px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#0a0e2e', color: '#d4af37', border: 'none' }}>Daily</button>
+                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#f0f2f5', border: 'none' }}>Monthly</button>
+                                  <button style={{ padding: '8px 15px', borderRadius: '5px', background: '#f0f2f5', border: 'none' }}>Period</button>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                  <button style={{ background: '#217346', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', display: 'flex', gap: '5px' }}><Download size={14}/> Excel</button>
+                                  <button style={{ background: '#e11d48', color: 'white', padding: '8px 15px', border: 'none', borderRadius: '5px', display: 'flex', gap: '5px' }}><FileText size={14}/> PDF</button>
+                                </div>
+                              </div>
+                              <table style={{ width: '100%', background: 'white', border: '1px solid #eee' }}>
+                                <thead style={{ background: '#f8fafc' }}>
+                                  <tr><th>Date</th><th>Particular</th><th>Receipt</th><th>Payment</th><th>Balance</th></tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>08-May-26</td>
+                                    <td>Office Rent</td>
+                                    <td>-</td>
+                                    <td style={{ color: 'red' }}>₹ 50,000 <ArrowUp size={12} inline/></td>
+                                    <td>₹ 4,50,000</td>
+                                  </tr>
+                                  <tr>
+                                    <td>08-May-26</td>
+                                    <td>Service Fee</td>
+                                    <td style={{ color: 'green' }}>₹ 1,20,000 <ArrowDown size={12} inline/></td>
+                                    <td>-</td>
+                                    <td>₹ 5,70,000</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
-          {/* FIRM MASTER - ADDRESS FULL WIDTH */}
+          {/* 2. FIRM MASTER */}
           {activeTab === "Firm Master" && (
-            <div style={{ background: 'white', padding: '35px', borderRadius: '15px', borderTop: '5px solid #d4af37' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <input placeholder="Firm Name" style={{ padding: '15px', borderRadius: '10px', border: '1px solid #ddd' }} onChange={e => setForm({...form, name: e.target.value})} />
-                <input placeholder="GST Number" style={{ padding: '15px', borderRadius: '10px', border: '1px solid #ddd' }} onChange={e => setForm({...form, gst: e.target.value})} />
-                <input placeholder="Office Address" style={{ padding: '15px', borderRadius: '10px', border: '1px solid #ddd', gridColumn: 'span 2' }} onChange={e => setForm({...form, address: e.target.value})} />
-                <button onClick={() => handleSave("firms")} style={{ gridColumn: 'span 2', padding: '15px', background: '#0a0e2e', color: '#d4af37', fontWeight: 'bold', borderRadius: '10px' }}>SAVE FIRM</button>
+             <div style={{ animation: 'fadeIn 0.5s ease' }}>
+                <div style={{ background: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', borderTop: '5px solid #d4af37' }}>
+                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                      <input placeholder="Firm Name" style={inputStyle} onChange={e => setForm({...form, name: e.target.value})} />
+                      <input placeholder="GST No" style={inputStyle} onChange={e => setForm({...form, gst: e.target.value})} />
+                      <input placeholder="Office Address" style={inputStyle} onChange={e => setForm({...form, address: e.target.value})} />
+                   </div>
+                   <button onClick={() => addDoc(collection(db, "firms"), form)} style={goldBtn}>SAVE FIRM MASTER</button>
+                </div>
+                
+                <h3 style={{ margin: '40px 0 20px', color: '#0a0e2e' }}>Firm History</h3>
+                <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead style={{ background: '#f8fafc' }}>
+                      <tr><th style={thStyle}>Firm Name</th><th style={thStyle}>GST</th><th style={thStyle}>Address</th><th style={thStyle}>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {firms.map(f => (
+                        <tr key={f.id} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={tdStyle}>{f.name}</td>
+                          <td style={tdStyle}>{f.gst}</td>
+                          <td style={tdStyle}>{f.address}</td>
+                          <td style={tdStyle}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                              <Edit3 size={18} color="#d4af37" style={{ cursor: 'pointer' }} />
+                              <Trash2 size={18} color="#ff4d4d" style={{ cursor: 'pointer' }} />
+                              <XCircle size={18} color="#64748b" style={{ cursor: 'pointer' }} title="Close Firm" />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+             </div>
+          )}
+
+          {/* 3. USER MASTER */}
+          {activeTab === "User Master" && (
+            <div style={{ animation: 'fadeIn 0.5s ease' }}>
+              <div style={{ background: 'white', padding: '40px', borderRadius: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', borderTop: '5px solid #d4af37' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                  <input placeholder="User Code" style={inputStyle} />
+                  <input placeholder="User Name" style={inputStyle} />
+                  <input placeholder="User Email" style={inputStyle} />
+                  <input placeholder="Mobile" style={inputStyle} />
+                  <select style={inputStyle}>
+                    <option>Select Role</option>
+                    <option>Admin</option>
+                    <option>Operator</option>
+                    <option>Viewer</option>
+                  </select>
+                </div>
+                <button style={goldBtn}>SAVE USER MASTER</button>
               </div>
             </div>
           )}
 
-          {/* USER MASTER - 6 FIELDS RESTORED */}
-          {activeTab === "User Master" && (
-            <div style={{ background: 'white', padding: '35px', borderRadius: '15px', borderTop: '5px solid #d4af37' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-                <input placeholder="Full Name" style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, uName: e.target.value})} />
-                <input placeholder="Email" style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, uEmail: e.target.value})} />
-                <input placeholder="Mobile" style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, uMobile: e.target.value})} />
-                <select style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, role: e.target.value})}><option value="">Role</option><option value="Admin">Admin</option></select>
-                <input type="password" placeholder="Pass" style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, pass: e.target.value})} />
-                <input type="password" placeholder="Confirm" style={{ padding: '12px', border: '1px solid #ddd' }} onChange={e => setForm({...form, cPass: e.target.value})} />
-                <button onClick={() => handleSave("users")} style={{ gridColumn: 'span 3', padding: '15px', background: '#0a0e2e', color: '#d4af37', fontWeight: 'bold' }}>AUTHORIZE</button>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
   );
 }
 
+// PREMIUM LOGIN SCREEN
 function LoginScreen() {
   const [e, setE] = useState(""); const [p, setP] = useState("");
-  const login = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Login Failed")); };
+  const login = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Invalid Access!")); };
+  
   return (
-    <div style={{ height: '100vh', width: '100vw', background: '#0a0e2e', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'fixed' }}>
-      <div style={{ background: 'white', padding: '50px', borderRadius: '20px', textAlign: 'center', width: '380px' }}>
-        <ShieldCheck size={60} color="#d4af37" style={{ marginBottom: '20px' }} />
-        <h2 style={{ color: '#0a0e2e' }}>BANKING LOGIN</h2>
-        <form onSubmit={login} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '30px' }}>
-          <input type="email" placeholder="EMAIL" style={{ padding: '15px' }} required onChange={v => setE(v.target.value)} />
-          <input type="password" placeholder="PASSWORD" style={{ padding: '15px' }} required onChange={v => setP(v.target.value)} />
-          <button type="submit" style={{ padding: '15px', background: '#0a0e2e', color: '#d4af37', fontWeight: 'bold' }}>LOGIN</button>
+    <div style={{ height: '100vh', width: '100vw', background: '#0a0e2e', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ background: 'white', padding: '60px', borderRadius: '30px', textAlign: 'center', width: '450px', boxShadow: '0 25px 80px rgba(0,0,0,0.5)', border: '1px solid rgba(212,175,55,0.3)' }}>
+        <div style={{ width: '80px', height: '80px', background: '#0a0e2e', borderRadius: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 30px', border: '2px solid #d4af37' }}>
+          <ShieldCheck size={40} color="#d4af37" />
+        </div>
+        <h2 style={{ color: '#0a0e2e', margin: '0 0 10px', fontSize: '26px', fontWeight: '900' }}>BANKING PRO</h2>
+        <p style={{ color: '#d4af37', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '40px' }}>SECURE ACCESS PORTAL</p>
+        
+        <form onSubmit={login} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <input type="email" placeholder="LOGIN ID" style={inputStyle} required onChange={v => setE(v.target.value)} />
+          <input type="password" placeholder="PASSWORD" style={inputStyle} required onChange={v => setP(v.target.value)} />
+          <button type="submit" style={{ padding: '18px', background: '#0a0e2e', color: '#d4af37', fontWeight: '900', border: '1px solid #d4af37', borderRadius: '15px', cursor: 'pointer', fontSize: '16px', marginTop: '10px' }}>LOG IN TO SYSTEM</button>
         </form>
+        
+        <div style={{ marginTop: '50px', borderTop: '1px solid #eee', paddingTop: '30px' }}>
+          <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Developed by</p>
+          <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#0a0e2e', margin: '5px 0' }}>SOFTVIEW TECHNOLOGIES</p>
+          <p style={{ fontSize: '12px', color: '#d4af37' }}>+91 7972084304</p>
+        </div>
       </div>
     </div>
   );
 }
+
+// STYLES
+const inputStyle = { padding: '15px', borderRadius: '12px', border: '2px solid #f0f2f5', outline: 'none', fontSize: '14px', background: '#fcfdfd' };
+const goldBtn = { width: '100%', padding: '18px', background: '#0a0e2e', color: '#d4af37', fontWeight: '900', border: '1px solid #d4af37', borderRadius: '12px', cursor: 'pointer', marginTop: '20px' };
+const thStyle = { padding: '15px', textAlign: 'left', color: '#64748b', fontSize: '12px', textTransform: 'uppercase' };
+const tdStyle = { padding: '15px', fontSize: '14px', color: '#0a0e2e', fontWeight: '500' };
