@@ -1,47 +1,95 @@
+/* --- Global & Luxury Variables --- */
 :root {
   --navy: #0a0e2e;
   --gold: #d4af37;
   --light-gold: #f4cf6e;
   --white: #ffffff;
+  --bg-light: #f8fafc;
+  --danger: #e11d48;
 }
 
-body { margin: 0; font-family: 'Inter', sans-serif; background: #f0f2f5; }
+body { margin: 0; font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg-light); }
 
-/* LOGIN PAGE - DARK BLUE & GOLD */
-.login-page { height: 100vh; background: linear-gradient(135deg, #0a0e2e 0%, #1a237e 100%); display: flex; justify-content: center; align-items: center; }
-.login-container { background: rgba(255, 255, 255, 0.05); padding: 50px; border-radius: 20px; border: 1px solid var(--gold); text-align: center; color: white; width: 400px; backdrop-filter: blur(10px); }
-.login-brand h1 { color: var(--gold); letter-spacing: 4px; margin-bottom: 5px; }
-.login-form input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--gold); background: transparent; color: white; box-sizing: border-box;}
-.login-form button { width: 100%; padding: 15px; background: var(--gold); color: var(--navy); font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; }
-.login-footer { margin-top: 30px; font-size: 11px; color: #aaa; }
+/* --- INTERNAL LUXURY LAYOUT --- */
+.luxury-app { display: flex; height: 100vh; overflow: hidden; }
 
-/* INTERNAL LUXURY LAYOUT */
-.luxury-app { display: flex; height: 100vh; }
-.sidebar { width: 260px; background: var(--navy); color: white; padding: 30px 0; display: flex; flex-direction: column; }
-.sidebar-brand { padding: 0 30px 40px; text-align: center; }
-.logo-gold { font-size: 24px; font-weight: bold; color: var(--gold); letter-spacing: 2px; }
-.premium-tag { font-size: 10px; color: var(--light-gold); letter-spacing: 1px; }
+/* Sidebar Styling */
+.sidebar { width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
+.sidebar-brand { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.logo-gold { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 2px; }
+.premium-tag { font-size: 9px; color: var(--light-gold); letter-spacing: 1.5px; opacity: 0.8; }
 
-.nav-link { padding: 15px 30px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; color: #cbd5e1; }
-.nav-link.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-left: 5px solid var(--gold); }
-.sidebar-footer { margin-top: auto; padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; }
+.nav-menu { flex: 1; padding: 20px 0; }
+.nav-link { padding: 14px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: #94a3b8; font-size: 14px; }
+.nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+.nav-link.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-right: 4px solid var(--gold); font-weight: 600; }
 
-/* MAIN CONTENT */
-.main-content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; }
-.premium-header { padding: 20px 40px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-.u-name { font-weight: bold; color: var(--navy); display: block; }
-.u-clock { font-size: 12px; color: #64748b; }
+/* --- SOBER BRANDING (Sidebar Bottom) --- */
+.sidebar-branding-sober {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  text-align: center;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+}
+.sv-dev-text { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+.sv-brand-gold { font-size: 11px; color: var(--gold); font-weight: bold; margin: 3px 0; }
+.sv-contact-line { font-size: 10px; color: #475569; margin: 0; }
 
-.luxury-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 3px solid var(--gold); }
-.luxury-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.luxury-table th { background: var(--navy); color: var(--gold); padding: 15px; text-align: left; }
-.luxury-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+/* --- HEADER STYLING --- */
+.premium-header { padding: 15px 40px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.page-title { font-weight: 700; color: var(--navy); letter-spacing: 1px; }
+.header-right { display: flex; align-items: center; gap: 25px; }
+.user-profile-box { text-align: right; border-right: 1px solid #e2e8f0; padding-right: 20px; }
+.u-name-top { font-weight: 700; color: var(--navy); font-size: 14px; display: block; }
+.u-time-top { font-size: 11px; color: #64748b; font-family: monospace; }
 
-.gold-text { color: #b45309; font-weight: bold; }
-.btn-gold-save { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 12px 30px; border-radius: 8px; cursor: pointer; }
-.icon-gold { color: var(--gold); cursor: pointer; margin-right: 10px; }
+/* Logout Button in Header */
+.header-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.header-logout-btn:hover { background: var(--danger); color: white; transform: translateY(-1px); }
 
-.green-text { color: green; font-weight: bold; }
-.red-text { color: red; font-weight: bold; }
-.mt-20 { margin-top: 20px; }
-.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+/* --- CONTENT AREA --- */
+.content-area { flex: 1; padding: 30px; overflow-y: auto; background: #f1f5f9; }
+.luxury-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 20px; border-top: 4px solid var(--gold); }
+
+/* Form Elements */
+.luxury-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; }
+input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
+
+.btn-gold-action { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+.btn-gold-action:hover { background: var(--gold); color: var(--navy); }
+
+/* Table Styling */
+.luxury-table { width: 100%; border-collapse: collapse; }
+.luxury-table th { text-align: left; padding: 15px; background: #f8fafc; color: #475569; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+.luxury-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #1e293b; }
+.balance-gold { color: #b45309; font-weight: 800; font-size: 15px; }
+
+/* Ledger Dropdown */
+.ledger-container-gold { background: #fafafa; padding: 20px; border-radius: 10px; border: 1px dashed var(--gold); margin: 10px; }
+.tool-btn { padding: 6px 12px; border-radius: 4px; border: none; margin-right: 10px; cursor: pointer; font-weight: 600; font-size: 12px; }
+.excel { background: #16a34a; color: white; }
+.pdf { background: #dc2626; color: white; }
+
+/* --- LOGIN PAGE STYLING --- */
+.login-luxury-bg { height: 100vh; background: radial-gradient(circle at center, #1a237e 0%, #0a0e2e 100%); display: flex; justify-content: center; align-items: center; }
+.login-gold-frame { background: rgba(255, 255, 255, 0.03); padding: 50px; border-radius: 24px; border: 1px solid var(--gold); width: 380px; backdrop-filter: blur(15px); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+.login-header-gold h1 { color: var(--gold); letter-spacing: 5px; margin: 0; font-size: 28px; }
+.login-header-gold span { color: var(--light-gold); font-size: 10px; letter-spacing: 2px; }
+.login-form-gold { margin-top: 30px; }
+.login-form-gold input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.3); color: white; margin-bottom: 15px; box-sizing: border-box; }
+.login-form-gold button { width: 100%; padding: 15px; background: var(--gold); color: var(--navy); border: none; border-radius: 8px; font-weight: 800; cursor: pointer; letter-spacing: 1px; }
+.login-gold-footer { margin-top: 30px; font-size: 10px; color: #64748b; text-align: center; }
