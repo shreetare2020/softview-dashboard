@@ -1,5 +1,4 @@
 // ============================ APP.JS ============================
-// FULL PREMIUM BANKING PRO WITH FIREBASE + LEDGER EXPAND
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
@@ -10,86 +9,59 @@ import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
 } from "firebase/firestore";
+
+import * as XLSX from "xlsx";
+
+import { saveAs } from "file-saver";
+
+import jsPDF from "jspdf";
+
+import autoTable from "jspdf-autotable";
 
 function App() {
 
   // ================= LOGIN =================
 
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  // ================= MENU =================
-
-  const [activeMenu, setActiveMenu] =
-    useState("dashboard");
+  const [loggedIn, setLoggedIn] =
+    useState(true);
 
   // ================= CLOCK =================
 
   const [time, setTime] =
     useState(new Date());
 
+  // ================= MENU =================
+
+  const [activeMenu, setActiveMenu] =
+    useState("dashboard");
+
   // ================= FIRMS =================
-
-  const [firmName, setFirmName] =
-    useState("");
-
-  const [gstNo, setGstNo] =
-    useState("");
-
-  const [officeAddress, setOfficeAddress] =
-    useState("");
 
   const [firms, setFirms] =
     useState([]);
 
-  // ================= BANKS =================
-
-  const [bankName, setBankName] =
+  const [firmName, setFirmName] =
     useState("");
 
-  const [bankBranch, setBankBranch] =
+  // ================= BANKS =================
+
+  const [banks, setBanks] =
+    useState([]);
+
+  const [bankName, setBankName] =
     useState("");
 
   const [accountNo, setAccountNo] =
     useState("");
 
-  const [ifsc, setIfsc] =
+  const [openingBalance,
+    setOpeningBalance] =
     useState("");
 
-  const [openingBalance, setOpeningBalance] =
+  const [linkedFirm,
+    setLinkedFirm] =
     useState("");
-
-  const [drcr, setDrcr] =
-    useState("DR");
-
-  const [linkedFirm, setLinkedFirm] =
-    useState("");
-
-  const [banks, setBanks] =
-    useState([]);
-
-  // ================= USERS =================
-
-  const [userCode, setUserCode] =
-    useState("");
-
-  const [userName, setUserName] =
-    useState("");
-
-  const [email, setEmail] =
-    useState("");
-
-  const [mobile, setMobile] =
-    useState("");
-
-  const [role, setRole] =
-    useState("Admin");
-
-  const [users, setUsers] =
-    useState([]);
 
   // ================= LEDGER =================
 
@@ -98,32 +70,39 @@ function App() {
 
   // ================= FILTER =================
 
-  const [selectedFirm, setSelectedFirm] =
+  const [selectedFirm,
+    setSelectedFirm] =
     useState("All Firms");
 
-  // ================= LEDGER FILTER =================
-
-  const [expandedBank, setExpandedBank] =
+  const [expandedBank,
+    setExpandedBank] =
     useState(null);
 
-  const [ledgerFilter, setLedgerFilter] =
+  const [ledgerFilter,
+    setLedgerFilter] =
     useState("daily");
 
-  const [fromDate, setFromDate] =
+  const [fromDate,
+    setFromDate] =
     useState("");
 
-  const [toDate, setToDate] =
+  const [toDate,
+    setToDate] =
     useState("");
 
   // ================= CLOCK =================
 
   useEffect(() => {
 
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
+    const interval =
+      setInterval(() => {
 
-    return () => clearInterval(interval);
+        setTime(new Date());
+
+      }, 1000);
+
+    return () =>
+      clearInterval(interval);
 
   }, []);
 
@@ -133,7 +112,6 @@ function App() {
 
     fetchFirms();
     fetchBanks();
-    fetchUsers();
     fetchLedger();
 
   }, []);
@@ -142,14 +120,16 @@ function App() {
 
   const fetchFirms = async () => {
 
-    const snapshot = await getDocs(
-      collection(db, "firms")
-    );
+    const snapshot =
+      await getDocs(
+        collection(db, "firms")
+      );
 
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const data =
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
     setFirms(data);
   };
@@ -158,46 +138,34 @@ function App() {
 
   const fetchBanks = async () => {
 
-    const snapshot = await getDocs(
-      collection(db, "banks")
-    );
+    const snapshot =
+      await getDocs(
+        collection(db, "banks")
+      );
 
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const data =
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
     setBanks(data);
-  };
-
-  // ================= FETCH USERS =================
-
-  const fetchUsers = async () => {
-
-    const snapshot = await getDocs(
-      collection(db, "users")
-    );
-
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setUsers(data);
   };
 
   // ================= FETCH LEDGER =================
 
   const fetchLedger = async () => {
 
-    const snapshot = await getDocs(
-      collection(db, "ledger")
-    );
+    const snapshot =
+      await getDocs(
+        collection(db, "ledger")
+      );
 
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const data =
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
     setLedger(data);
   };
@@ -206,20 +174,14 @@ function App() {
 
   const saveFirm = async () => {
 
-    if (!firmName)
-      return alert("Enter Firm Name");
-
-    await addDoc(collection(db, "firms"), {
-      firmName,
-      gstNo,
-      officeAddress,
-      status: "ACTIVE",
-      closeDate: "",
-    });
+    await addDoc(
+      collection(db, "firms"),
+      {
+        firmName,
+      }
+    );
 
     setFirmName("");
-    setGstNo("");
-    setOfficeAddress("");
 
     fetchFirms();
 
@@ -230,101 +192,23 @@ function App() {
 
   const saveBank = async () => {
 
-    if (!bankName)
-      return alert("Enter Bank Name");
-
-    await addDoc(collection(db, "banks"), {
-      bankName,
-      bankBranch,
-      accountNo,
-      ifsc,
-      openingBalance,
-      drcr,
-      linkedFirm,
-      status: "ACTIVE",
-      closeDate: "",
-    });
+    await addDoc(
+      collection(db, "banks"),
+      {
+        bankName,
+        accountNo,
+        openingBalance,
+        linkedFirm,
+      }
+    );
 
     setBankName("");
-    setBankBranch("");
     setAccountNo("");
-    setIfsc("");
     setOpeningBalance("");
-    setLinkedFirm("");
 
     fetchBanks();
 
     alert("Bank Saved");
-  };
-
-  // ================= SAVE USER =================
-
-  const saveUser = async () => {
-
-    await addDoc(collection(db, "users"), {
-      userCode,
-      userName,
-      email,
-      mobile,
-      role,
-      status: "ACTIVE",
-    });
-
-    setUserCode("");
-    setUserName("");
-    setEmail("");
-    setMobile("");
-
-    fetchUsers();
-
-    alert("User Saved");
-  };
-
-  // ================= DELETE =================
-
-  const deleteFirm = async (id) => {
-
-    await deleteDoc(doc(db, "firms", id));
-
-    fetchFirms();
-  };
-
-  const deleteBank = async (id) => {
-
-    await deleteDoc(doc(db, "banks", id));
-
-    fetchBanks();
-  };
-
-  const deleteUser = async (id) => {
-
-    await deleteDoc(doc(db, "users", id));
-
-    fetchUsers();
-  };
-
-  // ================= CLOSE =================
-
-  const closeFirm = async (id) => {
-
-    await updateDoc(doc(db, "firms", id), {
-      status: "CLOSED",
-      closeDate:
-        new Date().toLocaleDateString(),
-    });
-
-    fetchFirms();
-  };
-
-  const closeBank = async (id) => {
-
-    await updateDoc(doc(db, "banks", id), {
-      status: "CLOSED",
-      closeDate:
-        new Date().toLocaleDateString(),
-    });
-
-    fetchBanks();
   };
 
   // ================= FILTERED BANKS =================
@@ -334,56 +218,237 @@ function App() {
       ? banks
       : banks.filter(
           (item) =>
-            item.linkedFirm === selectedFirm
+            item.linkedFirm ===
+            selectedFirm
         );
 
   // ================= FILTER LEDGER =================
 
-  const getFilteredLedger = (bankName) => {
+  const getFilteredLedger =
+    (bankName) => {
 
-    const today = new Date();
+      const today =
+        new Date();
 
-    return ledger.filter((item) => {
+      return ledger.filter(
+        (item) => {
 
-      if (item.bankName !== bankName)
-        return false;
+          if (
+            item.bankName !== bankName
+          )
+            return false;
 
-      const itemDate =
-        new Date(item.date);
+          const itemDate =
+            new Date(item.date);
 
-      if (ledgerFilter === "daily") {
+          if (
+            ledgerFilter ===
+            "daily"
+          ) {
 
-        return (
-          itemDate.toDateString() ===
-          today.toDateString()
+            return (
+              itemDate.toDateString() ===
+              today.toDateString()
+            );
+          }
+
+          if (
+            ledgerFilter ===
+            "monthly"
+          ) {
+
+            return (
+              itemDate.getMonth() ===
+                today.getMonth() &&
+              itemDate.getFullYear() ===
+                today.getFullYear()
+            );
+          }
+
+          if (
+            ledgerFilter ===
+              "period" &&
+            fromDate &&
+            toDate
+          ) {
+
+            return (
+              itemDate >=
+                new Date(
+                  fromDate
+                ) &&
+              itemDate <=
+                new Date(toDate)
+            );
+          }
+
+          return true;
+        }
+      );
+    };
+
+  // ================= EXCEL EXPORT =================
+
+  const exportExcel =
+    (bankName) => {
+
+      const data =
+        getFilteredLedger(
+          bankName
         );
-      }
 
-      if (ledgerFilter === "monthly") {
+      const formattedData =
+        data.map((item) => ({
 
-        return (
-          itemDate.getMonth() ===
-            today.getMonth() &&
-          itemDate.getFullYear() ===
-            today.getFullYear()
+          Date: item.date,
+
+          "Opening Balance":
+            item.openingBalance,
+
+          Particular:
+            item.particular,
+
+          Receipt:
+            item.receipt,
+
+          Payment:
+            item.payment,
+
+          "Closing Balance":
+            item.closingBalance,
+
+        }));
+
+      const worksheet =
+        XLSX.utils.json_to_sheet(
+          formattedData
         );
-      }
 
-      if (
-        ledgerFilter === "period" &&
-        fromDate &&
-        toDate
-      ) {
+      worksheet["!cols"] = [
 
-        return (
-          itemDate >= new Date(fromDate) &&
-          itemDate <= new Date(toDate)
-        );
-      }
+        { wch: 15 },
 
-      return true;
-    });
-  };
+        { wch: 20 },
+
+        { wch: 35 },
+
+        { wch: 15 },
+
+        { wch: 15 },
+
+        { wch: 20 },
+
+      ];
+
+      const workbook =
+        XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Ledger"
+      );
+
+      const excelBuffer =
+        XLSX.write(workbook, {
+
+          bookType: "xlsx",
+
+          type: "array",
+
+        });
+
+      const fileData =
+        new Blob([excelBuffer], {
+
+          type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+
+        });
+
+      saveAs(
+        fileData,
+        `${bankName}_Ledger.xlsx`
+      );
+    };
+
+  // ================= PDF EXPORT =================
+
+  const exportPDF =
+    (bankName) => {
+
+      const doc =
+        new jsPDF();
+
+      doc.setFontSize(18);
+
+      doc.text(
+        `${bankName} Ledger`,
+        14,
+        20
+      );
+
+      autoTable(doc, {
+
+        startY: 30,
+
+        head: [[
+
+          "Date",
+
+          "Opening",
+
+          "Particular",
+
+          "Receipt",
+
+          "Payment",
+
+          "Closing",
+
+        ]],
+
+        body:
+          getFilteredLedger(
+            bankName
+          ).map((item) => [
+
+            item.date,
+
+            item.openingBalance,
+
+            item.particular,
+
+            item.receipt,
+
+            item.payment,
+
+            item.closingBalance,
+
+          ]),
+
+        headStyles: {
+
+          fillColor: [255, 215, 0],
+
+          textColor: [0, 0, 0],
+
+        },
+
+        bodyStyles: {
+
+          fillColor: [18, 44, 71],
+
+          textColor: [255, 255, 255],
+
+        },
+
+      });
+
+      doc.save(
+        `${bankName}_Ledger.pdf`
+      );
+    };
 
   // ================= LOGIN PAGE =================
 
@@ -397,18 +462,13 @@ function App() {
 
           <h1>BANKING PRO</h1>
 
-          <h3>
-            Executive Version 2.0
-          </h3>
-
           <input
-            type="text"
             placeholder="Login ID"
           />
 
           <input
-            type="password"
             placeholder="Password"
+            type="password"
           />
 
           <button
@@ -418,18 +478,6 @@ function App() {
           >
             LOGIN
           </button>
-
-          <div className="developer">
-
-            Developed By
-            <br />
-
-            SOFTVIEW TECHNOLOGIES
-            <br />
-
-            +91 7972084304
-
-          </div>
 
         </div>
 
@@ -447,71 +495,33 @@ function App() {
 
       <div className="sidebar">
 
-        <div>
+        <h1>BANKING PRO</h1>
 
-          <div className="logo">
+        <button
+          onClick={() =>
+            setActiveMenu(
+              "dashboard"
+            )
+          }
+        >
+          Dashboard
+        </button>
 
-            <h1>BANKING PRO</h1>
+        <button
+          onClick={() =>
+            setActiveMenu("firm")
+          }
+        >
+          Firm Master
+        </button>
 
-            <p>
-              Executive Version 2.0
-            </p>
-
-          </div>
-
-          <button
-            onClick={() =>
-              setActiveMenu("dashboard")
-            }
-          >
-            Dashboard
-          </button>
-
-          <button
-            onClick={() =>
-              setActiveMenu("firm")
-            }
-          >
-            Firm Master
-          </button>
-
-          <button
-            onClick={() =>
-              setActiveMenu("bank")
-            }
-          >
-            Bank Master
-          </button>
-
-          <button
-            onClick={() =>
-              setActiveMenu("user")
-            }
-          >
-            User Master
-          </button>
-
-          <button
-            onClick={() =>
-              setActiveMenu("setting")
-            }
-          >
-            Settings
-          </button>
-
-        </div>
-
-        <div className="branding">
-
-          Developed By
-          <br />
-
-          SOFTVIEW TECHNOLOGIES
-          <br />
-
-          +91 7972084304
-
-        </div>
+        <button
+          onClick={() =>
+            setActiveMenu("bank")
+          }
+        >
+          Bank Master
+        </button>
 
       </div>
 
@@ -523,32 +533,16 @@ function App() {
 
         <div className="header">
 
-          <div className="welcome">
+          <h2>
             Welcome To Banking Pro
-          </div>
+          </h2>
 
-          <div className="right-header">
+          <div className="clock">
 
-            <div className="clock">
+            {time.toLocaleDateString()}
+            <br />
 
-              Admin User
-              <br />
-
-              {time.toLocaleDateString()}
-              <br />
-
-              {time.toLocaleTimeString()}
-
-            </div>
-
-            <button
-              className="logout-btn"
-              onClick={() =>
-                setLoggedIn(false)
-              }
-            >
-              Logout
-            </button>
+            {time.toLocaleTimeString()}
 
           </div>
 
@@ -556,7 +550,8 @@ function App() {
 
         {/* DASHBOARD */}
 
-        {activeMenu === "dashboard" && (
+        {activeMenu ===
+          "dashboard" && (
 
           <div className="card">
 
@@ -577,22 +572,20 @@ function App() {
                   All Firms
                 </option>
 
-                {firms
-                  .filter(
-                    (item) =>
-                      item.status ===
-                      "ACTIVE"
-                  )
-                  .map((item) => (
+                {firms.map(
+                  (item) => (
 
                     <option
                       key={item.id}
-                      value={item.firmName}
+                      value={
+                        item.firmName
+                      }
                     >
                       {item.firmName}
                     </option>
 
-                  ))}
+                  )
+                )}
 
               </select>
 
@@ -608,13 +601,11 @@ function App() {
 
                   <th>Firm</th>
 
-                  <th>Bank Name</th>
+                  <th>Bank</th>
 
-                  <th>Account No</th>
+                  <th>Account</th>
 
-                  <th>Closing Balance</th>
-
-                  <th>Status</th>
+                  <th>Balance</th>
 
                 </tr>
 
@@ -622,289 +613,301 @@ function App() {
 
               <tbody>
 
-                {filteredBanks.map((item) => (
+                {filteredBanks.map(
+                  (item) => (
 
-                  <React.Fragment
-                    key={item.id}
-                  >
-
-                    {/* BANK ROW */}
-
-                    <tr>
-
-                      <td>
-
-                        <button
-                          className="expand-btn"
-                          onClick={() =>
-                            setExpandedBank(
-                              expandedBank ===
-                                item.bankName
-                                ? null
-                                : item.bankName
-                            )
-                          }
-                        >
-
-                          {expandedBank ===
-                          item.bankName
-                            ? "▲"
-                            : "▼"}
-
-                        </button>
-
-                      </td>
-
-                      <td>
-                        {item.linkedFirm}
-                      </td>
-
-                      <td>
-                        {item.bankName}
-                      </td>
-
-                      <td>
-                        {item.accountNo}
-                      </td>
-
-                      <td>
-                        ₹{" "}
-                        {item.openingBalance}
-                      </td>
-
-                      <td>
-                        {item.status}
-                      </td>
-
-                    </tr>
-
-                    {/* LEDGER */}
-
-                    {expandedBank ===
-                      item.bankName && (
+                    <React.Fragment
+                      key={item.id}
+                    >
 
                       <tr>
 
-                        <td colSpan="6">
+                        <td>
 
-                          <div className="ledger-box">
-
-                            {/* FILTERS */}
-
-                            <div className="ledger-top">
-
-                              <div className="ledger-buttons">
-
-                                <button
-                                  className={
-                                    ledgerFilter ===
-                                    "daily"
-                                      ? "active-filter"
-                                      : ""
-                                  }
-                                  onClick={() =>
-                                    setLedgerFilter(
-                                      "daily"
-                                    )
-                                  }
-                                >
-                                  Daily
-                                </button>
-
-                                <button
-                                  className={
-                                    ledgerFilter ===
-                                    "monthly"
-                                      ? "active-filter"
-                                      : ""
-                                  }
-                                  onClick={() =>
-                                    setLedgerFilter(
-                                      "monthly"
-                                    )
-                                  }
-                                >
-                                  Monthly
-                                </button>
-
-                                <button
-                                  className={
-                                    ledgerFilter ===
-                                    "period"
-                                      ? "active-filter"
-                                      : ""
-                                  }
-                                  onClick={() =>
-                                    setLedgerFilter(
-                                      "period"
-                                    )
-                                  }
-                                >
-                                  Period Wise
-                                </button>
-
-                              </div>
-
-                              {ledgerFilter ===
-                                "period" && (
-
-                                <div className="date-filter">
-
-                                  <input
-                                    type="date"
-                                    value={fromDate}
-                                    onChange={(e) =>
-                                      setFromDate(
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-
-                                  <input
-                                    type="date"
-                                    value={toDate}
-                                    onChange={(e) =>
-                                      setToDate(
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-
-                                </div>
-
-                              )}
-
-                            </div>
-
-                            {/* LEDGER TABLE */}
-
-                            <table className="ledger-table">
-
-                              <thead>
-
-                                <tr>
-
-                                  <th>
-                                    Date
-                                  </th>
-
-                                  <th>
-                                    Opening Balance
-                                  </th>
-
-                                  <th>
-                                    Particular
-                                  </th>
-
-                                  <th>
-                                    Receipt
-                                  </th>
-
-                                  <th>
-                                    Payment
-                                  </th>
-
-                                  <th>
-                                    Closing Balance
-                                  </th>
-
-                                </tr>
-
-                              </thead>
-
-                              <tbody>
-
-                                {getFilteredLedger(
+                          <button
+                            className="expand-btn"
+                            onClick={() =>
+                              setExpandedBank(
+                                expandedBank ===
                                   item.bankName
-                                ).map(
-                                  (led) => (
+                                  ? null
+                                  : item.bankName
+                              )
+                            }
+                          >
 
-                                    <tr
-                                      key={
-                                        led.id
-                                      }
-                                    >
+                            {expandedBank ===
+                            item.bankName
+                              ? "▲"
+                              : "▼"}
 
-                                      <td>
-                                        {
-                                          led.date
-                                        }
-                                      </td>
+                          </button>
 
-                                      <td>
-                                        ₹{" "}
-                                        {
-                                          led.openingBalance
-                                        }
-                                      </td>
+                        </td>
 
-                                      <td>
-                                        {
-                                          led.particular
-                                        }
-                                      </td>
+                        <td>
+                          {
+                            item.linkedFirm
+                          }
+                        </td>
 
-                                      <td className="receipt">
+                        <td>
+                          {
+                            item.bankName
+                          }
+                        </td>
 
-                                        ↓ ₹{" "}
-                                        {
-                                          led.receipt
-                                        }
+                        <td>
+                          {
+                            item.accountNo
+                          }
+                        </td>
 
-                                      </td>
-
-                                      <td className="payment">
-
-                                        ↑ ₹{" "}
-                                        {
-                                          led.payment
-                                        }
-
-                                      </td>
-
-                                      <td>
-
-                                        ₹{" "}
-                                        {
-                                          led.closingBalance
-                                        }
-
-                                      </td>
-
-                                    </tr>
-
-                                  )
-                                )}
-
-                              </tbody>
-
-                            </table>
-
-                            {/* EXPORT */}
-
-                            <div className="export-buttons">
-
-                              <button>
-                                Export Excel
-                              </button>
-
-                              <button>
-                                Export PDF
-                              </button>
-
-                            </div>
-
-                          </div>
-
+                        <td>
+                          ₹
+                          {
+                            item.openingBalance
+                          }
                         </td>
 
                       </tr>
 
-                    )}
+                      {/* LEDGER */}
 
-                  </React.Fragment>
+                      {expandedBank ===
+                        item.bankName && (
 
-                ))}
+                        <tr>
+
+                          <td colSpan="5">
+
+                            <div className="ledger-box">
+
+                              {/* FILTER */}
+
+                              <div className="ledger-top">
+
+                                <div className="ledger-buttons">
+
+                                  <button
+                                    onClick={() =>
+                                      setLedgerFilter(
+                                        "daily"
+                                      )
+                                    }
+                                  >
+                                    Daily
+                                  </button>
+
+                                  <button
+                                    onClick={() =>
+                                      setLedgerFilter(
+                                        "monthly"
+                                      )
+                                    }
+                                  >
+                                    Monthly
+                                  </button>
+
+                                  <button
+                                    onClick={() =>
+                                      setLedgerFilter(
+                                        "period"
+                                      )
+                                    }
+                                  >
+                                    Period Wise
+                                  </button>
+
+                                </div>
+
+                                {ledgerFilter ===
+                                  "period" && (
+
+                                  <div className="date-filter">
+
+                                    <input
+                                      type="date"
+                                      value={
+                                        fromDate
+                                      }
+                                      onChange={(
+                                        e
+                                      ) =>
+                                        setFromDate(
+                                          e
+                                            .target
+                                            .value
+                                        )
+                                      }
+                                    />
+
+                                    <input
+                                      type="date"
+                                      value={
+                                        toDate
+                                      }
+                                      onChange={(
+                                        e
+                                      ) =>
+                                        setToDate(
+                                          e
+                                            .target
+                                            .value
+                                        )
+                                      }
+                                    />
+
+                                  </div>
+
+                                )}
+
+                              </div>
+
+                              {/* LEDGER TABLE */}
+
+                              <table className="ledger-table">
+
+                                <thead>
+
+                                  <tr>
+
+                                    <th>
+                                      Date
+                                    </th>
+
+                                    <th>
+                                      Opening
+                                    </th>
+
+                                    <th>
+                                      Particular
+                                    </th>
+
+                                    <th>
+                                      Receipt
+                                    </th>
+
+                                    <th>
+                                      Payment
+                                    </th>
+
+                                    <th>
+                                      Closing
+                                    </th>
+
+                                  </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                  {getFilteredLedger(
+                                    item.bankName
+                                  ).map(
+                                    (
+                                      led
+                                    ) => (
+
+                                      <tr
+                                        key={
+                                          led.id
+                                        }
+                                      >
+
+                                        <td>
+                                          {
+                                            led.date
+                                          }
+                                        </td>
+
+                                        <td>
+                                          ₹
+                                          {
+                                            led.openingBalance
+                                          }
+                                        </td>
+
+                                        <td>
+                                          {
+                                            led.particular
+                                          }
+                                        </td>
+
+                                        <td className="receipt">
+
+                                          ↓ ₹
+                                          {
+                                            led.receipt
+                                          }
+
+                                        </td>
+
+                                        <td className="payment">
+
+                                          ↑ ₹
+                                          {
+                                            led.payment
+                                          }
+
+                                        </td>
+
+                                        <td>
+
+                                          ₹
+                                          {
+                                            led.closingBalance
+                                          }
+
+                                        </td>
+
+                                      </tr>
+
+                                    )
+                                  )}
+
+                                </tbody>
+
+                              </table>
+
+                              {/* EXPORT */}
+
+                              <div className="export-buttons">
+
+                                <button
+                                  onClick={() =>
+                                    exportExcel(
+                                      item.bankName
+                                    )
+                                  }
+                                >
+                                  Export Excel
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    exportPDF(
+                                      item.bankName
+                                    )
+                                  }
+                                >
+                                  Export PDF
+                                </button>
+
+                              </div>
+
+                            </div>
+
+                          </td>
+
+                        </tr>
+
+                      )}
+
+                    </React.Fragment>
+
+                  )
+                )}
 
               </tbody>
 
