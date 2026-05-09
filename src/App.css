@@ -1,60 +1,68 @@
 :root {
-  --gold: linear-gradient(135deg, #d4af37 0%, #f9e2af 50%, #b8860b 100%);
-  --dark-navy: #0a192f;
-  --premium-bg: #f4f7fa;
+  --royal-gold: linear-gradient(135deg, #d4af37 0%, #f9e2af 50%, #b8860b 100%);
+  --deep-navy: #050a14;
+  --panel-bg: #0a121e; /* Right side premium dark color */
+  --card-glass: rgba(255, 255, 255, 0.03);
 }
 
-body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: var(--premium-bg); }
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--deep-navy); color: #fff; }
 
-/* Right Side Premium Background */
-main { background: linear-gradient(to bottom right, #ffffff, #f0f4f8); flex: 1; overflow-y: auto; }
+/* Right Side Premium Styling */
+main { 
+  background: var(--panel-bg); 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  border-left: 1px solid rgba(212, 175, 55, 0.2);
+}
 
 .premium-card {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 30px;
-  margin-bottom: 25px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+  background: var(--card-glass);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 35px;
   border: 1px solid rgba(212, 175, 55, 0.1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 
 .luxury-input {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  padding: 15px;
+  color: #fff;
   font-size: 14px;
-  margin-bottom: 15px;
   transition: 0.3s;
 }
+.luxury-input:focus { border-color: #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); outline: none; }
 
-.luxury-input:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
-
-.btn-royal {
-  background: var(--gold);
-  color: #0a192f;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 10px;
+.btn-gold {
+  background: var(--royal-gold);
+  color: #050a14;
   font-weight: 800;
+  padding: 15px 30px;
+  border-radius: 12px;
+  border: none;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.gold-btn {
+.royal-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+.royal-table th { color: #d4af37; text-transform: uppercase; font-size: 12px; padding: 15px; border-bottom: 2px solid rgba(212, 175, 55, 0.2); }
+.royal-table td { background: rgba(255, 255, 255, 0.02); padding: 15px; font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+.royal-table tr:hover td { background: rgba(212, 175, 55, 0.05); }
+
+/* Export Buttons */
+.btn-export {
   background: #fff;
-  border: 2px solid #d4af37;
   color: #b8860b;
-  padding: 8px 15px;
+  border: 2px solid #d4af37;
+  padding: 10px 20px;
   border-radius: 8px;
   font-weight: bold;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  cursor: pointer;
 }
-
-.royal-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.royal-table th { background: var(--dark-navy); color: #d4af37; padding: 15px; text-align: left; }
-.royal-table td { padding: 15px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
