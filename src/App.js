@@ -1,192 +1,387 @@
-// ========================== APP.JS ==========================
-// Premium Banking Pro Executive Version 2.0
-// React + Firebase Connected UI
-// Replace your existing App.js with this
+// ============================ APP.JS ============================
+// PREMIUM BANKING PRO EXECUTIVE VERSION 2.0
+// FIREBASE CONNECTED VERSION
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
+import { db } from "./firebase";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+
 function App() {
+
+  // ================= LOGIN =================
+
   const [loggedIn, setLoggedIn] = useState(false);
+
+  // ================= MENU =================
+
   const [activeMenu, setActiveMenu] = useState("dashboard");
+
+  // ================= CLOCK =================
+
   const [time, setTime] = useState(new Date());
 
+  // ================= FIRMS =================
+
+  const [firmName, setFirmName] = useState("");
+  const [gstNo, setGstNo] = useState("");
+  const [officeAddress, setOfficeAddress] = useState("");
+
+  const [firms, setFirms] = useState([]);
+
+  // ================= BANKS =================
+
+  const [bankName, setBankName] = useState("");
+  const [bankBranch, setBankBranch] = useState("");
+  const [accountNo, setAccountNo] = useState("");
+  const [ifsc, setIfsc] = useState("");
+  const [openingBalance, setOpeningBalance] = useState("");
+  const [drcr, setDrcr] = useState("DR");
   const [selectedFirm, setSelectedFirm] = useState("All Firms");
 
+  const [banks, setBanks] = useState([]);
+
+  // ================= USERS =================
+
+  const [userCode, setUserCode] = useState("");
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [role, setRole] = useState("Admin");
+
+  const [users, setUsers] = useState([]);
+
+  // ================= LEDGER =================
+
+  const [ledger, setLedger] = useState([]);
+
+  // ================= CLOCK =================
+
   useEffect(() => {
-    const timer = setInterval(() => {
+
+    const interval = setInterval(() => {
       setTime(new Date());
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
+
   }, []);
 
-  // Dummy Data
-  const firms = [
-    "All Firms",
-    "Softview Technologies",
-    "Royal Finance",
-    "Prime Industries",
-  ];
+  // ================= FETCH =================
 
-  const bankData = [
-    {
-      bank: "HDFC BANK",
-      account: "1234567890",
-      balance: "₹ 12,50,000",
+  useEffect(() => {
+
+    fetchFirms();
+    fetchBanks();
+    fetchUsers();
+    fetchLedger();
+
+  }, []);
+
+  // ================= FETCH FUNCTIONS =================
+
+  const fetchFirms = async () => {
+
+    const snapshot = await getDocs(collection(db, "firms"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setFirms(data);
+  };
+
+  const fetchBanks = async () => {
+
+    const snapshot = await getDocs(collection(db, "banks"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setBanks(data);
+  };
+
+  const fetchUsers = async () => {
+
+    const snapshot = await getDocs(collection(db, "users"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setUsers(data);
+  };
+
+  const fetchLedger = async () => {
+
+    const snapshot = await getDocs(collection(db, "ledger"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setLedger(data);
+  };
+
+  // ================= SAVE FIRM =================
+
+  const saveFirm = async () => {
+
+    if (!firmName) return alert("Enter Firm Name");
+
+    await addDoc(collection(db, "firms"), {
+      firmName,
+      gstNo,
+      officeAddress,
       status: "ACTIVE",
-    },
-    {
-      bank: "ICICI BANK",
-      account: "7896541230",
-      balance: "₹ 4,90,000",
+      closeDate: "",
+    });
+
+    setFirmName("");
+    setGstNo("");
+    setOfficeAddress("");
+
+    fetchFirms();
+
+    alert("Firm Saved");
+  };
+
+  // ================= SAVE BANK =================
+
+  const saveBank = async () => {
+
+    if (!bankName) return alert("Enter Bank Name");
+
+    await addDoc(collection(db, "banks"), {
+      bankName,
+      bankBranch,
+      accountNo,
+      ifsc,
+      openingBalance,
+      drcr,
+      firmName,
       status: "ACTIVE",
-    },
-    {
-      bank: "SBI BANK",
-      account: "7418529630",
-      balance: "₹ 1,10,000",
+      closeDate: "",
+    });
+
+    setBankName("");
+    setBankBranch("");
+    setAccountNo("");
+    setIfsc("");
+    setOpeningBalance("");
+
+    fetchBanks();
+
+    alert("Bank Saved");
+  };
+
+  // ================= SAVE USER =================
+
+  const saveUser = async () => {
+
+    await addDoc(collection(db, "users"), {
+      userCode,
+      userName,
+      email,
+      mobile,
+      role,
+      status: "ACTIVE",
+    });
+
+    setUserCode("");
+    setUserName("");
+    setEmail("");
+    setMobile("");
+
+    fetchUsers();
+
+    alert("User Saved");
+  };
+
+  // ================= DELETE =================
+
+  const deleteFirm = async (id) => {
+
+    await deleteDoc(doc(db, "firms", id));
+
+    fetchFirms();
+  };
+
+  const deleteBank = async (id) => {
+
+    await deleteDoc(doc(db, "banks", id));
+
+    fetchBanks();
+  };
+
+  const deleteUser = async (id) => {
+
+    await deleteDoc(doc(db, "users", id));
+
+    fetchUsers();
+  };
+
+  // ================= CLOSE =================
+
+  const closeFirm = async (id) => {
+
+    await updateDoc(doc(db, "firms", id), {
       status: "CLOSED",
-    },
-  ];
+      closeDate: new Date().toLocaleDateString(),
+    });
 
-  const ledgerData = [
-    {
-      date: "09-05-2026",
-      particular: "Client Receipt",
-      receipt: "₹ 1,20,000",
-      payment: "-",
-      closing: "₹ 10,20,000",
-    },
-    {
-      date: "09-05-2026",
-      particular: "Office Expense",
-      receipt: "-",
-      payment: "₹ 25,000",
-      closing: "₹ 9,95,000",
-    },
-  ];
+    fetchFirms();
+  };
 
-  // LOGIN PAGE
+  const closeBank = async (id) => {
+
+    await updateDoc(doc(db, "banks", id), {
+      status: "CLOSED",
+      closeDate: new Date().toLocaleDateString(),
+    });
+
+    fetchBanks();
+  };
+
+  // ================= FILTER =================
+
+  const filteredBanks =
+    selectedFirm === "All Firms"
+      ? banks
+      : banks.filter(
+          (item) => item.firmName === selectedFirm
+        );
+
+  // ================= LOGIN PAGE =================
+
   if (!loggedIn) {
+
     return (
-      <div className="login-container">
+
+      <div className="login-page">
+
         <div className="login-card">
-          <div className="luxury-top"></div>
 
-          <h1 className="login-title">BANKING PRO</h1>
+          <h1>BANKING PRO</h1>
 
-          <p className="executive-text">
-            Executive Version 2.0
-          </p>
+          <h3>Executive Version 2.0</h3>
 
-          <div className="input-group">
-            <label>Login ID</label>
-            <input type="text" placeholder="Enter Login ID" />
-          </div>
+          <input type="text" placeholder="Login ID" />
 
-          <div className="input-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter Password" />
-          </div>
+          <input type="password" placeholder="Password" />
 
-          <button
-            className="premium-btn"
-            onClick={() => setLoggedIn(true)}
-          >
+          <button onClick={() => setLoggedIn(true)}>
             LOGIN
           </button>
 
           <div className="developer">
-            Developed by – SOFTVIEW TECHNOLOGIES
+            Developed By
             <br />
-            Contact : +91 7972084304
+            SOFTVIEW TECHNOLOGIES
+            <br />
+            +91 7972084304
           </div>
+
         </div>
+
       </div>
     );
   }
 
-  // INTERNAL PAGE
+  // ================= MAIN PAGE =================
+
   return (
-    <div className="main-layout">
+
+    <div className="main-container">
 
       {/* SIDEBAR */}
+
       <div className="sidebar">
 
-        <div className="brand-section">
-          <h1>BANKING PRO</h1>
-          <p>Executive Version 2.0</p>
-        </div>
+        <div>
 
-        <div className="menu-section">
+          <div className="logo">
 
-          <button
-            className={activeMenu === "dashboard" ? "menu active" : "menu"}
-            onClick={() => setActiveMenu("dashboard")}
-          >
+            <h1>BANKING PRO</h1>
+
+            <p>Executive Version 2.0</p>
+
+          </div>
+
+          <button onClick={() => setActiveMenu("dashboard")}>
             Dashboard
           </button>
 
-          <button
-            className={activeMenu === "firm" ? "menu active" : "menu"}
-            onClick={() => setActiveMenu("firm")}
-          >
+          <button onClick={() => setActiveMenu("firm")}>
             Firm Master
           </button>
 
-          <button
-            className={activeMenu === "bank" ? "menu active" : "menu"}
-            onClick={() => setActiveMenu("bank")}
-          >
+          <button onClick={() => setActiveMenu("bank")}>
             Bank Master
           </button>
 
-          <button
-            className={activeMenu === "user" ? "menu active" : "menu"}
-            onClick={() => setActiveMenu("user")}
-          >
+          <button onClick={() => setActiveMenu("user")}>
             User Master
           </button>
 
-          <button
-            className={activeMenu === "setting" ? "menu active" : "menu"}
-            onClick={() => setActiveMenu("setting")}
-          >
+          <button onClick={() => setActiveMenu("setting")}>
             Settings
           </button>
 
         </div>
 
-        <div className="branding-footer">
-          DEVELOPED BY
+        <div className="branding">
+
+          Developed By
           <br />
           SOFTVIEW TECHNOLOGIES
           <br />
           +91 7972084304
+
         </div>
 
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* CONTENT */}
+
       <div className="content">
 
-        {/* TOP HEADER */}
-        <div className="top-header">
+        {/* HEADER */}
+
+        <div className="header">
 
           <div className="welcome">
             Welcome To Banking Pro
           </div>
 
-          <div className="header-right">
-            <div className="clock-box">
-              <span>Admin User</span>
-              <span>
-                {time.toLocaleDateString()}
-              </span>
-              <span>
-                {time.toLocaleTimeString()}
-              </span>
+          <div className="right-header">
+
+            <div className="clock">
+
+              Admin User
+
+              <br />
+
+              {time.toLocaleDateString()}
+
+              <br />
+
+              {time.toLocaleTimeString()}
+
             </div>
 
             <button
@@ -195,254 +390,356 @@ function App() {
             >
               Logout
             </button>
+
           </div>
 
         </div>
 
         {/* DASHBOARD */}
+
         {activeMenu === "dashboard" && (
-          <div>
 
-            <div className="page-card">
+          <div className="card">
 
-              <div className="card-top">
+            <div className="top-bar">
 
-                <h2>Dashboard Summary</h2>
+              <h2>Dashboard</h2>
 
-                <div className="filter-box">
-                  <label>Select Firm Here</label>
+              <select
+                value={selectedFirm}
+                onChange={(e) =>
+                  setSelectedFirm(e.target.value)
+                }
+              >
 
-                  <select
-                    value={selectedFirm}
-                    onChange={(e) =>
-                      setSelectedFirm(e.target.value)
-                    }
-                  >
-                    {firms.map((firm, index) => (
-                      <option key={index}>
-                        {firm}
-                      </option>
-                    ))}
-                  </select>
+                <option>All Firms</option>
 
-                </div>
+                {firms.map((item) => (
+                  <option key={item.id}>
+                    {item.firmName}
+                  </option>
+                ))}
 
-              </div>
-
-              {/* BANK SUMMARY TABLE */}
-              <table className="premium-table">
-
-                <thead>
-                  <tr>
-                    <th>Bank Name</th>
-                    <th>Bank A/c No.</th>
-                    <th>Bank Closing Balance</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {bankData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.bank}</td>
-                      <td>{item.account}</td>
-                      <td>{item.balance}</td>
-
-                      <td>
-                        <span
-                          className={
-                            item.status === "ACTIVE"
-                              ? "active-status"
-                              : "closed-status"
-                          }
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-
-              </table>
+              </select>
 
             </div>
 
-            {/* LEDGER */}
-            <div className="page-card">
-
-              <div className="ledger-top">
-
-                <h2>Account Ledger View</h2>
-
-                <div className="ledger-filters">
-                  <button className="filter-btn">
-                    Daily
-                  </button>
-
-                  <button className="filter-btn">
-                    Monthly
-                  </button>
-
-                  <button className="filter-btn">
-                    Period Wise
-                  </button>
-                </div>
-
-              </div>
-
-              <table className="premium-table">
-
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Particular</th>
-                    <th>Receipt</th>
-                    <th>Payment</th>
-                    <th>Closing Balance</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-
-                  {ledgerData.map((item, index) => (
-                    <tr key={index}>
-
-                      <td>{item.date}</td>
-
-                      <td>{item.particular}</td>
-
-                      <td className="green-text">
-                        ↓ {item.receipt}
-                      </td>
-
-                      <td className="red-text">
-                        ↑ {item.payment}
-                      </td>
-
-                      <td>{item.closing}</td>
-
-                    </tr>
-                  ))}
-
-                </tbody>
-
-              </table>
-
-              <div className="export-buttons">
-
-                <button className="premium-btn">
-                  Export Excel
-                </button>
-
-                <button className="premium-btn">
-                  Export PDF
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-        )}
-
-        {/* FIRM MASTER */}
-        {activeMenu === "firm" && (
-          <div className="page-card">
-
-            <h2>Firm Master</h2>
-
-            <div className="form-grid">
-
-              <input placeholder="Firm Name" />
-              <input placeholder="GST No" />
-              <input placeholder="Office Address" />
-
-            </div>
-
-            <button className="premium-btn">
-              Save Firm
-            </button>
-
-            <table className="premium-table">
+            <table>
 
               <thead>
+
                 <tr>
-                  <th>Firm Name</th>
-                  <th>GST No</th>
-                  <th>Address</th>
-                  <th>Action</th>
+                  <th>Bank Name</th>
+                  <th>Account No</th>
+                  <th>Balance</th>
+                  <th>Status</th>
                 </tr>
+
               </thead>
 
               <tbody>
-                <tr>
-                  <td>Softview Technologies</td>
-                  <td>27ABCDE1234A1Z5</td>
-                  <td>Mumbai</td>
 
-                  <td>
-                    <button className="table-btn">
-                      Edit
-                    </button>
+                {filteredBanks.map((item) => (
 
-                    <button className="table-btn delete">
-                      Delete
-                    </button>
+                  <tr key={item.id}>
 
-                    <button className="table-btn close">
-                      Close
-                    </button>
-                  </td>
-                </tr>
+                    <td>{item.bankName}</td>
+
+                    <td>{item.accountNo}</td>
+
+                    <td>
+                      ₹ {item.openingBalance}
+                    </td>
+
+                    <td>{item.status}</td>
+
+                  </tr>
+
+                ))}
+
               </tbody>
 
             </table>
 
           </div>
+
+        )}
+
+        {/* FIRM MASTER */}
+
+        {activeMenu === "firm" && (
+
+          <div className="card">
+
+            <h2>Firm Master</h2>
+
+            <div className="grid">
+
+              <input
+                placeholder="Firm Name"
+                value={firmName}
+                onChange={(e) =>
+                  setFirmName(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="GST No"
+                value={gstNo}
+                onChange={(e) =>
+                  setGstNo(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="Office Address"
+                value={officeAddress}
+                onChange={(e) =>
+                  setOfficeAddress(e.target.value)
+                }
+              />
+
+            </div>
+
+            <button onClick={saveFirm}>
+              Save Firm
+            </button>
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>Firm Name</th>
+                  <th>GST</th>
+                  <th>Address</th>
+                  <th>Action</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {firms.map((item) => (
+
+                  <tr key={item.id}>
+
+                    <td>{item.firmName}</td>
+
+                    <td>{item.gstNo}</td>
+
+                    <td>{item.officeAddress}</td>
+
+                    <td>
+
+                      <button
+                        className="delete"
+                        onClick={() =>
+                          deleteFirm(item.id)
+                        }
+                      >
+                        Delete
+                      </button>
+
+                      <button
+                        className="close"
+                        onClick={() =>
+                          closeFirm(item.id)
+                        }
+                      >
+                        Close
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
         )}
 
         {/* BANK MASTER */}
+
         {activeMenu === "bank" && (
-          <div className="page-card">
+
+          <div className="card">
 
             <h2>Bank Master</h2>
 
-            <div className="form-grid">
+            <div className="grid">
 
-              <input placeholder="Bank Name" />
-              <input placeholder="Bank Branch" />
-              <input placeholder="Bank A/c No." />
-              <input placeholder="IFSC Code" />
-              <input placeholder="Opening Balance" />
+              <input
+                placeholder="Bank Name"
+                value={bankName}
+                onChange={(e) =>
+                  setBankName(e.target.value)
+                }
+              />
 
-              <select>
+              <input
+                placeholder="Bank Branch"
+                value={bankBranch}
+                onChange={(e) =>
+                  setBankBranch(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="Account No"
+                value={accountNo}
+                onChange={(e) =>
+                  setAccountNo(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="IFSC"
+                value={ifsc}
+                onChange={(e) =>
+                  setIfsc(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="Opening Balance"
+                value={openingBalance}
+                onChange={(e) =>
+                  setOpeningBalance(e.target.value)
+                }
+              />
+
+              <select
+                value={drcr}
+                onChange={(e) =>
+                  setDrcr(e.target.value)
+                }
+              >
                 <option>DR</option>
                 <option>CR</option>
               </select>
 
             </div>
 
-            <button className="premium-btn">
+            <button onClick={saveBank}>
               Save Bank
             </button>
 
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>Bank</th>
+                  <th>Branch</th>
+                  <th>Account</th>
+                  <th>Balance</th>
+                  <th>Action</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {banks.map((item) => (
+
+                  <tr key={item.id}>
+
+                    <td>{item.bankName}</td>
+
+                    <td>{item.bankBranch}</td>
+
+                    <td>{item.accountNo}</td>
+
+                    <td>{item.openingBalance}</td>
+
+                    <td>
+
+                      <button
+                        className="delete"
+                        onClick={() =>
+                          deleteBank(item.id)
+                        }
+                      >
+                        Delete
+                      </button>
+
+                      <button
+                        className="close"
+                        onClick={() =>
+                          closeBank(item.id)
+                        }
+                      >
+                        Close
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
           </div>
+
         )}
 
         {/* USER MASTER */}
+
         {activeMenu === "user" && (
-          <div className="page-card">
+
+          <div className="card">
 
             <h2>User Master</h2>
 
-            <div className="form-grid">
+            <div className="grid">
 
-              <input placeholder="User Code" />
-              <input placeholder="User Name" />
-              <input placeholder="User Email" />
-              <input placeholder="Mobile" />
+              <input
+                placeholder="User Code"
+                value={userCode}
+                onChange={(e) =>
+                  setUserCode(e.target.value)
+                }
+              />
 
-              <select>
+              <input
+                placeholder="User Name"
+                value={userName}
+                onChange={(e) =>
+                  setUserName(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="Email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+              />
+
+              <input
+                placeholder="Mobile"
+                value={mobile}
+                onChange={(e) =>
+                  setMobile(e.target.value)
+                }
+              />
+
+              <select
+                value={role}
+                onChange={(e) =>
+                  setRole(e.target.value)
+                }
+              >
                 <option>Admin</option>
                 <option>Operator</option>
                 <option>Viewer</option>
@@ -450,43 +747,87 @@ function App() {
 
             </div>
 
-            <button className="premium-btn">
+            <button onClick={saveUser}>
               Save User
             </button>
 
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Role</th>
+                  <th>Action</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {users.map((item) => (
+
+                  <tr key={item.id}>
+
+                    <td>{item.userName}</td>
+
+                    <td>{item.email}</td>
+
+                    <td>{item.mobile}</td>
+
+                    <td>{item.role}</td>
+
+                    <td>
+
+                      <button
+                        className="delete"
+                        onClick={() =>
+                          deleteUser(item.id)
+                        }
+                      >
+                        Delete
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
           </div>
+
         )}
 
         {/* SETTINGS */}
+
         {activeMenu === "setting" && (
-          <div className="page-card">
+
+          <div className="card">
 
             <h2>Settings</h2>
 
-            <div className="form-grid">
+            <div className="grid">
 
-              <input
-                type="password"
-                placeholder="Old Password"
-              />
+              <input type="password" placeholder="Old Password" />
 
-              <input
-                type="password"
-                placeholder="New Password"
-              />
+              <input type="password" placeholder="New Password" />
 
-              <input
-                type="password"
-                placeholder="Confirm Password"
-              />
+              <input type="password" placeholder="Confirm Password" />
 
             </div>
 
-            <button className="premium-btn">
+            <button>
               Change Password
             </button>
 
           </div>
+
         )}
 
       </div>
