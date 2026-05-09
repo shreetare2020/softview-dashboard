@@ -90,7 +90,14 @@ export default function App() {
       <aside className="executive-sidebar">
         <div style={{ padding: '30px 20px' }}>
           <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '20px' }}>BANKING PRO</h1>
-          <p style={{ fontSize: '9px', color: '#64748b' }}>SOFTVIEW TECHNOLOGIES</p>
+          <p style={{
+  fontSize: '10px',
+  color: '#94a3b8',
+  marginTop: '5px',
+  lineHeight: '16px'
+}}>
+  Executive Version 2.0
+</p>
         </div>
         <nav style={{ flex: 1 }}>
           <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}><LayoutDashboard size={18}/> Dashboard</div>
@@ -100,22 +107,85 @@ export default function App() {
           <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => setActiveTab('Setting')}><Settings size={18}/> Setting</div>
         </nav>
         <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
-          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}>Support: 7972084304</p>
+          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}><div style={{
+  padding: '20px',
+  borderTop: '1px solid rgba(212,175,55,0.1)',
+  color: '#cbd5e1',
+  fontSize: '11px',
+  lineHeight: '20px'
+}}>
+
+  <div style={{
+    color: '#d4af37',
+    fontWeight: 'bold',
+    marginBottom: '5px'
+  }}>
+    Developed By
+  </div>
+
+  <div>
+    SOFTVIEW TECHNOLOGIES
+  </div>
+
+  <div style={{
+    color: '#d4af37',
+    marginTop: '5px'
+  }}>
+    +91 7972084304
+  </div>
+
+</p>
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
       <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
         <header className="luxury-header">
-          <div style={{ fontWeight: 'bold' }}>{activeTab.toUpperCase()}</div>
           <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-            <div style={{ textAlign: 'right', borderRight: '1px solid #ddd', paddingRight: '15px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '900', color: '#0a192f' }}>{time.toLocaleTimeString()}</div>
-                <div style={{ fontSize: '10px', color: '#64748b' }}>{time.toLocaleDateString()}</div>
-            </div>
-            <button className="btn-gold" style={{ background: '#ffefef', color: 'red' }} onClick={() => signOut(auth)}><LogOut size={16}/></button>
-          </div>
-        </header>
+
+  <div style={{
+    textAlign: 'right',
+    borderRight: '1px solid #ddd',
+    paddingRight: '15px'
+  }}>
+
+    <div style={{
+      fontSize: '12px',
+      fontWeight: '700',
+      color: '#fff'
+    }}>
+      Login User : {user?.email}
+    </div>
+
+    <div style={{
+      fontSize: '13px',
+      fontWeight: '900',
+      color: '#d4af37'
+    }}>
+      {time.toLocaleTimeString()}
+    </div>
+
+    <div style={{
+      fontSize: '10px',
+      color: '#cbd5e1'
+    }}>
+      {time.toLocaleDateString()}
+    </div>
+
+  </div>
+
+  <button
+    className="btn-gold"
+    style={{
+      background: '#ffefef',
+      color: 'red'
+    }}
+    onClick={() => signOut(auth)}
+  >
+    <LogOut size={16}/>
+  </button>
+
+</div>
 
         <div style={{ padding: '30px' }}>
           {activeTab === "Dashboard" && (
@@ -166,43 +236,157 @@ export default function App() {
                </div>
                <table className="royal-table" style={{marginTop:'20px'}}>
                  <thead><tr><th>Firm Name</th><th>GST</th><th>Address</th><th>Actions</th></tr></thead>
-                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td><Trash2 size={16} color="red"/></td></tr>)}</tbody>
-               </table>
-             </div>
-          )}
+                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td style={{display:'flex', gap:'10px'}}>
 
-          {activeTab === "Bank Master" && (
-             <div>
-               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
-                  <input placeholder="Bank Name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, bankName: e.target.value})} />
-                  <input placeholder="Branch" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, branch: e.target.value})} />
-                  <input placeholder="A/c No" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, accNo: e.target.value})} />
-                  <input placeholder="Opening Bal" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, balance: e.target.value})} />
-                  <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, type: e.target.value})}><option>dr/cr</option><option value="dr">dr</option><option value="cr">cr</option></select>
-                  <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, linkedFirm: e.target.value})}><option>Link Firm</option>{firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}</select>
-                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>SAVE BANK</button>
-               </div>
-               <table className="royal-table" style={{marginTop:'20px'}}>
-                 <thead><tr><th>Bank Name</th><th>A/c No</th><th>Balance</th></tr></thead>
-                 <tbody>{banks.map(b => <tr key={b.id}><td>{b.bankName}</td><td>{b.accNo}</td><td>{b.balance} {b.type}</td></tr>)}</tbody>
-               </table>
-             </div>
-          )}
+  <Edit3
+    size={16}
+    color="#0a192f"
+    style={{cursor:'pointer'}}
+    onClick={() => setForm(f)}
+  />
 
-          {activeTab === "User Master" && (
-            <div>
-              <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
-                <input placeholder="Name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uName: e.target.value})} />
-                <input placeholder="Email" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, uEmail: e.target.value})} />
-                <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, role: e.target.value})}><option>Role</option><option value="Admin">Admin</option><option value="Operator">Operator</option></select>
-                <button className="btn-gold" onClick={() => handleSave("User Master")}>SAVE USER</button>
-              </div>
-              <table className="royal-table" style={{marginTop:'20px'}}>
-                <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
-                <tbody>{usersList.map(u => <tr key={u.id}><td>{u.uName}</td><td>{u.uEmail}</td><td>{u.role}</td></tr>)}</tbody>
-              </table>
-            </div>
-          )}
+  <Trash2
+    size={16}
+    color="red"
+    style={{cursor:'pointer'}}
+    onClick={async () => {
+      if(window.confirm("Delete Firm ?")){
+        await deleteDoc(doc(db,"Firms",f.id))
+      }
+    }}
+  />
+
+  <button
+    style={{
+      background:'#0a192f',
+      color:'#fff',
+      border:'none',
+      borderRadius:'5px',
+      padding:'3px 10px',
+      cursor:'pointer'
+    }}
+    onClick={async () => {
+      await updateDoc(doc(db,"Firms",f.id),{
+        status:'Closed',
+        closedDate:new Date()
+      })
+    }}
+  >
+    Close
+  </button>
+
+</td>
+</tr>)}<tbody>
+  {banks.map(b =>
+
+    <tr key={b.id}>
+
+      <td>{b.bankName}</td>
+
+      <td>{b.accNo}</td>
+
+      <td>{b.balance} {b.type}</td>
+
+      <td style={{display:'flex', gap:'10px'}}>
+
+        <Edit3
+          size={16}
+          color="#0a192f"
+          style={{cursor:'pointer'}}
+          onClick={() => setForm(b)}
+        />
+
+        <Trash2
+          size={16}
+          color="red"
+          style={{cursor:'pointer'}}
+          onClick={async () => {
+            if(window.confirm("Delete Bank ?")){
+              await deleteDoc(doc(db,"Bank Master",b.id))
+            }
+          }}
+        />
+
+        <button
+          style={{
+            background:'#0a192f',
+            color:'#fff',
+            border:'none',
+            borderRadius:'5px',
+            padding:'3px 10px'
+          }}
+          onClick={async () => {
+            await updateDoc(doc(db,"Bank Master",b.id),{
+              status:'Closed',
+              closedDate:new Date()
+            })
+          }}
+        >
+          Close
+        </button>
+
+      </td>
+
+    </tr>
+
+  )}
+<tbody>
+
+  {usersList.map(u =>
+
+    <tr key={u.id}>
+
+      <td>{u.uName}</td>
+
+      <td>{u.uEmail}</td>
+
+      <td>{u.role}</td>
+
+      <td style={{display:'flex', gap:'10px'}}>
+
+        <Edit3
+          size={16}
+          color="#0a192f"
+          style={{cursor:'pointer'}}
+          onClick={() => setForm(u)}
+        />
+
+        <Trash2
+          size={16}
+          color="red"
+          style={{cursor:'pointer'}}
+          onClick={async () => {
+            if(window.confirm("Delete User ?")){
+              await deleteDoc(doc(db,"User Master",u.id))
+            }
+          }}
+        />
+
+        <button
+          style={{
+            background:'#0a192f',
+            color:'#fff',
+            border:'none',
+            borderRadius:'5px',
+            padding:'3px 10px'
+          }}
+          onClick={async () => {
+            await updateDoc(doc(db,"User Master",u.id),{
+              status:'Closed',
+              closedDate:new Date()
+            })
+          }}
+        >
+          Close
+        </button>
+
+      </td>
+
+    </tr>
+
+  )}
+
+</tbody>
 
           {activeTab === "Setting" && (
             <div className="ledger-box" style={{background:'white', padding:'40px', width:'400px'}}>
