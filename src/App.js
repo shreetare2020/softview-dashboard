@@ -1,125 +1,662 @@
-import React, { useState, useEffect } from 'react';
-import { auth, db } from "./firebase";
-import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, query, orderBy } from "firebase/firestore";
-import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, Clock, Download, FileText } from 'lucide-react';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import { db } from "./firebase";
 
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState("Viewer");
-  const [activeTab, setActiveTab] = useState("Dashboard");
+import {
+  collection,
+  addDoc,
+  getDocs,
+} from "firebase/firestore";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+function App() {
+
+  const [loggedIn, setLoggedIn] = useState(true);
+  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [time, setTime] = useState(new Date());
+
   const [firms, setFirms] = useState([]);
   const [banks, setBanks] = useState([]);
-  const [usersList, setUsersList] = useState([]);
-  const [selectedFirm, setSelectedFirm] = useState("All");
+  const [users, setUsers] = useState([]);
+
+  const [firmName, setFirmName] = useState("");
+  const [gstNo, setGstNo] = useState("");
+  const [officeAddress, setOfficeAddress] = useState("");
+
+  const [bankName, setBankName] = useState("");
+  const [branch, setBranch] = useState("");
+  const [accountNo, setAccountNo] = useState("");
+  const [ifsc, setIfsc] = useState("");
+  const [openingBalance, setOpeningBalance] = useState("");
+  const [linkedFirm, setLinkedFirm] = useState("");
+
+  const [userCode, setUserCode] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [role, setRole] = useState("Operator");
+
+  const [selectedFirm, setSelectedFirm] = useState("All Firms");
   const [expandedBank, setExpandedBank] = useState(null);
-  const [time, setTime] = useState(new Date());
-  const [form, setForm] = useState({});
-  const [newPass, setNewPass] = useState("");
+
+  const [ledger] = useState([
+    {
+      id: 1,
+      bankName: "SBI",
+      accountNo: "65498798",
+      date: "2026-05-01",
+      opening: 100000,
+      particular: "Cash Deposit",
+      receipt: 50000,
+      payment: 0,
+      closing: 150000,
+    },
+    {
+      id: 2,
+      bankName: "SBI",
+      accountNo: "65498798",
+      date: "2026-05-02",
+      opening: 150000,
+      particular: "Cheque Payment",
+      receipt: 0,
+      payment: 25000,
+      closing: 125000,
+    },
+    {
+      id: 3,
+      bankName: "HDFC LTD",
+      accountNo: "132165464",
+      date: "2026-05-03",
+      opening: 100000,
+      particular: "Online Receipt",
+      receipt: 35000,
+      payment: 0,
+      closing: 135000,
+    },
+  ]);
 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (u) {
-        // 🔥 AUTO-FETCH ALL NODES (Jo screenshot mein hain)
-        onSnapshot(collection(db, "User Master"), s => setUsersList(s.docs.map(d => ({id: d.id, ...d.data()}))));
-        onSnapshot(collection(db, "Firms"), s => setFirms(s.docs.map(d => ({id: d.id, ...d.data()}))));
-        onSnapshot(collection(db, "Bank Master"), s => setBanks(s.docs.map(d => ({id: d.id, ...d.data()}))));
-        
-        // Role Check
-        onSnapshot(collection(db, "User Master"), s => {
-          const match = s.docs.find(d => d.data().uEmail === u.email);
-          if (match) setUserRole(match.data().role);
-        });
-      }
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetchFirms();
+    fetchBanks();
+    fetchUsers();
+  }, []);
+
+  const fetchFirms = async () => {
+    const snapshot = await getDocs(collection(db, "firms"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setFirms(data);
+  };
+
+  const fetchBanks = async () => {
+    const snapshot = await getDocs(collection(db, "banks"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setBanks(data);
+  };
+
+  const fetchUsers = async () => {
+    const snapshot = await getDocs(collection(db, "users"));
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setUsers(data);
+  };
+
+  const saveFirm = async () => {
+    await addDoc(collection(db, "firms"), {
+      firmName,
+      gstNo,
+      officeAddress,
+      status: "ACTIVE",
     });
-    return () => { clearInterval(timer); unsub(); };
-  }, [user]);
 
-  const handleSave = async (coll) => {
-    if (userRole === "Viewer") return alert("Permission Denied!");
-    try {
-      await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
-      setForm({}); alert("Data Locked & Saved!");
-    } catch (e) { alert("Error: " + e.message); }
+    setFirmName("");
+    setGstNo("");
+    setOfficeAddress("");
+
+    fetchFirms();
   };
 
-  // 📊 COLOURFUL EXCEL EXPORT
-  const exportExcel = (b) => {
-    const data = [
-      { Date: "Opening Balance", Particulars: "B/F", Voucher: "-", Dr: 0, Cr: 0, Balance: b.balance }
-    ];
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-    XLSX.writeFile(wb, `${b.bankName}_Ledger.xlsx`);
+  const saveBank = async () => {
+    await addDoc(collection(db, "banks"), {
+      bankName,
+      branch,
+      accountNo,
+      ifsc,
+      openingBalance,
+      linkedFirm,
+      status: "ACTIVE",
+    });
+
+    setBankName("");
+    setBranch("");
+    setAccountNo("");
+    setIfsc("");
+    setOpeningBalance("");
+    setLinkedFirm("");
+
+    fetchBanks();
   };
 
-  // 📄 PREMIUM PDF EXPORT (No Overlap)
-  const exportPDF = (b) => {
+  const saveUser = async () => {
+    await addDoc(collection(db, "users"), {
+      userCode,
+      userName,
+      userEmail,
+      mobile,
+      role,
+      status: "ACTIVE",
+    });
+
+    setUserCode("");
+    setUserName("");
+    setUserEmail("");
+    setMobile("");
+    setRole("Operator");
+
+    fetchUsers();
+  };
+
+  const filteredBanks =
+    selectedFirm === "All Firms"
+      ? banks
+      : banks.filter(
+          (item) => item.linkedFirm === selectedFirm
+        );
+
+  const exportPDF = (bank) => {
+
+    const bankLedger = ledger.filter(
+      (l) => l.bankName === bank.bankName
+    );
+
     const doc = new jsPDF();
-    doc.setFontSize(18); doc.setTextColor(10, 25, 47); // Dark Blue
-    doc.text("BANKING PRO - LEDGER REPORT", 14, 20);
-    doc.setFontSize(10); doc.setTextColor(100);
-    doc.text(`Bank: ${b.bankName} | A/c: ${b.accNo}`, 14, 28);
-    doc.text(`Generated on: ${time.toLocaleString()}`, 14, 33);
-    
-    const body = [["Opening Balance", "B/F", "-", "0", "0", `₹ ${b.balance} ${b.type}`]];
-    doc.autoTable({
-      startY: 40,
-      head: [['Date', 'Particulars', 'Voucher', 'Dr', 'Cr', 'Balance']],
-      body: body,
-      headStyles: { fillColor: [212, 175, 55], textColor: [255, 255, 255] }, // Gold Header
-      alternateRowStyles: { fillColor: [245, 245, 245] }
+
+    doc.setFillColor(7, 23, 39);
+    doc.rect(0, 0, 220, 35, "F");
+
+    doc.setTextColor(255, 215, 0);
+    doc.setFontSize(22);
+    doc.text("BANK ACCOUNT LEDGER", 14, 18);
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.text(`Generated On : ${new Date().toLocaleString()}`, 14, 28);
+
+    doc.setTextColor(0,0,0);
+
+    doc.text(`Bank Name : ${bank.bankName}`,14,50);
+    doc.text(`Account No : ${bank.accountNo}`,14,58);
+    doc.text(`Firm Name : ${bank.linkedFirm}`,14,66);
+
+    autoTable(doc, {
+      startY: 80,
+      head: [[
+        "Date",
+        "Opening",
+        "Particular",
+        "Receipt",
+        "Payment",
+        "Closing"
+      ]],
+
+      body: bankLedger.map((item)=>([
+        item.date,
+        item.opening,
+        item.particular,
+        item.receipt,
+        item.payment,
+        item.closing,
+      ])),
+
+      headStyles:{
+        fillColor:[255,215,0],
+        textColor:[0,0,0],
+      },
+
+      bodyStyles:{
+        fillColor:[18,43,67],
+        textColor:[255,255,255],
+      },
     });
-    doc.save(`${b.bankName}_Ledger.pdf`);
+
+    doc.save(`${bank.bankName}_Ledger.pdf`);
   };
 
-  if (!user) return <LoginScreen />;
+  const exportExcel = (bank) => {
 
-  const dashboardData = banks.filter(b => selectedFirm === "All" || b.linkedFirm === selectedFirm);
+    const bankLedger = ledger.filter(
+      (l) => l.bankName === bank.bankName
+    );
+
+    const data = [
+      ["BANK ACCOUNT LEDGER"],
+      [],
+      ["Generated On", new Date().toLocaleString()],
+      ["Bank Name", bank.bankName],
+      ["Account Number", bank.accountNo],
+      ["Firm Name", bank.linkedFirm],
+      [],
+      [
+        "Date",
+        "Opening",
+        "Particular",
+        "Receipt",
+        "Payment",
+        "Closing",
+      ],
+    ];
+
+    bankLedger.forEach((item) => {
+      data.push([
+        item.date,
+        item.opening,
+        item.particular,
+        item.receipt,
+        item.payment,
+        item.closing,
+      ]);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    saveAs(fileData, `${bank.bankName}_Ledger.xlsx`);
+  };
 
   return (
-    <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-      {/* SIDEBAR */}
-      <aside className="executive-sidebar">
-        <div style={{ padding: '30px 20px' }}>
-          <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '20px' }}>BANKING PRO</h1>
-          <p style={{
-  fontSize: '10px',
-  color: '#94a3b8',
-  marginTop: '5px',
-  lineHeight: '16px'
-}}>
-  Executive Version 2.0
-</p>
-        </div>
-        <nav style={{ flex: 1 }}>
-          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('Dashboard')}><LayoutDashboard size={18}/> Dashboard</div>
-          <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => setActiveTab('Firm Master')}><Building2 size={18}/> Firm Master</div>
-          <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => setActiveTab('Bank Master')}><Landmark size={18}/> Bank Master</div>
-          <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => setActiveTab('User Master')}><Users size={18}/> User Master</div>
-          <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => setActiveTab('Setting')}><Settings size={18}/> Setting</div>
-        </nav>
-        <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
-          <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '11px' }}><div style={{
-  padding: '20px',
-  borderTop: '1px solid rgba(212,175,55,0.1)',
-  color: '#cbd5e1',
-  fontSize: '11px',
-  lineHeight: '20px'
-}}>
+    <div className="main-container">
+      <div className="sidebar">
 
-  <div style={{
-    color: '#d4af37',
-    fontWeight: 'bold',
-    marginBottom: '5px'
-  }}>
+        <div>
+
+          <div className="logo-section">
+            <h1>BANKING PRO</h1>
+            <p>Executive Version 2.0</p>
+          </div>
+
+          <div className="menu-section">
+
+            <button
+              className={activeMenu === "dashboard" ? "active-btn" : ""}
+              onClick={() => setActiveMenu("dashboard")}
+            >
+              Dashboard
+            </button>
+
+            <button
+              className={activeMenu === "firm" ? "active-btn" : ""}
+              onClick={() => setActiveMenu("firm")}
+            >
+              Firm Master
+            </button>
+
+            <button
+              className={activeMenu === "bank" ? "active-btn" : ""}
+              onClick={() => setActiveMenu("bank")}
+            >
+              Bank Master
+            </button>
+
+            <button
+              className={activeMenu === "user" ? "active-btn" : ""}
+              onClick={() => setActiveMenu("user")}
+            >
+              User Master
+            </button>
+
+            <button
+              className={activeMenu === "setting" ? "active-btn" : ""}
+              onClick={() => setActiveMenu("setting")}
+            >
+              Settings
+            </button>
+
+          </div>
+
+        </div>
+
+        <div className="branding">
+          Developed By
+          <br />
+          <strong>SOFTVIEW TECHNOLOGIES</strong>
+          <br />
+          +91 7972084304
+        </div>
+      </div>
+
+      <div className="content">
+
+        <div className="header">
+
+          <h2>Welcome To Banking Pro</h2>
+
+          <div className="top-right">
+
+            <div className="user-box">
+              <div className="user-name">ADMIN USER</div>
+              <div className="user-role">Administrator</div>
+              <div className="clock">
+                {time.toLocaleDateString()}
+                <br />
+                {time.toLocaleTimeString()}
+              </div>
+            </div>
+
+            <button
+              className="logout-btn"
+              onClick={() => setLoggedIn(false)}
+            >
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* DASHBOARD */}
+
+        {activeMenu === "dashboard" && (
+          <div className="card">
+
+            <div className="top-bar">
+              <h2>Dashboard</h2>
+
+              <select
+                value={selectedFirm}
+                onChange={(e) => setSelectedFirm(e.target.value)}
+              >
+                <option>All Firms</option>
+
+                {firms.map((item) => (
+                  <option key={item.id} value={item.firmName}>
+                    {item.firmName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Firm</th>
+                  <th>Bank</th>
+                  <th>Account No</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredBanks.map((item) => (
+                  <React.Fragment key={item.id}>
+
+                    <tr>
+                      <td>
+                        <button
+                          className="expand-btn"
+                          onClick={() =>
+                            setExpandedBank(
+                              expandedBank === item.bankName
+                                ? null
+                                : item.bankName
+                            )
+                          }
+                        >
+                          {expandedBank === item.bankName ? "▲" : "▼"}
+                        </button>
+                      </td>
+
+                      <td>{item.linkedFirm}</td>
+                      <td>{item.bankName}</td>
+                      <td>{item.accountNo}</td>
+                      <td>₹ {item.openingBalance}</td>
+                      <td>{item.status}</td>
+                    </tr>
+
+                    {expandedBank === item.bankName && (
+                      <tr>
+                        <td colSpan="6">
+
+                          <div className="ledger-box">
+
+                            <div className="ledger-top">
+
+                              <div className="ledger-buttons">
+                                <button>Daily</button>
+                                <button>Monthly</button>
+                                <button>Period Wise</button>
+                              </div>
+
+                              <div className="export-buttons">
+                                <button onClick={() => exportExcel(item)}>
+                                  Export Excel
+                                </button>
+
+                                <button onClick={() => exportPDF(item)}>
+                                  Export PDF
+                                </button>
+                              </div>
+                            </div>
+
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>Date</th>
+                                  <th>Opening</th>
+                                  <th>Particular</th>
+                                  <th>Receipt</th>
+                                  <th>Payment</th>
+                                  <th>Closing</th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                {ledger
+                                  .filter((l) => l.bankName === item.bankName)
+                                  .map((led) => (
+                                    <tr key={led.id}>
+                                      <td>{led.date}</td>
+                                      <td>₹ {led.opening}</td>
+                                      <td>{led.particular}</td>
+                                      <td className="receipt">
+                                        ↓ ₹ {led.receipt}
+                                      </td>
+                                      <td className="payment">
+                                        ↑ ₹ {led.payment}
+                                      </td>
+                                      <td>₹ {led.closing}</td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ========================== FINAL CORRECTED HEADER + LOGIC ==========================
+// Replace ONLY your current header block and table action sections with these.
+// This fixes:
+// - Login user display
+// - Date & live clock
+// - Logout button
+// - Developed by branding
+// - Executive Version 2.0
+// - Edit/Delete/Close logic
+// - JSX closing tag errors
+
+/* ================= HEADER ================= */
+
+<header className="luxury-header">
+
+  <div>
+    <div style={{
+      fontWeight: 'bold',
+      fontSize: '18px',
+      color: '#fff'
+    }}>
+      {activeTab.toUpperCase()}
+    </div>
+  </div>
+
+  <div
+    style={{
+      display: 'flex',
+      gap: '25px',
+      alignItems: 'center'
+    }}
+  >
+
+    <div
+      style={{
+        textAlign: 'right',
+        borderRight: '1px solid rgba(255,255,255,0.2)',
+        paddingRight: '15px'
+      }}
+    >
+
+      <div
+        style={{
+          fontSize: '12px',
+          fontWeight: '700',
+          color: '#ffffff'
+        }}
+      >
+        Login User : {user?.email}
+      </div>
+
+      <div
+        style={{
+          fontSize: '13px',
+          fontWeight: '900',
+          color: '#d4af37'
+        }}
+      >
+        {time.toLocaleTimeString()}
+      </div>
+
+      <div
+        style={{
+          fontSize: '10px',
+          color: '#cbd5e1'
+        }}
+      >
+        {time.toLocaleDateString()}
+      </div>
+
+    </div>
+
+    <button
+      className="btn-gold"
+      style={{
+        background: '#ffefef',
+        color: 'red'
+      }}
+      onClick={() => signOut(auth)}
+    >
+      <LogOut size={16}/>
+    </button>
+
+  </div>
+
+</header>
+
+/* ================= SIDEBAR TOP ================= */
+
+<div style={{ padding: '30px 20px' }}>
+
+  <h1
+    style={{
+      color: 'var(--gold)',
+      margin: 0,
+      fontSize: '20px'
+    }}
+  >
+    BANKING PRO
+  </h1>
+
+  <p
+    style={{
+      fontSize: '10px',
+      color: '#94a3b8',
+      marginTop: '5px',
+      lineHeight: '16px'
+    }}
+  >
+    Executive Version 2.0
+  </p>
+
+</div>
+
+/* ================= SIDEBAR FOOTER ================= */
+
+<div
+  style={{
+    padding: '20px',
+    borderTop: '1px solid rgba(212,175,55,0.1)',
+    color: '#cbd5e1',
+    fontSize: '11px',
+    lineHeight: '20px'
+  }}
+>
+
+  <div
+    style={{
+      color: '#d4af37',
+      fontWeight: 'bold',
+      marginBottom: '5px'
+    }}
+  >
     Developed By
   </div>
 
@@ -127,116 +664,20 @@ export default function App() {
     SOFTVIEW TECHNOLOGIES
   </div>
 
-  <div style={{
-    color: '#d4af37',
-    marginTop: '5px'
-  }}>
+  <div
+    style={{
+      color: '#d4af37',
+      marginTop: '5px'
+    }}
+  >
     +91 7972084304
   </div>
 
-</p>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
-        
-          <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-
-  <div style={{
-    textAlign: 'right',
-    borderRight: '1px solid #ddd',
-    paddingRight: '15px'
-  }}>
-
-    <div style={{
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#fff'
-    }}>
-      Login User : {user?.email}
-    </div>
-
-    <div style={{
-      fontSize: '13px',
-      fontWeight: '900',
-      color: '#d4af37'
-    }}>
-      {time.toLocaleTimeString()}
-    </div>
-
-    <div style={{
-      fontSize: '10px',
-      color: '#cbd5e1'
-    }}>
-      {time.toLocaleDateString()}
-    </div>
-
-  </div>
-
-  <button
-    className="btn-gold"
-    style={{
-      background: '#ffefef',
-      color: 'red'
-    }}
-    onClick={() => signOut(auth)}
-  >
-    <LogOut size={16}/>
-  </button>
-
 </div>
 
-        <div style={{ padding: '30px' }}>
-          {activeTab === "Dashboard" && (
-            <div>
-              <select className="btn-gold" style={{background:'white', marginBottom:'20px'}} onChange={(e) => setSelectedFirm(e.target.value)}>
-                <option value="All">All Firms</option>
-                {firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
-              </select>
-              <table className="royal-table">
-                <thead><tr><th>Bank Name</th><th>A/c No.</th><th style={{textAlign:'right'}}>Closing Balance</th><th>Ledger</th></tr></thead>
-                <tbody>
-                  {dashboardData.map(b => (
-                    <React.Fragment key={b.id}>
-                      <tr onClick={() => setExpandedBank(expandedBank === b.id ? null : b.id)} style={{cursor:'pointer'}}>
-                        <td>{b.bankName}</td><td>{b.accNo}</td><td style={{textAlign:'right'}}>₹ {b.balance} {b.type}</td>
-                        <td style={{textAlign:'center'}}><ChevronDown style={{color:'var(--gold)', transform: expandedBank === b.id ? 'rotate(180deg)' : 'none'}}/></td>
-                      </tr>
-                      {expandedBank === b.id && (
-                        <tr>
-                          <td colSpan="4" style={{padding:'20px', background:'#f1f5f9'}}>
-                             <div style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
-                               <button onClick={() => exportExcel(b)} className="btn-gold" style={{padding:'5px 15px'}}><Download size={14}/> Excel</button>
-                               <button onClick={() => exportPDF(b)} className="btn-gold" style={{padding:'5px 15px'}}><FileText size={14}/> PDF</button>
-                             </div>
-                             <table className="royal-table" style={{background:'white'}}>
-                               <thead><tr><th>Date</th><th>Particulars</th><th>Dr</th><th>Cr</th><th>Balance</th></tr></thead>
-                               <tbody>
-                                 <tr><td>Opening</td><td>Balance B/F</td><td>-</td><td>-</td><td>₹ {b.balance} {b.type}</td></tr>
-                               </tbody>
-                             </table>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+/* ================= FIRM MASTER ACTIONS ================= */
 
-          {activeTab === "Firm Master" && (
-             <div>
-               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'15px', background:'white', padding:'20px'}}>
-                  <input placeholder="Firm Name" className="btn-gold" style={{background:'white', textAlign:'left'}} onChange={e => setForm({...form, name: e.target.value})} />
-                  <input placeholder="GST No" className="btn-gold" style={{background:'white', textAlign:'left'}} onChange={e => setForm({...form, gst: e.target.value})} />
-                  <input placeholder="Address" className="btn-gold" style={{background:'white', textAlign:'left'}} onChange={e => setForm({...form, address: e.target.value})} />
-                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Firms")}>SAVE FIRM</button>
-               </div>
-               <table className="royal-table" style={{marginTop:'20px'}}>
-                 <thead><tr><th>Firm Name</th><th>GST</th><th>Address</th><th>Actions</th></tr></thead>
-                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td style={{display:'flex', gap:'10px'}}>
+<td style={{display:'flex', gap:'10px'}}>
 
   <Edit3
     size={16}
@@ -276,142 +717,89 @@ export default function App() {
   </button>
 
 </td>
-</tr>)}<tbody>
-  {banks.map(b =>
 
-    <tr key={b.id}>
+/* ================= BANK MASTER ACTIONS ================= */
 
-      <td>{b.bankName}</td>
+<td style={{display:'flex', gap:'10px'}}>
 
-      <td>{b.accNo}</td>
+  <Edit3
+    size={16}
+    color="#0a192f"
+    style={{cursor:'pointer'}}
+    onClick={() => setForm(b)}
+  />
 
-      <td>{b.balance} {b.type}</td>
+  <Trash2
+    size={16}
+    color="red"
+    style={{cursor:'pointer'}}
+    onClick={async () => {
+      if(window.confirm("Delete Bank ?")){
+        await deleteDoc(doc(db,"Bank Master",b.id))
+      }
+    }}
+  />
 
-      <td style={{display:'flex', gap:'10px'}}>
+  <button
+    style={{
+      background:'#0a192f',
+      color:'#fff',
+      border:'none',
+      borderRadius:'5px',
+      padding:'3px 10px'
+    }}
+    onClick={async () => {
+      await updateDoc(doc(db,"Bank Master",b.id),{
+        status:'Closed',
+        closedDate:new Date()
+      })
+    }}
+  >
+    Close
+  </button>
 
-        <Edit3
-          size={16}
-          color="#0a192f"
-          style={{cursor:'pointer'}}
-          onClick={() => setForm(b)}
-        />
+</td>
 
-        <Trash2
-          size={16}
-          color="red"
-          style={{cursor:'pointer'}}
-          onClick={async () => {
-            if(window.confirm("Delete Bank ?")){
-              await deleteDoc(doc(db,"Bank Master",b.id))
-            }
-          }}
-        />
+/* ================= USER MASTER ACTIONS ================= */
 
-        <button
-          style={{
-            background:'#0a192f',
-            color:'#fff',
-            border:'none',
-            borderRadius:'5px',
-            padding:'3px 10px'
-          }}
-          onClick={async () => {
-            await updateDoc(doc(db,"Bank Master",b.id),{
-              status:'Closed',
-              closedDate:new Date()
-            })
-          }}
-        >
-          Close
-        </button>
+<td style={{display:'flex', gap:'10px'}}>
 
-      </td>
+  <Edit3
+    size={16}
+    color="#0a192f"
+    style={{cursor:'pointer'}}
+    onClick={() => setForm(u)}
+  />
 
-    </tr>
+  <Trash2
+    size={16}
+    color="red"
+    style={{cursor:'pointer'}}
+    onClick={async () => {
+      if(window.confirm("Delete User ?")){
+        await deleteDoc(doc(db,"User Master",u.id))
+      }
+    }}
+  />
 
-  )}
-<tbody>
+  <button
+    style={{
+      background:'#0a192f',
+      color:'#fff',
+      border:'none',
+      borderRadius:'5px',
+      padding:'3px 10px'
+    }}
+    onClick={async () => {
+      await updateDoc(doc(db,"User Master",u.id),{
+        status:'Closed',
+        closedDate:new Date()
+      })
+    }}
+  >
+    Close
+  </button>
 
-  {usersList.map(u =>
+</td>
 
-    <tr key={u.id}>
-
-      <td>{u.uName}</td>
-
-      <td>{u.uEmail}</td>
-
-      <td>{u.role}</td>
-
-      <td style={{display:'flex', gap:'10px'}}>
-
-        <Edit3
-          size={16}
-          color="#0a192f"
-          style={{cursor:'pointer'}}
-          onClick={() => setForm(u)}
-        />
-
-        <Trash2
-          size={16}
-          color="red"
-          style={{cursor:'pointer'}}
-          onClick={async () => {
-            if(window.confirm("Delete User ?")){
-              await deleteDoc(doc(db,"User Master",u.id))
-            }
-          }}
-        />
-
-        <button
-          style={{
-            background:'#0a192f',
-            color:'#fff',
-            border:'none',
-            borderRadius:'5px',
-            padding:'3px 10px'
-          }}
-          onClick={async () => {
-            await updateDoc(doc(db,"User Master",u.id),{
-              status:'Closed',
-              closedDate:new Date()
-            })
-          }}
-        >
-          Close
-        </button>
-
-      </td>
-
-    </tr>
-
-  )}
-
-</tbody>
-
-          {activeTab === "Setting" && (
-            <div className="ledger-box" style={{background:'white', padding:'40px', width:'400px'}}>
-              <h3>Security Settings</h3>
-              <input type="password" placeholder="New Password" className="btn-gold" style={{background:'#f8fafc', width:'100%', marginBottom:'20px'}} onChange={e => setNewPass(e.target.value)} />
-              <button className="btn-gold" style={{width:'100%'}} onClick={() => updatePassword(auth.currentUser, newPass).then(() => alert("Password Updated")).catch(e => alert(e.message))}>UPDATE PASSWORD</button>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function LoginScreen() {
-  const [e, setE] = useState(""); const [p, setP] = useState("");
-  const h = (ev) => { ev.preventDefault(); signInWithEmailAndPassword(auth, e, p).catch(() => alert("Login Failed")); };
-  return (
-    <div style={{height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0a192f'}}>
-      <form onSubmit={h} style={{background:'white', padding:'50px', borderRadius:'15px', width:'400px', borderTop:'5px solid #d4af37'}}>
-        <h2 style={{textAlign:'center', color:'#0a192f'}}>BANKING PRO</h2>
-        <input type="email" placeholder="Email" className="btn-gold" style={{width:'100%', marginBottom:'15px', background:'#f8fafc'}} onChange={v => setE(v.target.value)} />
-        <input type="password" placeholder="Password" className="btn-gold" style={{width:'100%', marginBottom:'25px', background:'#f8fafc'}} onChange={v => setP(v.target.value)} />
-        <button type="submit" className="btn-gold" style={{width:'100%'}}>LOG IN</button>
-      </form>
-    </div>
-  );
-}
+export default App;
