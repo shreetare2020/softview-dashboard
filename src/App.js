@@ -16,6 +16,42 @@ import autoTable from "jspdf-autotable";
 function App() {
 
   const [loggedIn, setLoggedIn] = useState(true);
+  if (!loggedIn) {
+  return (
+    <div className="login-page">
+
+      <div className="login-card">
+
+        <h1>Banking Pro</h1>
+
+        <p>Executive Version 2.0</p>
+
+        <input placeholder="Login ID" />
+
+        <input
+          type="password"
+          placeholder="Password"
+        />
+
+        <button
+          onClick={() => setLoggedIn(true)}
+        >
+          Login
+        </button>
+
+        <div className="login-branding">
+          Developed By
+          <br />
+          SOFTVIEW TECHNOLOGIES
+          <br />
+          +91 7972084304
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [time, setTime] = useState(new Date());
 
