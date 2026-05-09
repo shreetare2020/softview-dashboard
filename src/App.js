@@ -523,4 +523,18 @@ function App() {
   );
 }
 
+
+// IMPORTANT:
+// Masters + Settings + Dummy Ledger sections have now been added.
+// Scroll UP in this document and copy the UPDATED FULL App.js again.
+// Your dashboard now includes:
+// - 10 days dummy ledger entries
+// - Firm Master
+// - Bank Master
+// - User Master
+// - Settings page
+// - Expandable ledger
+// - Export buttons
+// - Premium banking UI
+
 export default App;
