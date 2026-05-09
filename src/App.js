@@ -12,11 +12,8 @@ import {
 } from "firebase/firestore";
 
 import * as XLSX from "xlsx";
-
 import { saveAs } from "file-saver";
-
 import jsPDF from "jspdf";
-
 import autoTable from "jspdf-autotable";
 
 function App() {
@@ -26,17 +23,17 @@ function App() {
   const [loggedIn, setLoggedIn] =
     useState(true);
 
-  // ================= CLOCK =================
-
-  const [time, setTime] =
-    useState(new Date());
-
   // ================= MENU =================
 
   const [activeMenu, setActiveMenu] =
     useState("dashboard");
 
-  // ================= FIRMS =================
+  // ================= CLOCK =================
+
+  const [time, setTime] =
+    useState(new Date());
+
+  // ================= FIRM =================
 
   const [firms, setFirms] =
     useState([]);
@@ -44,7 +41,7 @@ function App() {
   const [firmName, setFirmName] =
     useState("");
 
-  // ================= BANKS =================
+  // ================= BANK =================
 
   const [banks, setBanks] =
     useState([]);
@@ -174,6 +171,9 @@ function App() {
 
   const saveFirm = async () => {
 
+    if (!firmName)
+      return alert("Enter Firm Name");
+
     await addDoc(
       collection(db, "firms"),
       {
@@ -192,6 +192,9 @@ function App() {
 
   const saveBank = async () => {
 
+    if (!bankName)
+      return alert("Enter Bank Name");
+
     await addDoc(
       collection(db, "banks"),
       {
@@ -205,6 +208,7 @@ function App() {
     setBankName("");
     setAccountNo("");
     setOpeningBalance("");
+    setLinkedFirm("");
 
     fetchBanks();
 
@@ -297,48 +301,10 @@ function App() {
           bankName
         );
 
-      const formattedData =
-        data.map((item) => ({
-
-          Date: item.date,
-
-          "Opening Balance":
-            item.openingBalance,
-
-          Particular:
-            item.particular,
-
-          Receipt:
-            item.receipt,
-
-          Payment:
-            item.payment,
-
-          "Closing Balance":
-            item.closingBalance,
-
-        }));
-
       const worksheet =
         XLSX.utils.json_to_sheet(
-          formattedData
+          data
         );
-
-      worksheet["!cols"] = [
-
-        { wch: 15 },
-
-        { wch: 20 },
-
-        { wch: 35 },
-
-        { wch: 15 },
-
-        { wch: 15 },
-
-        { wch: 20 },
-
-      ];
 
       const workbook =
         XLSX.utils.book_new();
@@ -429,17 +395,17 @@ function App() {
 
         headStyles: {
 
-          fillColor: [255, 215, 0],
+          fillColor: [255,215,0],
 
-          textColor: [0, 0, 0],
+          textColor: [0,0,0],
 
         },
 
         bodyStyles: {
 
-          fillColor: [18, 44, 71],
+          fillColor: [18,44,71],
 
-          textColor: [255, 255, 255],
+          textColor: [255,255,255],
 
         },
 
@@ -462,13 +428,18 @@ function App() {
 
           <h1>BANKING PRO</h1>
 
+          <h3>
+            Executive Version 2.0
+          </h3>
+
           <input
+            type="text"
             placeholder="Login ID"
           />
 
           <input
-            placeholder="Password"
             type="password"
+            placeholder="Password"
           />
 
           <button
@@ -495,33 +466,37 @@ function App() {
 
       <div className="sidebar">
 
-        <h1>BANKING PRO</h1>
+        <div>
 
-        <button
-          onClick={() =>
-            setActiveMenu(
-              "dashboard"
-            )
-          }
-        >
-          Dashboard
-        </button>
+          <h1>BANKING PRO</h1>
 
-        <button
-          onClick={() =>
-            setActiveMenu("firm")
-          }
-        >
-          Firm Master
-        </button>
+          <button
+            onClick={() =>
+              setActiveMenu(
+                "dashboard"
+              )
+            }
+          >
+            Dashboard
+          </button>
 
-        <button
-          onClick={() =>
-            setActiveMenu("bank")
-          }
-        >
-          Bank Master
-        </button>
+          <button
+            onClick={() =>
+              setActiveMenu("firm")
+            }
+          >
+            Firm Master
+          </button>
+
+          <button
+            onClick={() =>
+              setActiveMenu("bank")
+            }
+          >
+            Bank Master
+          </button>
+
+        </div>
 
       </div>
 
@@ -548,7 +523,7 @@ function App() {
 
         </div>
 
-        {/* DASHBOARD */}
+        {/* ================= DASHBOARD ================= */}
 
         {activeMenu ===
           "dashboard" && (
@@ -683,8 +658,6 @@ function App() {
 
                             <div className="ledger-box">
 
-                              {/* FILTER */}
-
                               <div className="ledger-top">
 
                                 <div className="ledger-buttons">
@@ -763,8 +736,6 @@ function App() {
                                 )}
 
                               </div>
-
-                              {/* LEDGER TABLE */}
 
                               <table className="ledger-table">
 
@@ -870,8 +841,6 @@ function App() {
 
                               </table>
 
-                              {/* EXPORT */}
-
                               <div className="export-buttons">
 
                                 <button
@@ -905,6 +874,229 @@ function App() {
                       )}
 
                     </React.Fragment>
+
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
+        {/* ================= FIRM MASTER ================= */}
+
+        {activeMenu ===
+          "firm" && (
+
+          <div className="card">
+
+            <h2>Firm Master</h2>
+
+            <div className="form-grid">
+
+              <input
+                type="text"
+                placeholder="Firm Name"
+                value={firmName}
+                onChange={(e) =>
+                  setFirmName(
+                    e.target.value
+                  )
+                }
+              />
+
+              <button
+                onClick={saveFirm}
+              >
+                Save Firm
+              </button>
+
+            </div>
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Firm Name
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {firms.map(
+                  (item) => (
+
+                    <tr
+                      key={item.id}
+                    >
+
+                      <td>
+                        {
+                          item.firmName
+                        }
+                      </td>
+
+                    </tr>
+
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
+        {/* ================= BANK MASTER ================= */}
+
+        {activeMenu ===
+          "bank" && (
+
+          <div className="card">
+
+            <h2>Bank Master</h2>
+
+            <div className="form-grid">
+
+              <input
+                type="text"
+                placeholder="Bank Name"
+                value={bankName}
+                onChange={(e) =>
+                  setBankName(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Account No"
+                value={accountNo}
+                onChange={(e) =>
+                  setAccountNo(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                type="number"
+                placeholder="Opening Balance"
+                value={
+                  openingBalance
+                }
+                onChange={(e) =>
+                  setOpeningBalance(
+                    e.target.value
+                  )
+                }
+              />
+
+              <select
+                value={linkedFirm}
+                onChange={(e) =>
+                  setLinkedFirm(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="">
+                  Select Firm
+                </option>
+
+                {firms.map(
+                  (item) => (
+
+                    <option
+                      key={item.id}
+                      value={
+                        item.firmName
+                      }
+                    >
+                      {
+                        item.firmName
+                      }
+                    </option>
+
+                  )
+                )}
+
+              </select>
+
+              <button
+                onClick={saveBank}
+              >
+                Save Bank
+              </button>
+
+            </div>
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>Firm</th>
+
+                  <th>Bank</th>
+
+                  <th>Account</th>
+
+                  <th>Balance</th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {banks.map(
+                  (item) => (
+
+                    <tr
+                      key={item.id}
+                    >
+
+                      <td>
+                        {
+                          item.linkedFirm
+                        }
+                      </td>
+
+                      <td>
+                        {
+                          item.bankName
+                        }
+                      </td>
+
+                      <td>
+                        {
+                          item.accountNo
+                        }
+                      </td>
+
+                      <td>
+                        ₹
+                        {
+                          item.openingBalance
+                        }
+                      </td>
+
+                    </tr>
 
                   )
                 )}
