@@ -61,6 +61,11 @@ export default function App() {
       alert("Account Closed!");
     }
   };
+  const handleEdit = (data) => {
+  setForm(data); // Ye pura data form state mein daal dega
+  window.scrollTo({ top: 0, behavior: 'smooth' }); // Screen ko upar le jayega jahan form hai
+  alert("Data loaded in form! Ab edit karke 'Save' dabayein.");
+};
 
   const exportExcel = (b) => {
     const data = [{ Date: "Opening Balance", Particulars: "B/F", Voucher: "-", Dr: 0, Cr: 0, Balance: b.balance }];
@@ -177,7 +182,13 @@ export default function App() {
                  <thead><tr><th>Firm Name</th><th>GST</th><th>Actions</th></tr></thead>
                  <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td>
                   <td>
-                    <Edit3 size={16} color="blue" style={{cursor:'pointer', marginRight:'10px'}}/>
+                    
+                    <Edit3 
+  size={16} 
+  color="blue" 
+  style={{cursor:'pointer', marginRight:'10px'}} 
+  onClick={() => handleEdit(f)} 
+/>
                     <Trash2 size={16} color="red" style={{cursor:'pointer'}} onClick={() => handleDelete("Firms", f.id)}/>
                   </td>
                  </tr>)}</tbody>
@@ -200,7 +211,13 @@ export default function App() {
                  <tbody>{banks.map(b => <tr key={b.id}>
                     <td>{b.bankName}</td><td>{b.accNo}</td><td>{b.balance} {b.type}</td>
                     <td>
-                      <Edit3 size={16} color="blue" style={{cursor:'pointer', marginRight:'10px'}}/>
+                      
+                      <Edit3 
+  size={16} 
+  color="blue" 
+  style={{cursor:'pointer', marginRight:'10px'}} 
+  onClick={() => handleEdit(b)} 
+/>
                       <Trash2 size={16} color="red" style={{cursor:'pointer', marginRight:'10px'}} onClick={() => handleDelete("Bank Master", b.id)}/>
                       <button onClick={() => handleCloseEntry("Bank Master", b.id)} style={{fontSize:'9px', background: b.status==='Closed'?'#64748b':'#ef4444', color:'white', border:'none', padding:'4px 8px', borderRadius:'4px'}}>{b.status === 'Closed' ? `CLOSED: ${b.closingDate}` : 'CLOSE'}</button>
                     </td>
