@@ -1,100 +1,94 @@
-:root {
-  --dark-blue: #0a192f;
-  --gold: #d4af37;
-  --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f9e29c 50%, #b8860b 100%);
-  --soft-white: #f8fafc;
-}
-
 body {
-  background-color: var(--soft-white);
-  font-family: 'Segoe UI', Roboto, sans-serif;
   margin: 0;
+  font-family: Arial;
+  background: #f4f6f8;
 }
 
-.luxury-header {
-  background: var(--dark-blue);
-  color: white;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 3px solid var(--gold);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.executive-sidebar {
-  background: var(--dark-blue);
-  width: 260px;
+/* LOGIN */
+.login-container {
   height: 100vh;
-  position: fixed;
-  border-right: 1px solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0f172a;
+}
+
+.login-box {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
+  width: 300px;
 }
 
-.nav-item {
-  padding: 15px 25px;
-  color: #cbd5e1;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-left: 4px solid transparent;
+.login-box input {
+  margin: 10px 0;
+  padding: 10px;
 }
 
-.nav-item:hover,
-.nav-item.active {
-  background: rgba(212, 175, 55, 0.1);
-  color: var(--gold);
-  border-left: 4px solid var(--gold);
-}
-
-.btn-gold {
-  background: var(--gold-gradient);
-  color: var(--dark-blue);
+.login-box button {
+  padding: 10px;
+  background: #2563eb;
+  color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.btn-gold:hover {
-  transform: translateY(-2px);
+/* APP LAYOUT */
+.app {
+  display: flex;
 }
 
-.royal-table {
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: #111827;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+}
+
+.sidebar button {
+  display: block;
   width: 100%;
-  border-collapse: collapse;
+  margin: 10px 0;
+  padding: 10px;
+  background: #1f2937;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
+/* CARDS */
+.card-container {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
   background: white;
+  padding: 20px;
   border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  flex: 1;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.royal-table th {
-  background: var(--dark-blue);
-  color: var(--gold);
-  padding: 15px;
-  text-align: left;
+/* TABLE */
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-.royal-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.status-closed {
-  color: #ef4444;
-  font-weight: bold;
-  font-size: 10px;
-}
-
-.status-open {
-  color: #16a34a;
-  font-weight: bold;
-  font-size: 10px;
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
 }
