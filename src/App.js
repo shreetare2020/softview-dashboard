@@ -140,7 +140,7 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
-        <header className="luxury-header">
+        
           <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
 
   <div style={{
