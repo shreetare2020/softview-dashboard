@@ -205,123 +205,66 @@ export default function App() {
                   <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Firms")}>SAVE FIRM</button>
                </div>
                <table className="royal-table" style={{marginTop:'20px'}}>
-                 <thead><tr><th>Firm Name</th><th>GST</th><th>Address</th><th>Actions</th></tr></thead>
-                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>{f.address}</td><td style={{display:'flex', gap:'10px'}}>
+  <thead>
+    <tr>
+      <th>Bank Name</th>
+      <th>A/c No</th>
+      <th>Balance</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
 
-  <Edit3
-    size={16}
-    color="#0a192f"
-    style={{cursor:'pointer'}}
-    onClick={() => setForm(f)}
-  />
+  <tbody>
+    {banks.map(b => (
+      <tr key={b.id}>
+        <td>{b.bankName}</td>
+        <td>{b.accNo}</td>
+        <td>{b.balance} {b.type}</td>
 
-  <Trash2
-    size={16}
-    color="red"
-    style={{cursor:'pointer'}}
-    onClick={async () => {
-      if(window.confirm("Delete Firm ?")){
-        await deleteDoc(doc(db,"Firms",f.id))
-      }
-    }}
-  />
+        <td style={{display:'flex', gap:'10px'}}>
 
-  <button
-    style={{
-      background:'#0a192f',
-      color:'#fff',
-      border:'none',
-      borderRadius:'5px',
-      padding:'4px 10px',
-      cursor:'pointer'
-    }}
-    onClick={async () => {
-      await updateDoc(doc(db,"Firms",f.id),{
-        status:'Closed',
-        closedDate:new Date()
-      })
-    }}
-  >
-    Close
-  </button>
+          <Edit3
+            size={16}
+            color="#0a192f"
+            style={{cursor:'pointer'}}
+            onClick={() => setForm(b)}
+          />
 
-</td></td></tr>)}</tbody>
-               </table>
-             </div>
-          )}
+          <Trash2
+            size={16}
+            color="red"
+            style={{cursor:'pointer'}}
+            onClick={async () => {
+              if(window.confirm("Delete Bank ?")){
+                await deleteDoc(doc(db,"Bank Master",b.id))
+              }
+            }}
+          />
 
-          {activeTab === "Bank Master" && (
-             <div>
-               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', background:'white', padding:'20px'}}>
-                  <input placeholder="Bank Name" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, bankName: e.target.value})} />
-                  <input placeholder="Branch" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, branch: e.target.value})} />
-                  <input placeholder="A/c No" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, accNo: e.target.value})} />
-                  <input placeholder="Opening Bal" className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, balance: e.target.value})} />
-                  <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, type: e.target.value})}><option>dr/cr</option><option value="dr">dr</option><option value="cr">cr</option></select>
-                  <select className="btn-gold" style={{background:'white'}} onChange={e => setForm({...form, linkedFirm: e.target.value})}><option>Link Firm</option>{firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}</select>
-                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>SAVE BANK</button>
-               </div>
-               <table className="royal-table" style={{marginTop:'20px'}}>
-                 <thead>
-<tr>
-<th>Bank Name</th>
-<th>A/c No</th>
-<th>Balance</th>
-<th>Actions</th>
-</tr>
-</thead>
+          <button
+            style={{
+              background:'#0a192f',
+              color:'#fff',
+              border:'none',
+              borderRadius:'5px',
+              padding:'4px 10px',
+              cursor:'pointer'
+            }}
+            onClick={async () => {
+              await updateDoc(doc(db,"Bank Master",b.id),{
+                status:'Closed',
+                closedDate:new Date()
+              })
+            }}
+          >
+            Close
+          </button>
 
-<tbody>
-{banks.map(b =>
-<tr key={b.id}>
-<td>{b.bankName}</td>
-<td>{b.accNo}</td>
-<td>{b.balance} {b.type}</td>
-
-<td style={{display:'flex', gap:'10px'}}>
-
-<Edit3
-size={16}
-color="#0a192f"
-style={{cursor:'pointer'}}
-onClick={() => setForm(b)}
-/>
-
-<Trash2
-size={16}
-color="red"
-style={{cursor:'pointer'}}
-onClick={async () => {
-if(window.confirm("Delete Bank ?")){
-await deleteDoc(doc(db,"Bank Master",b.id))
-}
-}}
-/>
-
-<button
-style={{
-background:'#0a192f',
-color:'#fff',
-border:'none',
-borderRadius:'5px',
-padding:'4px 10px',
-cursor:'pointer'
-}}
-onClick={async () => {
-await updateDoc(doc(db,"Bank Master",b.id),{
-status:'Closed',
-closedDate:new Date()
-})
-}}
->
-Close
-</button>
-
-</td>
-</tr>
-)}
-</tbody>
-               </table>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
              </div>
           )}
 
@@ -334,68 +277,68 @@ Close
                 <button className="btn-gold" onClick={() => handleSave("User Master")}>SAVE USER</button>
               </div>
               <table className="royal-table" style={{marginTop:'20px'}}>
-                <thead>
-<tr>
-<th>Name</th>
-<th>Email</th>
-<th>Role</th>
-<th>Actions</th>
-</tr>
-</thead>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
 
-<tbody>
-{usersList.map(u =>
-<tr key={u.id}>
+  <tbody>
+    {usersList.map(u => (
+      <tr key={u.id}>
 
-<td>{u.uName}</td>
-<td>{u.uEmail}</td>
-<td>{u.role}</td>
+        <td>{u.uName}</td>
+        <td>{u.uEmail}</td>
+        <td>{u.role}</td>
 
-<td style={{display:'flex', gap:'10px'}}>
+        <td style={{display:'flex', gap:'10px'}}>
 
-<Edit3
-size={16}
-color="#0a192f"
-style={{cursor:'pointer'}}
-onClick={() => setForm(u)}
-/>
+          <Edit3
+            size={16}
+            color="#0a192f"
+            style={{cursor:'pointer'}}
+            onClick={() => setForm(u)}
+          />
 
-<Trash2
-size={16}
-color="red"
-style={{cursor:'pointer'}}
-onClick={async () => {
-if(window.confirm("Delete User ?")){
-await deleteDoc(doc(db,"User Master",u.id))
-}
-}}
-/>
+          <Trash2
+            size={16}
+            color="red"
+            style={{cursor:'pointer'}}
+            onClick={async () => {
+              if(window.confirm("Delete User ?")){
+                await deleteDoc(doc(db,"User Master",u.id))
+              }
+            }}
+          />
 
-<button
-style={{
-background:'#0a192f',
-color:'#fff',
-border:'none',
-borderRadius:'5px',
-padding:'4px 10px',
-cursor:'pointer'
-}}
-onClick={async () => {
-await updateDoc(doc(db,"User Master",u.id),{
-status:'Closed',
-closedDate:new Date()
-})
-}}
->
-Close
-</button>
+          <button
+            style={{
+              background:'#0a192f',
+              color:'#fff',
+              border:'none',
+              borderRadius:'5px',
+              padding:'4px 10px',
+              cursor:'pointer'
+            }}
+            onClick={async () => {
+              await updateDoc(doc(db,"User Master",u.id),{
+                status:'Closed',
+                closedDate:new Date()
+              })
+            }}
+          >
+            Close
+          </button>
 
-</td>
+        </td>
 
-</tr>
-)}
-</tbody>
-              </table>
+      </tr>
+    ))}
+  </tbody>
+</table>
             </div>
           )}
 
