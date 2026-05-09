@@ -1,6 +1,5 @@
 // ============================ APP.JS ============================
-// PREMIUM BANKING PRO EXECUTIVE VERSION 2.0
-// FIREBASE CONNECTED VERSION
+// FULL PREMIUM BANKING PRO WITH FIREBASE + FIRM LINKING
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
@@ -30,7 +29,7 @@ function App() {
 
   const [time, setTime] = useState(new Date());
 
-  // ================= FIRMS =================
+  // ================= FIRM =================
 
   const [firmName, setFirmName] = useState("");
   const [gstNo, setGstNo] = useState("");
@@ -38,7 +37,7 @@ function App() {
 
   const [firms, setFirms] = useState([]);
 
-  // ================= BANKS =================
+  // ================= BANK =================
 
   const [bankName, setBankName] = useState("");
   const [bankBranch, setBankBranch] = useState("");
@@ -46,11 +45,12 @@ function App() {
   const [ifsc, setIfsc] = useState("");
   const [openingBalance, setOpeningBalance] = useState("");
   const [drcr, setDrcr] = useState("DR");
-  const [selectedFirm, setSelectedFirm] = useState("All Firms");
+
+  const [linkedFirm, setLinkedFirm] = useState("");
 
   const [banks, setBanks] = useState([]);
 
-  // ================= USERS =================
+  // ================= USER =================
 
   const [userCode, setUserCode] = useState("");
   const [userName, setUserName] = useState("");
@@ -60,9 +60,10 @@ function App() {
 
   const [users, setUsers] = useState([]);
 
-  // ================= LEDGER =================
+  // ================= FILTER =================
 
-  const [ledger, setLedger] = useState([]);
+  const [selectedFirm, setSelectedFirm] =
+    useState("All Firms");
 
   // ================= CLOCK =================
 
@@ -83,15 +84,16 @@ function App() {
     fetchFirms();
     fetchBanks();
     fetchUsers();
-    fetchLedger();
 
   }, []);
 
-  // ================= FETCH FUNCTIONS =================
+  // ================= FETCH FIRMS =================
 
   const fetchFirms = async () => {
 
-    const snapshot = await getDocs(collection(db, "firms"));
+    const snapshot = await getDocs(
+      collection(db, "firms")
+    );
 
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -101,9 +103,13 @@ function App() {
     setFirms(data);
   };
 
+  // ================= FETCH BANKS =================
+
   const fetchBanks = async () => {
 
-    const snapshot = await getDocs(collection(db, "banks"));
+    const snapshot = await getDocs(
+      collection(db, "banks")
+    );
 
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -113,9 +119,13 @@ function App() {
     setBanks(data);
   };
 
+  // ================= FETCH USERS =================
+
   const fetchUsers = async () => {
 
-    const snapshot = await getDocs(collection(db, "users"));
+    const snapshot = await getDocs(
+      collection(db, "users")
+    );
 
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -125,23 +135,12 @@ function App() {
     setUsers(data);
   };
 
-  const fetchLedger = async () => {
-
-    const snapshot = await getDocs(collection(db, "ledger"));
-
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setLedger(data);
-  };
-
   // ================= SAVE FIRM =================
 
   const saveFirm = async () => {
 
-    if (!firmName) return alert("Enter Firm Name");
+    if (!firmName)
+      return alert("Enter Firm Name");
 
     await addDoc(collection(db, "firms"), {
       firmName,
@@ -164,7 +163,8 @@ function App() {
 
   const saveBank = async () => {
 
-    if (!bankName) return alert("Enter Bank Name");
+    if (!bankName)
+      return alert("Enter Bank Name");
 
     await addDoc(collection(db, "banks"), {
       bankName,
@@ -173,7 +173,7 @@ function App() {
       ifsc,
       openingBalance,
       drcr,
-      firmName,
+      linkedFirm,
       status: "ACTIVE",
       closeDate: "",
     });
@@ -183,6 +183,7 @@ function App() {
     setAccountNo("");
     setIfsc("");
     setOpeningBalance("");
+    setLinkedFirm("");
 
     fetchBanks();
 
@@ -241,7 +242,8 @@ function App() {
 
     await updateDoc(doc(db, "firms", id), {
       status: "CLOSED",
-      closeDate: new Date().toLocaleDateString(),
+      closeDate:
+        new Date().toLocaleDateString(),
     });
 
     fetchFirms();
@@ -251,19 +253,21 @@ function App() {
 
     await updateDoc(doc(db, "banks", id), {
       status: "CLOSED",
-      closeDate: new Date().toLocaleDateString(),
+      closeDate:
+        new Date().toLocaleDateString(),
     });
 
     fetchBanks();
   };
 
-  // ================= FILTER =================
+  // ================= FILTERED BANKS =================
 
   const filteredBanks =
     selectedFirm === "All Firms"
       ? banks
       : banks.filter(
-          (item) => item.firmName === selectedFirm
+          (item) =>
+            item.linkedFirm === selectedFirm
         );
 
   // ================= LOGIN PAGE =================
@@ -278,22 +282,36 @@ function App() {
 
           <h1>BANKING PRO</h1>
 
-          <h3>Executive Version 2.0</h3>
+          <h3>
+            Executive Version 2.0
+          </h3>
 
-          <input type="text" placeholder="Login ID" />
+          <input
+            type="text"
+            placeholder="Login ID"
+          />
 
-          <input type="password" placeholder="Password" />
+          <input
+            type="password"
+            placeholder="Password"
+          />
 
-          <button onClick={() => setLoggedIn(true)}>
+          <button
+            onClick={() => setLoggedIn(true)}
+          >
             LOGIN
           </button>
 
           <div className="developer">
+
             Developed By
             <br />
+
             SOFTVIEW TECHNOLOGIES
             <br />
+
             +91 7972084304
+
           </div>
 
         </div>
@@ -318,27 +336,49 @@ function App() {
 
             <h1>BANKING PRO</h1>
 
-            <p>Executive Version 2.0</p>
+            <p>
+              Executive Version 2.0
+            </p>
 
           </div>
 
-          <button onClick={() => setActiveMenu("dashboard")}>
+          <button
+            onClick={() =>
+              setActiveMenu("dashboard")
+            }
+          >
             Dashboard
           </button>
 
-          <button onClick={() => setActiveMenu("firm")}>
+          <button
+            onClick={() =>
+              setActiveMenu("firm")
+            }
+          >
             Firm Master
           </button>
 
-          <button onClick={() => setActiveMenu("bank")}>
+          <button
+            onClick={() =>
+              setActiveMenu("bank")
+            }
+          >
             Bank Master
           </button>
 
-          <button onClick={() => setActiveMenu("user")}>
+          <button
+            onClick={() =>
+              setActiveMenu("user")
+            }
+          >
             User Master
           </button>
 
-          <button onClick={() => setActiveMenu("setting")}>
+          <button
+            onClick={() =>
+              setActiveMenu("setting")
+            }
+          >
             Settings
           </button>
 
@@ -348,8 +388,10 @@ function App() {
 
           Developed By
           <br />
+
           SOFTVIEW TECHNOLOGIES
           <br />
+
           +91 7972084304
 
         </div>
@@ -386,7 +428,9 @@ function App() {
 
             <button
               className="logout-btn"
-              onClick={() => setLoggedIn(false)}
+              onClick={() =>
+                setLoggedIn(false)
+              }
             >
               Logout
             </button>
@@ -408,17 +452,32 @@ function App() {
               <select
                 value={selectedFirm}
                 onChange={(e) =>
-                  setSelectedFirm(e.target.value)
+                  setSelectedFirm(
+                    e.target.value
+                  )
                 }
               >
 
-                <option>All Firms</option>
+                <option>
+                  All Firms
+                </option>
 
-                {firms.map((item) => (
-                  <option key={item.id}>
-                    {item.firmName}
-                  </option>
-                ))}
+                {firms
+                  .filter(
+                    (item) =>
+                      item.status ===
+                      "ACTIVE"
+                  )
+                  .map((item) => (
+
+                    <option
+                      key={item.id}
+                      value={item.firmName}
+                    >
+                      {item.firmName}
+                    </option>
+
+                  ))}
 
               </select>
 
@@ -429,10 +488,17 @@ function App() {
               <thead>
 
                 <tr>
+
+                  <th>Firm</th>
+
                   <th>Bank Name</th>
+
                   <th>Account No</th>
+
                   <th>Balance</th>
+
                   <th>Status</th>
+
                 </tr>
 
               </thead>
@@ -443,15 +509,25 @@ function App() {
 
                   <tr key={item.id}>
 
-                    <td>{item.bankName}</td>
+                    <td>
+                      {item.linkedFirm}
+                    </td>
 
-                    <td>{item.accountNo}</td>
+                    <td>
+                      {item.bankName}
+                    </td>
+
+                    <td>
+                      {item.accountNo}
+                    </td>
 
                     <td>
                       ₹ {item.openingBalance}
                     </td>
 
-                    <td>{item.status}</td>
+                    <td>
+                      {item.status}
+                    </td>
 
                   </tr>
 
@@ -479,7 +555,9 @@ function App() {
                 placeholder="Firm Name"
                 value={firmName}
                 onChange={(e) =>
-                  setFirmName(e.target.value)
+                  setFirmName(
+                    e.target.value
+                  )
                 }
               />
 
@@ -487,7 +565,9 @@ function App() {
                 placeholder="GST No"
                 value={gstNo}
                 onChange={(e) =>
-                  setGstNo(e.target.value)
+                  setGstNo(
+                    e.target.value
+                  )
                 }
               />
 
@@ -495,7 +575,9 @@ function App() {
                 placeholder="Office Address"
                 value={officeAddress}
                 onChange={(e) =>
-                  setOfficeAddress(e.target.value)
+                  setOfficeAddress(
+                    e.target.value
+                  )
                 }
               />
 
@@ -510,10 +592,17 @@ function App() {
               <thead>
 
                 <tr>
-                  <th>Firm Name</th>
+
+                  <th>Firm</th>
+
                   <th>GST</th>
+
                   <th>Address</th>
+
+                  <th>Status</th>
+
                   <th>Action</th>
+
                 </tr>
 
               </thead>
@@ -524,18 +613,30 @@ function App() {
 
                   <tr key={item.id}>
 
-                    <td>{item.firmName}</td>
+                    <td>
+                      {item.firmName}
+                    </td>
 
-                    <td>{item.gstNo}</td>
+                    <td>
+                      {item.gstNo}
+                    </td>
 
-                    <td>{item.officeAddress}</td>
+                    <td>
+                      {item.officeAddress}
+                    </td>
+
+                    <td>
+                      {item.status}
+                    </td>
 
                     <td>
 
                       <button
                         className="delete"
                         onClick={() =>
-                          deleteFirm(item.id)
+                          deleteFirm(
+                            item.id
+                          )
                         }
                       >
                         Delete
@@ -544,7 +645,9 @@ function App() {
                       <button
                         className="close"
                         onClick={() =>
-                          closeFirm(item.id)
+                          closeFirm(
+                            item.id
+                          )
                         }
                       >
                         Close
@@ -578,15 +681,19 @@ function App() {
                 placeholder="Bank Name"
                 value={bankName}
                 onChange={(e) =>
-                  setBankName(e.target.value)
+                  setBankName(
+                    e.target.value
+                  )
                 }
               />
 
               <input
-                placeholder="Bank Branch"
+                placeholder="Branch"
                 value={bankBranch}
                 onChange={(e) =>
-                  setBankBranch(e.target.value)
+                  setBankBranch(
+                    e.target.value
+                  )
                 }
               />
 
@@ -594,7 +701,9 @@ function App() {
                 placeholder="Account No"
                 value={accountNo}
                 onChange={(e) =>
-                  setAccountNo(e.target.value)
+                  setAccountNo(
+                    e.target.value
+                  )
                 }
               />
 
@@ -602,7 +711,9 @@ function App() {
                 placeholder="IFSC"
                 value={ifsc}
                 onChange={(e) =>
-                  setIfsc(e.target.value)
+                  setIfsc(
+                    e.target.value
+                  )
                 }
               />
 
@@ -610,18 +721,59 @@ function App() {
                 placeholder="Opening Balance"
                 value={openingBalance}
                 onChange={(e) =>
-                  setOpeningBalance(e.target.value)
+                  setOpeningBalance(
+                    e.target.value
+                  )
                 }
               />
 
               <select
                 value={drcr}
                 onChange={(e) =>
-                  setDrcr(e.target.value)
+                  setDrcr(
+                    e.target.value
+                  )
                 }
               >
+
                 <option>DR</option>
+
                 <option>CR</option>
+
+              </select>
+
+              {/* LINKED FIRM */}
+
+              <select
+                value={linkedFirm}
+                onChange={(e) =>
+                  setLinkedFirm(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="">
+                  Select Firm
+                </option>
+
+                {firms
+                  .filter(
+                    (item) =>
+                      item.status ===
+                      "ACTIVE"
+                  )
+                  .map((item) => (
+
+                    <option
+                      key={item.id}
+                      value={item.firmName}
+                    >
+                      {item.firmName}
+                    </option>
+
+                  ))}
+
               </select>
 
             </div>
@@ -635,11 +787,21 @@ function App() {
               <thead>
 
                 <tr>
+
+                  <th>Firm</th>
+
                   <th>Bank</th>
+
                   <th>Branch</th>
+
                   <th>Account</th>
+
                   <th>Balance</th>
+
+                  <th>Status</th>
+
                   <th>Action</th>
+
                 </tr>
 
               </thead>
@@ -650,20 +812,38 @@ function App() {
 
                   <tr key={item.id}>
 
-                    <td>{item.bankName}</td>
+                    <td>
+                      {item.linkedFirm}
+                    </td>
 
-                    <td>{item.bankBranch}</td>
+                    <td>
+                      {item.bankName}
+                    </td>
 
-                    <td>{item.accountNo}</td>
+                    <td>
+                      {item.bankBranch}
+                    </td>
 
-                    <td>{item.openingBalance}</td>
+                    <td>
+                      {item.accountNo}
+                    </td>
+
+                    <td>
+                      ₹ {item.openingBalance}
+                    </td>
+
+                    <td>
+                      {item.status}
+                    </td>
 
                     <td>
 
                       <button
                         className="delete"
                         onClick={() =>
-                          deleteBank(item.id)
+                          deleteBank(
+                            item.id
+                          )
                         }
                       >
                         Delete
@@ -672,7 +852,9 @@ function App() {
                       <button
                         className="close"
                         onClick={() =>
-                          closeBank(item.id)
+                          closeBank(
+                            item.id
+                          )
                         }
                       >
                         Close
@@ -706,7 +888,9 @@ function App() {
                 placeholder="User Code"
                 value={userCode}
                 onChange={(e) =>
-                  setUserCode(e.target.value)
+                  setUserCode(
+                    e.target.value
+                  )
                 }
               />
 
@@ -714,7 +898,9 @@ function App() {
                 placeholder="User Name"
                 value={userName}
                 onChange={(e) =>
-                  setUserName(e.target.value)
+                  setUserName(
+                    e.target.value
+                  )
                 }
               />
 
@@ -722,7 +908,9 @@ function App() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) =>
-                  setEmail(e.target.value)
+                  setEmail(
+                    e.target.value
+                  )
                 }
               />
 
@@ -730,19 +918,33 @@ function App() {
                 placeholder="Mobile"
                 value={mobile}
                 onChange={(e) =>
-                  setMobile(e.target.value)
+                  setMobile(
+                    e.target.value
+                  )
                 }
               />
 
               <select
                 value={role}
                 onChange={(e) =>
-                  setRole(e.target.value)
+                  setRole(
+                    e.target.value
+                  )
                 }
               >
-                <option>Admin</option>
-                <option>Operator</option>
-                <option>Viewer</option>
+
+                <option>
+                  Admin
+                </option>
+
+                <option>
+                  Operator
+                </option>
+
+                <option>
+                  Viewer
+                </option>
+
               </select>
 
             </div>
@@ -756,11 +958,17 @@ function App() {
               <thead>
 
                 <tr>
+
                   <th>User</th>
+
                   <th>Email</th>
+
                   <th>Mobile</th>
+
                   <th>Role</th>
+
                   <th>Action</th>
+
                 </tr>
 
               </thead>
@@ -771,20 +979,30 @@ function App() {
 
                   <tr key={item.id}>
 
-                    <td>{item.userName}</td>
+                    <td>
+                      {item.userName}
+                    </td>
 
-                    <td>{item.email}</td>
+                    <td>
+                      {item.email}
+                    </td>
 
-                    <td>{item.mobile}</td>
+                    <td>
+                      {item.mobile}
+                    </td>
 
-                    <td>{item.role}</td>
+                    <td>
+                      {item.role}
+                    </td>
 
                     <td>
 
                       <button
                         className="delete"
                         onClick={() =>
-                          deleteUser(item.id)
+                          deleteUser(
+                            item.id
+                          )
                         }
                       >
                         Delete
@@ -814,11 +1032,20 @@ function App() {
 
             <div className="grid">
 
-              <input type="password" placeholder="Old Password" />
+              <input
+                type="password"
+                placeholder="Old Password"
+              />
 
-              <input type="password" placeholder="New Password" />
+              <input
+                type="password"
+                placeholder="New Password"
+              />
 
-              <input type="password" placeholder="Confirm Password" />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+              />
 
             </div>
 

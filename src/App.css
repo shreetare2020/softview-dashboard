@@ -4,11 +4,11 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Segoe UI;
+  font-family:'Segoe UI';
 }
 
 body{
-  background:#06121d;
+  background:#071421;
 }
 
 /* LOGIN */
@@ -18,27 +18,27 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg,#06121d,#0f2b46);
+  background:linear-gradient(135deg,#06121d,#0e2742);
 }
 
 .login-card{
-  width:400px;
-  background:#0f2235;
+  width:420px;
   padding:40px;
   border-radius:25px;
+  background:#0f2235;
   border:1px solid gold;
-  box-shadow:0 0 25px rgba(255,215,0,0.3);
+  box-shadow:0 0 25px rgba(255,215,0,0.25);
 }
 
 .login-card h1{
-  color:gold;
   text-align:center;
+  color:gold;
   font-size:38px;
 }
 
 .login-card h3{
-  color:white;
   text-align:center;
+  color:white;
   margin-bottom:30px;
 }
 
@@ -58,15 +58,15 @@ body{
   border:none;
   border-radius:12px;
   background:gold;
-  color:#06121d;
+  color:black;
   font-weight:bold;
   cursor:pointer;
 }
 
 .developer{
   margin-top:25px;
-  color:#d9d9d9;
   text-align:center;
+  color:#d7d7d7;
   line-height:25px;
 }
 
@@ -107,8 +107,9 @@ body{
   border-radius:14px;
   background:#123456;
   color:white;
-  cursor:pointer;
   font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
 }
 
 .sidebar button:hover{
@@ -118,8 +119,8 @@ body{
 
 .branding{
   color:#cccccc;
-  line-height:24px;
   font-size:13px;
+  line-height:24px;
 }
 
 /* CONTENT */
@@ -133,13 +134,13 @@ body{
 
 .header{
   background:#0f2235;
+  border:1px solid rgba(255,215,0,0.2);
   padding:20px;
   border-radius:20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:25px;
-  border:1px solid rgba(255,215,0,0.2);
 }
 
 .welcome{
@@ -150,15 +151,15 @@ body{
 
 .right-header{
   display:flex;
-  align-items:center;
   gap:15px;
+  align-items:center;
 }
 
 .clock{
   background:#123456;
-  color:white;
   padding:12px 18px;
-  border-radius:14px;
+  border-radius:12px;
+  color:white;
   text-align:center;
 }
 
@@ -235,8 +236,8 @@ table th{
 
 table td{
   padding:15px;
-  color:white;
   background:#132c46;
+  color:white;
   border-bottom:1px solid rgba(255,255,255,0.1);
 }
 
@@ -257,7 +258,7 @@ table td{
   color:white;
 }
 
-/* DELETE */
+/* ACTION BUTTONS */
 
 .delete{
   background:red !important;
@@ -268,6 +269,17 @@ table td{
 .close{
   background:orange !important;
   color:white !important;
+}
+
+/* DROPDOWN */
+
+select{
+  cursor:pointer;
+}
+
+select option{
+  background:#0f2235;
+  color:white;
 }
 
 /* RESPONSIVE */
@@ -289,8 +301,8 @@ table td{
 
   .top-bar{
     flex-direction:column;
-    align-items:flex-start;
     gap:15px;
+    align-items:flex-start;
   }
 
 }
