@@ -1,5 +1,5 @@
 // ============================ APP.JS ============================
-// FULL PREMIUM BANKING PRO WITH FIREBASE + FIRM LINKING
+// FULL PREMIUM BANKING PRO WITH FIREBASE + LEDGER EXPAND
 
 import React, { useEffect, useState } from "react";
 import "./App.css";
@@ -23,47 +23,97 @@ function App() {
 
   // ================= MENU =================
 
-  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [activeMenu, setActiveMenu] =
+    useState("dashboard");
 
   // ================= CLOCK =================
 
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] =
+    useState(new Date());
 
-  // ================= FIRM =================
+  // ================= FIRMS =================
 
-  const [firmName, setFirmName] = useState("");
-  const [gstNo, setGstNo] = useState("");
-  const [officeAddress, setOfficeAddress] = useState("");
+  const [firmName, setFirmName] =
+    useState("");
 
-  const [firms, setFirms] = useState([]);
+  const [gstNo, setGstNo] =
+    useState("");
 
-  // ================= BANK =================
+  const [officeAddress, setOfficeAddress] =
+    useState("");
 
-  const [bankName, setBankName] = useState("");
-  const [bankBranch, setBankBranch] = useState("");
-  const [accountNo, setAccountNo] = useState("");
-  const [ifsc, setIfsc] = useState("");
-  const [openingBalance, setOpeningBalance] = useState("");
-  const [drcr, setDrcr] = useState("DR");
+  const [firms, setFirms] =
+    useState([]);
 
-  const [linkedFirm, setLinkedFirm] = useState("");
+  // ================= BANKS =================
 
-  const [banks, setBanks] = useState([]);
+  const [bankName, setBankName] =
+    useState("");
 
-  // ================= USER =================
+  const [bankBranch, setBankBranch] =
+    useState("");
 
-  const [userCode, setUserCode] = useState("");
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [role, setRole] = useState("Admin");
+  const [accountNo, setAccountNo] =
+    useState("");
 
-  const [users, setUsers] = useState([]);
+  const [ifsc, setIfsc] =
+    useState("");
+
+  const [openingBalance, setOpeningBalance] =
+    useState("");
+
+  const [drcr, setDrcr] =
+    useState("DR");
+
+  const [linkedFirm, setLinkedFirm] =
+    useState("");
+
+  const [banks, setBanks] =
+    useState([]);
+
+  // ================= USERS =================
+
+  const [userCode, setUserCode] =
+    useState("");
+
+  const [userName, setUserName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [mobile, setMobile] =
+    useState("");
+
+  const [role, setRole] =
+    useState("Admin");
+
+  const [users, setUsers] =
+    useState([]);
+
+  // ================= LEDGER =================
+
+  const [ledger, setLedger] =
+    useState([]);
 
   // ================= FILTER =================
 
   const [selectedFirm, setSelectedFirm] =
     useState("All Firms");
+
+  // ================= LEDGER FILTER =================
+
+  const [expandedBank, setExpandedBank] =
+    useState(null);
+
+  const [ledgerFilter, setLedgerFilter] =
+    useState("daily");
+
+  const [fromDate, setFromDate] =
+    useState("");
+
+  const [toDate, setToDate] =
+    useState("");
 
   // ================= CLOCK =================
 
@@ -84,6 +134,7 @@ function App() {
     fetchFirms();
     fetchBanks();
     fetchUsers();
+    fetchLedger();
 
   }, []);
 
@@ -133,6 +184,22 @@ function App() {
     }));
 
     setUsers(data);
+  };
+
+  // ================= FETCH LEDGER =================
+
+  const fetchLedger = async () => {
+
+    const snapshot = await getDocs(
+      collection(db, "ledger")
+    );
+
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setLedger(data);
   };
 
   // ================= SAVE FIRM =================
@@ -270,6 +337,54 @@ function App() {
             item.linkedFirm === selectedFirm
         );
 
+  // ================= FILTER LEDGER =================
+
+  const getFilteredLedger = (bankName) => {
+
+    const today = new Date();
+
+    return ledger.filter((item) => {
+
+      if (item.bankName !== bankName)
+        return false;
+
+      const itemDate =
+        new Date(item.date);
+
+      if (ledgerFilter === "daily") {
+
+        return (
+          itemDate.toDateString() ===
+          today.toDateString()
+        );
+      }
+
+      if (ledgerFilter === "monthly") {
+
+        return (
+          itemDate.getMonth() ===
+            today.getMonth() &&
+          itemDate.getFullYear() ===
+            today.getFullYear()
+        );
+      }
+
+      if (
+        ledgerFilter === "period" &&
+        fromDate &&
+        toDate
+      ) {
+
+        return (
+          itemDate >= new Date(fromDate) &&
+          itemDate <= new Date(toDate)
+        );
+      }
+
+      return true;
+    });
+  };
+
   // ================= LOGIN PAGE =================
 
   if (!loggedIn) {
@@ -297,7 +412,9 @@ function App() {
           />
 
           <button
-            onClick={() => setLoggedIn(true)}
+            onClick={() =>
+              setLoggedIn(true)
+            }
           >
             LOGIN
           </button>
@@ -415,11 +532,9 @@ function App() {
             <div className="clock">
 
               Admin User
-
               <br />
 
               {time.toLocaleDateString()}
-
               <br />
 
               {time.toLocaleTimeString()}
@@ -489,13 +604,15 @@ function App() {
 
                 <tr>
 
+                  <th></th>
+
                   <th>Firm</th>
 
                   <th>Bank Name</th>
 
                   <th>Account No</th>
 
-                  <th>Balance</th>
+                  <th>Closing Balance</th>
 
                   <th>Status</th>
 
@@ -507,551 +624,291 @@ function App() {
 
                 {filteredBanks.map((item) => (
 
-                  <tr key={item.id}>
+                  <React.Fragment
+                    key={item.id}
+                  >
 
-                    <td>
-                      {item.linkedFirm}
-                    </td>
+                    {/* BANK ROW */}
 
-                    <td>
-                      {item.bankName}
-                    </td>
+                    <tr>
 
-                    <td>
-                      {item.accountNo}
-                    </td>
+                      <td>
 
-                    <td>
-                      ₹ {item.openingBalance}
-                    </td>
+                        <button
+                          className="expand-btn"
+                          onClick={() =>
+                            setExpandedBank(
+                              expandedBank ===
+                                item.bankName
+                                ? null
+                                : item.bankName
+                            )
+                          }
+                        >
 
-                    <td>
-                      {item.status}
-                    </td>
+                          {expandedBank ===
+                          item.bankName
+                            ? "▲"
+                            : "▼"}
 
-                  </tr>
+                        </button>
+
+                      </td>
+
+                      <td>
+                        {item.linkedFirm}
+                      </td>
+
+                      <td>
+                        {item.bankName}
+                      </td>
+
+                      <td>
+                        {item.accountNo}
+                      </td>
+
+                      <td>
+                        ₹{" "}
+                        {item.openingBalance}
+                      </td>
+
+                      <td>
+                        {item.status}
+                      </td>
+
+                    </tr>
+
+                    {/* LEDGER */}
+
+                    {expandedBank ===
+                      item.bankName && (
+
+                      <tr>
+
+                        <td colSpan="6">
+
+                          <div className="ledger-box">
+
+                            {/* FILTERS */}
+
+                            <div className="ledger-top">
+
+                              <div className="ledger-buttons">
+
+                                <button
+                                  className={
+                                    ledgerFilter ===
+                                    "daily"
+                                      ? "active-filter"
+                                      : ""
+                                  }
+                                  onClick={() =>
+                                    setLedgerFilter(
+                                      "daily"
+                                    )
+                                  }
+                                >
+                                  Daily
+                                </button>
+
+                                <button
+                                  className={
+                                    ledgerFilter ===
+                                    "monthly"
+                                      ? "active-filter"
+                                      : ""
+                                  }
+                                  onClick={() =>
+                                    setLedgerFilter(
+                                      "monthly"
+                                    )
+                                  }
+                                >
+                                  Monthly
+                                </button>
+
+                                <button
+                                  className={
+                                    ledgerFilter ===
+                                    "period"
+                                      ? "active-filter"
+                                      : ""
+                                  }
+                                  onClick={() =>
+                                    setLedgerFilter(
+                                      "period"
+                                    )
+                                  }
+                                >
+                                  Period Wise
+                                </button>
+
+                              </div>
+
+                              {ledgerFilter ===
+                                "period" && (
+
+                                <div className="date-filter">
+
+                                  <input
+                                    type="date"
+                                    value={fromDate}
+                                    onChange={(e) =>
+                                      setFromDate(
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+
+                                  <input
+                                    type="date"
+                                    value={toDate}
+                                    onChange={(e) =>
+                                      setToDate(
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+
+                                </div>
+
+                              )}
+
+                            </div>
+
+                            {/* LEDGER TABLE */}
+
+                            <table className="ledger-table">
+
+                              <thead>
+
+                                <tr>
+
+                                  <th>
+                                    Date
+                                  </th>
+
+                                  <th>
+                                    Opening Balance
+                                  </th>
+
+                                  <th>
+                                    Particular
+                                  </th>
+
+                                  <th>
+                                    Receipt
+                                  </th>
+
+                                  <th>
+                                    Payment
+                                  </th>
+
+                                  <th>
+                                    Closing Balance
+                                  </th>
+
+                                </tr>
+
+                              </thead>
+
+                              <tbody>
+
+                                {getFilteredLedger(
+                                  item.bankName
+                                ).map(
+                                  (led) => (
+
+                                    <tr
+                                      key={
+                                        led.id
+                                      }
+                                    >
+
+                                      <td>
+                                        {
+                                          led.date
+                                        }
+                                      </td>
+
+                                      <td>
+                                        ₹{" "}
+                                        {
+                                          led.openingBalance
+                                        }
+                                      </td>
+
+                                      <td>
+                                        {
+                                          led.particular
+                                        }
+                                      </td>
+
+                                      <td className="receipt">
+
+                                        ↓ ₹{" "}
+                                        {
+                                          led.receipt
+                                        }
+
+                                      </td>
+
+                                      <td className="payment">
+
+                                        ↑ ₹{" "}
+                                        {
+                                          led.payment
+                                        }
+
+                                      </td>
+
+                                      <td>
+
+                                        ₹{" "}
+                                        {
+                                          led.closingBalance
+                                        }
+
+                                      </td>
+
+                                    </tr>
+
+                                  )
+                                )}
+
+                              </tbody>
+
+                            </table>
+
+                            {/* EXPORT */}
+
+                            <div className="export-buttons">
+
+                              <button>
+                                Export Excel
+                              </button>
+
+                              <button>
+                                Export PDF
+                              </button>
+
+                            </div>
+
+                          </div>
+
+                        </td>
+
+                      </tr>
+
+                    )}
+
+                  </React.Fragment>
 
                 ))}
 
               </tbody>
 
             </table>
-
-          </div>
-
-        )}
-
-        {/* FIRM MASTER */}
-
-        {activeMenu === "firm" && (
-
-          <div className="card">
-
-            <h2>Firm Master</h2>
-
-            <div className="grid">
-
-              <input
-                placeholder="Firm Name"
-                value={firmName}
-                onChange={(e) =>
-                  setFirmName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="GST No"
-                value={gstNo}
-                onChange={(e) =>
-                  setGstNo(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Office Address"
-                value={officeAddress}
-                onChange={(e) =>
-                  setOfficeAddress(
-                    e.target.value
-                  )
-                }
-              />
-
-            </div>
-
-            <button onClick={saveFirm}>
-              Save Firm
-            </button>
-
-            <table>
-
-              <thead>
-
-                <tr>
-
-                  <th>Firm</th>
-
-                  <th>GST</th>
-
-                  <th>Address</th>
-
-                  <th>Status</th>
-
-                  <th>Action</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {firms.map((item) => (
-
-                  <tr key={item.id}>
-
-                    <td>
-                      {item.firmName}
-                    </td>
-
-                    <td>
-                      {item.gstNo}
-                    </td>
-
-                    <td>
-                      {item.officeAddress}
-                    </td>
-
-                    <td>
-                      {item.status}
-                    </td>
-
-                    <td>
-
-                      <button
-                        className="delete"
-                        onClick={() =>
-                          deleteFirm(
-                            item.id
-                          )
-                        }
-                      >
-                        Delete
-                      </button>
-
-                      <button
-                        className="close"
-                        onClick={() =>
-                          closeFirm(
-                            item.id
-                          )
-                        }
-                      >
-                        Close
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        )}
-
-        {/* BANK MASTER */}
-
-        {activeMenu === "bank" && (
-
-          <div className="card">
-
-            <h2>Bank Master</h2>
-
-            <div className="grid">
-
-              <input
-                placeholder="Bank Name"
-                value={bankName}
-                onChange={(e) =>
-                  setBankName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Branch"
-                value={bankBranch}
-                onChange={(e) =>
-                  setBankBranch(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Account No"
-                value={accountNo}
-                onChange={(e) =>
-                  setAccountNo(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="IFSC"
-                value={ifsc}
-                onChange={(e) =>
-                  setIfsc(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Opening Balance"
-                value={openingBalance}
-                onChange={(e) =>
-                  setOpeningBalance(
-                    e.target.value
-                  )
-                }
-              />
-
-              <select
-                value={drcr}
-                onChange={(e) =>
-                  setDrcr(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option>DR</option>
-
-                <option>CR</option>
-
-              </select>
-
-              {/* LINKED FIRM */}
-
-              <select
-                value={linkedFirm}
-                onChange={(e) =>
-                  setLinkedFirm(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Select Firm
-                </option>
-
-                {firms
-                  .filter(
-                    (item) =>
-                      item.status ===
-                      "ACTIVE"
-                  )
-                  .map((item) => (
-
-                    <option
-                      key={item.id}
-                      value={item.firmName}
-                    >
-                      {item.firmName}
-                    </option>
-
-                  ))}
-
-              </select>
-
-            </div>
-
-            <button onClick={saveBank}>
-              Save Bank
-            </button>
-
-            <table>
-
-              <thead>
-
-                <tr>
-
-                  <th>Firm</th>
-
-                  <th>Bank</th>
-
-                  <th>Branch</th>
-
-                  <th>Account</th>
-
-                  <th>Balance</th>
-
-                  <th>Status</th>
-
-                  <th>Action</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {banks.map((item) => (
-
-                  <tr key={item.id}>
-
-                    <td>
-                      {item.linkedFirm}
-                    </td>
-
-                    <td>
-                      {item.bankName}
-                    </td>
-
-                    <td>
-                      {item.bankBranch}
-                    </td>
-
-                    <td>
-                      {item.accountNo}
-                    </td>
-
-                    <td>
-                      ₹ {item.openingBalance}
-                    </td>
-
-                    <td>
-                      {item.status}
-                    </td>
-
-                    <td>
-
-                      <button
-                        className="delete"
-                        onClick={() =>
-                          deleteBank(
-                            item.id
-                          )
-                        }
-                      >
-                        Delete
-                      </button>
-
-                      <button
-                        className="close"
-                        onClick={() =>
-                          closeBank(
-                            item.id
-                          )
-                        }
-                      >
-                        Close
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        )}
-
-        {/* USER MASTER */}
-
-        {activeMenu === "user" && (
-
-          <div className="card">
-
-            <h2>User Master</h2>
-
-            <div className="grid">
-
-              <input
-                placeholder="User Code"
-                value={userCode}
-                onChange={(e) =>
-                  setUserCode(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="User Name"
-                value={userName}
-                onChange={(e) =>
-                  setUserName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Mobile"
-                value={mobile}
-                onChange={(e) =>
-                  setMobile(
-                    e.target.value
-                  )
-                }
-              />
-
-              <select
-                value={role}
-                onChange={(e) =>
-                  setRole(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option>
-                  Admin
-                </option>
-
-                <option>
-                  Operator
-                </option>
-
-                <option>
-                  Viewer
-                </option>
-
-              </select>
-
-            </div>
-
-            <button onClick={saveUser}>
-              Save User
-            </button>
-
-            <table>
-
-              <thead>
-
-                <tr>
-
-                  <th>User</th>
-
-                  <th>Email</th>
-
-                  <th>Mobile</th>
-
-                  <th>Role</th>
-
-                  <th>Action</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {users.map((item) => (
-
-                  <tr key={item.id}>
-
-                    <td>
-                      {item.userName}
-                    </td>
-
-                    <td>
-                      {item.email}
-                    </td>
-
-                    <td>
-                      {item.mobile}
-                    </td>
-
-                    <td>
-                      {item.role}
-                    </td>
-
-                    <td>
-
-                      <button
-                        className="delete"
-                        onClick={() =>
-                          deleteUser(
-                            item.id
-                          )
-                        }
-                      >
-                        Delete
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        )}
-
-        {/* SETTINGS */}
-
-        {activeMenu === "setting" && (
-
-          <div className="card">
-
-            <h2>Settings</h2>
-
-            <div className="grid">
-
-              <input
-                type="password"
-                placeholder="Old Password"
-              />
-
-              <input
-                type="password"
-                placeholder="New Password"
-              />
-
-              <input
-                type="password"
-                placeholder="Confirm Password"
-              />
-
-            </div>
-
-            <button>
-              Change Password
-            </button>
 
           </div>
 
