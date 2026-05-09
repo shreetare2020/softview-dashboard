@@ -221,7 +221,8 @@ export default function App() {
         <td>{b.accNo}</td>
         <td>{b.balance} {b.type}</td>
 
-        <td style={{display:'flex', gap:'10px'}}>
+        <td>
+<div className="action-wrap">
 
           <Edit3
             size={16}
@@ -242,6 +243,7 @@ export default function App() {
           />
 
           <button
+className="action-btn"
             style={{
               background:'#0a192f',
               color:'#fff',
@@ -259,6 +261,7 @@ export default function App() {
           >
             Close
           </button>
+          </div>
 
         </td>
       </tr>
