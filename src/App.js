@@ -18,7 +18,7 @@ export default function App() {
   const [selectedFirm, setSelectedFirm] = useState("All");
   const [expandedBank, setExpandedBank] = useState(null);
   const [time, setTime] = useState(new Date());
-  const [form, setForm] = useState({}); // Isi mein saara data load hoga
+  const [form, setForm] = useState({}); // Isi mein edit ka data load hoga
   const [newPass, setNewPass] = useState("");
 
   useEffect(() => {
@@ -38,35 +38,35 @@ export default function App() {
     return () => { clearInterval(timer); unsub(); };
   }, [user]);
 
-  // --- SMART SAVE/UPDATE LOGIC ---
+  // --- SAVE & UPDATE LOGIC ---
   const handleSave = async (coll) => {
     if (userRole === "Viewer") return alert("Permission Denied!");
     try {
       if (form.id) {
-        // Agar ID hai toh Update karo
-        const docRef = doc(db, coll, form.id);
-        const { id, ...updateData } = form; // ID ko update data se alag karo
-        await updateDoc(docRef, { ...updateData, updatedAt: new Date() });
-        alert("Data Updated Successfully!");
+        // UPDATE: Purana data badlega
+        const { id, ...dataWithoutId } = form;
+        await updateDoc(doc(db, coll, id), { ...dataWithoutId, updatedAt: new Date() });
+        alert("Record Updated!");
       } else {
-        // Naya Data Save karo
+        // SAVE: Naya data add hoga
         await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
         alert("New Record Created!");
       }
-      setForm({}); // Form clear karo
+      setForm({}); // Form khali kar dena
     } catch (e) { alert("Error: " + e.message); }
   };
 
-  const handleEdit = (data) => {
-    setForm(data); // Pura data form mein load
+  // --- EDIT: Data wapas form mein layega ---
+  const handleEdit = (item) => {
+    setForm(item);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (coll, id) => {
-    if (window.confirm("Are you sure?")) await deleteDoc(doc(db, coll, id));
+    if (window.confirm("Confirm Delete?")) await deleteDoc(doc(db, coll, id));
   };
 
-  const handleCloseEntry = async (coll, id) => {
+  const handleCloseAccount = async (coll, id) => {
     const cDate = prompt("Closing Date (DD/MM/YYYY):", new Date().toLocaleDateString());
     if (cDate) await updateDoc(doc(db, coll, id), { status: 'Closed', closingDate: cDate });
   };
@@ -76,44 +76,45 @@ export default function App() {
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       
-      {/* SIDEBAR */}
+      {/* SIDEBAR WITH FOOTER */}
       <aside className="executive-sidebar">
         <div style={{ padding: '30px 20px' }}>
           <h1 style={{ color: 'var(--gold)', margin: 0, fontSize: '20px' }}>BANKING PRO</h1>
           <p style={{ fontSize: '9px', color: '#64748b' }}>SOFTVIEW TECHNOLOGIES</p>
         </div>
         <nav style={{ flex: 1 }}>
-          {['Dashboard', 'Firm Master', 'Bank Master', 'User Master', 'Setting'].map(tab => (
-            <div key={tab} className={`nav-item ${activeTab === tab ? 'active' : ''}`} onClick={() => {setActiveTab(tab); setForm({});}}>
-               {tab === 'Dashboard' && <LayoutDashboard size={18}/>}
-               {tab === 'Firm Master' && <Building2 size={18}/>}
-               {tab === 'Bank Master' && <Landmark size={18}/>}
-               {tab === 'User Master' && <Users size={18}/>}
-               {tab === 'Setting' && <Settings size={18}/>}
-               {tab}
-            </div>
-          ))}
+          <div className={`nav-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => {setActiveTab('Dashboard'); setForm({});}}><LayoutDashboard size={18}/> Dashboard</div>
+          <div className={`nav-item ${activeTab === 'Firm Master' ? 'active' : ''}`} onClick={() => {setActiveTab('Firm Master'); setForm({});}}><Building2 size={18}/> Firm Master</div>
+          <div className={`nav-item ${activeTab === 'Bank Master' ? 'active' : ''}`} onClick={() => {setActiveTab('Bank Master'); setForm({});}}><Landmark size={18}/> Bank Master</div>
+          <div className={`nav-item ${activeTab === 'User Master' ? 'active' : ''}`} onClick={() => {setActiveTab('User Master'); setForm({});}}><Users size={18}/> User Master</div>
+          <div className={`nav-item ${activeTab === 'Setting' ? 'active' : ''}`} onClick={() => {setActiveTab('Setting'); setForm({});}}><Settings size={18}/> Setting</div>
         </nav>
+        
         <div style={{ padding: '20px', borderTop: '1px solid rgba(212,175,55,0.1)', background: 'rgba(0,0,0,0.2)' }}>
           <p style={{ color: '#64748b', fontSize: '9px', margin: 0 }}>DEVELOPED BY</p>
           <p style={{ color: 'var(--gold)', fontWeight: 'bold', fontSize: '13px', margin: '2px 0' }}>SOFTVIEW TECHNOLOGIES</p>
-          <p style={{ color: '#cbd5e1', fontSize: '10px', margin: 0 }}>+91 7972084304</p>
+          <p style={{ color: '#cbd5e1', fontSize: '10px', margin: 0 }}>📞 7972084304</p>
         </div>
       </aside>
 
+      {/* MAIN AREA */}
       <main style={{ flex: 1, marginLeft: '260px', overflowY: 'auto', background: '#f8fafc' }}>
         <header className="luxury-header">
           <div style={{ fontWeight: 'bold' }}>{activeTab.toUpperCase()}</div>
           <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
             <div style={{ textAlign: 'right', borderRight: '1px solid rgba(212,175,55,0.3)', paddingRight: '15px' }}>
-                <div style={{ fontSize: '14px', fontWeight: '900', color: 'white' }}>{user.email.split('@')[0].toUpperCase()} <span style={{ fontSize: '10px', background: 'var(--gold)', color: 'black', padding: '2px 6px', borderRadius: '4px' }}>{userRole}</span></div>
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>{time.toLocaleTimeString()} | {time.toLocaleDateString()}</div>
+                <div style={{ fontSize: '14px', fontWeight: '900', color: 'white' }}>
+                  {user.email.split('@')[0].toUpperCase()} 
+                  <span style={{ fontSize: '10px', background: 'var(--gold)', color: 'black', padding: '2px 6px', borderRadius: '4px', marginLeft: '10px' }}>{userRole}</span>
+                </div>
+                <div style={{ fontSize: '11px', color: '#94a3b8' }}><Clock size={10}/> {time.toLocaleTimeString()} | {time.toLocaleDateString()}</div>
             </div>
-            <button className="btn-gold" style={{ background: '#ffefef', color: 'red' }} onClick={() => signOut(auth)}><LogOut size={16}/></button>
+            <button className="btn-gold" style={{ background: '#ffefef', color: 'red' }} onClick={() => signOut(auth)}><LogOut size={18}/></button>
           </div>
         </header>
 
         <div style={{ padding: '30px' }}>
+          
           {/* FIRM MASTER */}
           {activeTab === "Firm Master" && (
              <div>
@@ -121,14 +122,16 @@ export default function App() {
                   <input placeholder="Firm Name" className="btn-gold" style={{background:'white', textAlign:'left'}} value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} />
                   <input placeholder="GST No" className="btn-gold" style={{background:'white', textAlign:'left'}} value={form.gst || ""} onChange={e => setForm({...form, gst: e.target.value})} />
                   <input placeholder="Address" className="btn-gold" style={{background:'white', textAlign:'left'}} value={form.address || ""} onChange={e => setForm({...form, address: e.target.value})} />
-                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Firms")}>{form.id ? "UPDATE FIRM" : "SAVE FIRM"}</button>
+                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Firms")}>{form.id ? "UPDATE FIRM DETAILS" : "SAVE NEW FIRM"}</button>
                </div>
                <table className="royal-table" style={{marginTop:'20px'}}>
                  <thead><tr><th>Firm Name</th><th>GST</th><th>Actions</th></tr></thead>
-                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td><td>
-                    <Edit3 size={16} color="blue" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleEdit(f)}/>
-                    <Trash2 size={16} color="red" style={{cursor:'pointer'}} onClick={() => handleDelete("Firms", f.id)}/>
-                 </td></tr>)}</tbody>
+                 <tbody>{firms.map(f => <tr key={f.id}><td>{f.name}</td><td>{f.gst}</td>
+                  <td>
+                    <Edit3 size={18} color="blue" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleEdit(f)} />
+                    <Trash2 size={18} color="red" style={{cursor:'pointer'}} onClick={() => handleDelete("Firms", f.id)} />
+                  </td>
+                 </tr>)}</tbody>
                </table>
              </div>
           )}
@@ -142,20 +145,25 @@ export default function App() {
                   <input placeholder="Opening Bal" className="btn-gold" style={{background:'white'}} value={form.balance || ""} onChange={e => setForm({...form, balance: e.target.value})} />
                   <select className="btn-gold" style={{background:'white'}} value={form.type || ""} onChange={e => setForm({...form, type: e.target.value})}><option value="">Type</option><option value="dr">dr</option><option value="cr">cr</option></select>
                   <select className="btn-gold" style={{background:'white'}} value={form.linkedFirm || ""} onChange={e => setForm({...form, linkedFirm: e.target.value})}><option value="">Link Firm</option>{firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}</select>
-                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>{form.id ? "UPDATE BANK" : "SAVE BANK"}</button>
+                  <button className="btn-gold" style={{gridColumn:'span 3'}} onClick={() => handleSave("Bank Master")}>{form.id ? "UPDATE BANK DETAILS" : "SAVE NEW BANK"}</button>
                </div>
                <table className="royal-table" style={{marginTop:'20px'}}>
                  <thead><tr><th>Bank Name</th><th>A/c No</th><th>Balance</th><th>Actions</th></tr></thead>
-                 <tbody>{banks.map(b => <tr key={b.id}><td>{b.bankName}</td><td>{b.accNo}</td><td>{b.balance} {b.type}</td><td>
-                    <Edit3 size={16} color="blue" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleEdit(b)}/>
-                    <Trash2 size={16} color="red" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleDelete("Bank Master", b.id)}/>
-                    <button onClick={() => handleCloseEntry("Bank Master", b.id)} style={{fontSize:'9px', background: b.status==='Closed'?'#64748b':'#ef4444', color:'white', border:'none', padding:'4px 8px', borderRadius:'4px'}}>{b.status === 'Closed' ? `CLOSED: ${b.closingDate}` : 'CLOSE'}</button>
-                 </td></tr>)}</tbody>
+                 <tbody>{banks.map(b => <tr key={b.id}>
+                    <td>{b.bankName}</td><td>{b.accNo}</td><td>{b.balance} {b.type}</td>
+                    <td>
+                      <Edit3 size={18} color="blue" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleEdit(b)} />
+                      <Trash2 size={18} color="red" style={{cursor:'pointer', marginRight:'15px'}} onClick={() => handleDelete("Bank Master", b.id)} />
+                      <button onClick={() => handleCloseAccount("Bank Master", b.id)} style={{fontSize:'10px', background: b.status==='Closed'?'#64748b':'#ef4444', color:'white', border:'none', padding:'4px 10px', borderRadius:'4px', cursor:'pointer'}}>
+                        {b.status === 'Closed' ? `CLOSED ON ${b.closingDate}` : 'CLOSE'}
+                      </button>
+                    </td>
+                 </tr>)}</tbody>
                </table>
              </div>
           )}
 
-          {/* DASHBOARD */}
+          {/* DASHBOARD & OTHER TABS FOLLOW SAME LOGIC */}
           {activeTab === "Dashboard" && (
             <div>
               <select className="btn-gold" style={{background:'white', marginBottom:'20px'}} onChange={(e) => setSelectedFirm(e.target.value)}>
