@@ -1,90 +1,60 @@
 :root {
   --gold: linear-gradient(135deg, #d4af37 0%, #f9e2af 50%, #b8860b 100%);
   --dark-navy: #0a192f;
-  --premium-white: #ffffff;
-  --glass: rgba(255, 255, 255, 0.95);
+  --premium-bg: #f4f7fa;
 }
 
-body { margin: 0; font-family: 'Inter', sans-serif; background: #f0f2f5; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: var(--premium-bg); }
 
-/* Sidebar Premium Look */
-.nav-item {
-  position: relative;
-  transition: all 0.3s ease;
-  border-left: 4px solid transparent;
-}
-.nav-item:hover { background: rgba(212, 175, 55, 0.05); color: #d4af37 !important; }
-.nav-item.active {
-  background: rgba(212, 175, 55, 0.1);
-  color: #d4af37 !important;
-  border-left: 4px solid #d4af37;
-}
+/* Right Side Premium Background */
+main { background: linear-gradient(to bottom right, #ffffff, #f0f4f8); flex: 1; overflow-y: auto; }
 
-/* Premium Cards */
 .premium-card {
-  background: var(--glass);
-  border-radius: 20px;
-  padding: 35px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
   border: 1px solid rgba(212, 175, 55, 0.1);
 }
 
-/* Luxury Inputs */
 .luxury-input {
+  width: 100%;
+  padding: 12px 15px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 20px;
+  border-radius: 10px;
   font-size: 14px;
+  margin-bottom: 15px;
   transition: 0.3s;
-  outline: none;
 }
-.luxury-input:focus { border-color: #d4af37; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
 
-/* Golden Buttons - THE REAL EXECUTIVE LOOK */
-.btn-royal-exec {
+.luxury-input:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+
+.btn-royal {
   background: var(--gold);
   color: #0a192f;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
   font-weight: 800;
+  cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border: none;
-  border-radius: 12px;
-  padding: 15px 30px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
-  transition: 0.3s;
 }
-.btn-royal-exec:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(184, 134, 11, 0.4); }
 
-.gold-btn-pdf, .gold-btn-excel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.gold-btn {
   background: #fff;
   border: 2px solid #d4af37;
   color: #b8860b;
-  padding: 10px 20px;
+  padding: 8px 15px;
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.gold-btn-pdf:hover { background: #d4af37; color: #fff; }
-.gold-btn-excel:hover { background: #b8860b; color: #fff; }
 
-/* Table Styling */
-.royal-table { width: 100%; border-collapse: collapse; }
-.royal-table th { 
-  background: var(--dark-navy); 
-  color: #d4af37; 
-  padding: 18px; 
-  text-align: left; 
-  font-size: 13px;
-  text-transform: uppercase;
-}
-.royal-table td { padding: 18px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 14px; }
-.royal-table tr:hover { background: rgba(212, 175, 55, 0.02); }
-
-/* Badges */
-.badge-Admin { background: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 11px; }
-.badge-Maker { background: #fef9c3; color: #854d0e; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 11px; }
+.royal-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.royal-table th { background: var(--dark-navy); color: #d4af37; padding: 15px; text-align: left; }
+.royal-table td { padding: 15px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
