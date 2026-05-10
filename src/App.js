@@ -205,9 +205,30 @@ export default function App() {
                         <tr>
                           <td colSpan="4" style={{background:'#f8fafc', padding:'25px'}}>
                             <div style={{display:'flex', gap:'15px', marginBottom:'15px'}}>
-                              <button className="btn-gold" style={{fontSize:'12px'}}><Download size={14}/> EXCEL REPORT</button>
-                              <button className="btn-gold" style={{fontSize:'12px'}}><FileText size={14}/> PDF STATEMENT</button>
-                            </div>
+  {/* EXCEL BUTTON */}
+  <button 
+    className="btn-gold" 
+    style={{fontSize:'12px', cursor:'pointer'}} 
+    onClick={(e) => {
+      e.stopPropagation(); // Ye row expansion ko rokega aur download chalu karega
+      exportToExcel([b], b.bankName);
+    }}
+  >
+    <Download size={14}/> EXCEL REPORT
+  </button>
+
+  {/* PDF BUTTON */}
+  <button 
+    className="btn-gold" 
+    style={{fontSize:'12px', cursor:'pointer'}} 
+    onClick={(e) => {
+      e.stopPropagation(); 
+      exportToPDF(b);
+    }}
+  >
+    <FileText size={14}/> PDF STATEMENT
+  </button>
+</div>
                             <table className="royal-table" style={{background:'white', boxShadow:'none'}}>
                               <thead><tr><th>Date</th><th>Particulars</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
                               <tbody><tr><td>-</td><td>Opening Balance B/F</td><td>-</td><td>-</td><td>₹ {b.balance}</td></tr></tbody>
