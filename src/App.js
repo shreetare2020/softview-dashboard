@@ -73,43 +73,57 @@ export default function App() {
     if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
   };
 
-  // --- EXCEL EXPORT LOGIC ---
+  // --- UPGRADED EXCEL LOGIC ---
   const exportToExcel = (data, fileName) => {
-    const filteredData = data.map(item => ({
-      "Bank Name": item.bankName,
-      "Account No": item.accNo,
-      "Firm Name": item.linkedFirm,
-      "Current Balance": `${item.balance} ${item.type}`,
-      "Status": item.status || 'Open'
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
-    XLSX.writeFile(workbook, `${fileName}_Report.xlsx`);
+    console.log("Excel Export Triggered for:", fileName); // Ye console mein dikhega
+    try {
+      const filteredData = data.map(item => ({
+        "Bank Name": item.bankName || "N/A",
+        "Account No": item.accNo || "N/A",
+        "Firm Name": item.linkedFirm || "N/A",
+        "Balance": `${item.balance || 0} ${item.type || ""}`,
+        "Status": item.status || 'Open'
+      }));
+      
+      const worksheet = XLSX.utils.json_to_sheet(filteredData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
+      XLSX.writeFile(workbook, `${fileName}_Report.xlsx`);
+      console.log("Excel Download Initiated");
+    } catch (error) {
+      console.error("Excel Error:", error);
+      alert("Excel Export Failed: " + error.message);
+    }
   };
 
-  // --- PDF EXPORT LOGIC ---
+  // --- UPGRADED PDF LOGIC ---
   const exportToPDF = (bank) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("BANKING PRO - STATEMENT", 14, 20);
-    doc.setFontSize(11);
-    doc.text(`Bank: ${bank.bankName} | A/c: ${bank.accNo}`, 14, 30);
-    doc.text(`Firm: ${bank.linkedFirm}`, 14, 35);
-    
-    const tableData = [
-      [new Date().toLocaleDateString(), "Opening Balance B/F", "-", "-", `₹ ${bank.balance} ${bank.type}`]
-    ];
+    console.log("PDF Export Triggered for:", bank.bankName);
+    try {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("BANKING PRO - STATEMENT", 14, 20);
+      doc.setFontSize(11);
+      doc.text(`Bank: ${bank.bankName} | A/c: ${bank.accNo}`, 14, 30);
+      doc.text(`Firm: ${bank.linkedFirm}`, 14, 35);
+      
+      const tableData = [
+        [new Date().toLocaleDateString(), "Opening Balance B/F", "-", "-", `₹ ${bank.balance} ${bank.type}`]
+      ];
 
-    doc.autoTable({
-      head: [['Date', 'Particulars', 'Debit', 'Credit', 'Balance']],
-      body: tableData,
-      startY: 45,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [10, 25, 47] }
-    });
+      doc.autoTable({
+        head: [['Date', 'Particulars', 'Debit', 'Credit', 'Balance']],
+        body: tableData,
+        startY: 45,
+        theme: 'grid'
+      });
 
-    doc.save(`${bank.bankName}_Statement.pdf`);
+      doc.save(`${bank.bankName}_Statement.pdf`);
+      console.log("PDF Download Initiated");
+    } catch (error) {
+      console.error("PDF Error:", error);
+      alert("PDF Export Failed: " + error.message);
+    }
   };
 
   if (!user) return <LoginScreen />;
