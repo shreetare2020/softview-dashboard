@@ -44,47 +44,55 @@ export default function App() {
     if (userRole === "Viewer") return alert("Permission Denied!");
 
     try {
-      // --- 1. GST NO. RESTRICTION (For Firm Master) ---
+      // 1. GST NO. RESTRICTION (Firm Master)
       if (coll === "Firms") {
         const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-        
         if (!form.gst || form.gst.length !== 15) {
           return alert("Strictly 15 characters required for GST Number!");
         }
         if (!gstRegex.test(form.gst)) {
-          return alert("Invalid GST Format! \nExample: 27ABCDE1234F1Z5");
+          return alert("Invalid GST Format! Correct Pattern: 27ABCDE1234F1Z5");
         }
       }
 
-      // --- 2. DUPLICATE BANK ACCOUNT CHECK (For Bank Master) ---
-      if (coll === "Bank Master" && !form.id) { // Nayi entry ke waqt hi check karega
+      // 2. DUPLICATE BANK ACCOUNT CHECK (Bank Master)
+      if (coll === "Bank Master" && !form.id) {
         const duplicateBank = banks.find(b => b.accNo === form.accNo);
         if (duplicateBank) {
-          return alert("Error: This Account Number is already registered! Duplicate entry not allowed.");
-        }
-        if (!form.accNo || form.accNo.length < 5) {
-          return alert("Please enter a valid Account Number!");
+          return alert("Already open account number! Duplicate Bank entry not allowed.");
         }
       }
 
-      // --- 3. SAVE / UPDATE LOGIC ---
+      // 3. SAVE / UPDATE LOGIC
       if (form.id) {
-        // Update existing record
-        const { id, ...dataWithoutId } = form;
-        await updateDoc(doc(db, coll, id), { ...dataWithoutId, updatedAt: new Date() });
-        alert("Record Updated Successfully!");
+        const { id, ...data } = form;
+        await updateDoc(doc(db, coll, id), { ...data, updatedAt: new Date() });
+        alert("Updated!");
       } else {
-        // Create new record
         await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
-        alert("New Record Saved Successfully!");
+        alert("Saved!");
       }
-      
-      setForm({}); // Form clear karein
+      setForm({});
     } catch (error) {
       console.error("Save Error:", error);
       alert("Error: " + error.message);
     }
-  }; // <--- Ye bracket band hona zaroori hai!
+  };
+
+  // --- Ab ye functions handleSave ke BAHAR hain, isliye edit chalega ---
+  const handleEdit = (item) => { 
+    setForm(item); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  };
+
+  const handleDelete = async (coll, id) => { 
+    if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); 
+  };
+
+  const handleCloseEntry = async (id) => {
+    const d = prompt("Enter Closing Date:", new Date().toLocaleDateString());
+    if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
+  };
   // --- UPGRADED EXCEL LOGIC ---
   const exportToExcel = async (bank, fileName) => {
     const workbook = new ExcelJS.Workbook();
