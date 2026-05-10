@@ -4,6 +4,8 @@ import { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
 import { LayoutDashboard, Building2, Landmark, Users, LogOut, Settings, ChevronDown, Edit3, Trash2, Clock, Download, FileText, ShieldCheck } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import './App.css';
@@ -74,50 +76,50 @@ export default function App() {
   };
 
   // --- UPGRADED EXCEL LOGIC ---
-  const exportToExcel = (bank, fileName) => {
-    try {
-      // 1. Data Structure taiyar karein (PDF ki tarah)
-      const excelData = [
-        { "Date": "BANK STATEMENT", "Particulars": bank.bankName, "Debit": "", "Credit": "", "Balance": "" },
-        { "Date": "Account No", "Particulars": bank.accNo, "Debit": "", "Credit": "", "Balance": "" },
-        { "Date": "Firm Name", "Particulars": bank.linkedFirm, "Debit": "", "Credit": "", "Balance": "" },
-        { "Date": "", "Particulars": "", "Debit": "", "Credit": "", "Balance": "" }, // Khali line gap ke liye
-        
-        // Header Row (Visual clarity ke liye)
-        { "Date": "DATE", "Particulars": "PARTICULARS", "Debit": "DEBIT", "Credit": "CREDIT", "Balance": "BALANCE" },
-        
-        // Opening Balance Row (Jaise PDF mein hai)
-        { 
-          "Date": new Date().toLocaleDateString(), 
-          "Particulars": "Opening Balance B/F", 
-          "Debit": "-", 
-          "Credit": "-", 
-          "Balance": `₹ ${bank.balance} ${bank.type}` 
-        }
-      ];
+  const exportToExcel = async (bank, fileName) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Bank Statement');
 
-      // 2. Excel Sheet banayein
-      const worksheet = XLSX.utils.json_to_sheet(excelData, { skipHeader: true });
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Bank Statement");
+    // 1. Header Styling (Company Name)
+    worksheet.mergeCells('A1:E1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'BANKING PRO - ' + bank.bankName;
+    titleCell.font = { name: 'Arial Black', size: 16, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0A192F' } }; // Dark Blue
+    titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-      // 3. Column ki width set karein (Taaki data na kute)
-      const wscols = [
-        {wch: 15}, // Date column
-        {wch: 30}, // Particulars
-        {wch: 12}, // Debit
-        {wch: 12}, // Credit
-        {wch: 20}  // Balance
-      ];
-      worksheet['!cols'] = wscols;
+    // 2. Bank Details (Sub-headers)
+    worksheet.addRow(['Account No:', bank.accNo, '', 'Firm:', bank.linkedFirm]);
+    worksheet.getRow(2).font = { bold: true };
 
-      // 4. Download file
-      XLSX.writeFile(workbook, `${fileName}_Excel_Report.xlsx`);
-      
-    } catch (error) {
-      console.error("Excel Error:", error);
-      alert("Excel Export Failed!");
-    }
+    worksheet.addRow([]); // Khali row
+
+    // 3. Table Headers (Colorful)
+    const headerRow = worksheet.addRow(['DATE', 'PARTICULARS', 'DEBIT', 'CREDIT', 'BALANCE']);
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD4AF25' } }; // Gold Color
+      cell.font = { bold: true, color: { argb: 'FF000000' } };
+      cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    });
+
+    // 4. Opening Balance Row
+    const openingRow = worksheet.addRow([
+      new Date().toLocaleDateString(), 
+      'Opening Balance B/F', 
+      '-', 
+      '-', 
+      `₹ ${bank.balance} ${bank.type}`
+    ]);
+    openingRow.getCell(5).font = { bold: true, color: { argb: 'FF059669' } }; // Green Color for Balance
+
+    // 5. Column Width Setting
+    worksheet.columns = [
+      { width: 20 }, { width: 35 }, { width: 15 }, { width: 15 }, { width: 25 }
+    ];
+
+    // 6. Save File
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `${fileName}_Colorful_Report.xlsx`);
   };
 
   // --- UPGRADED PDF LOGIC ---
