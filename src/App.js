@@ -74,25 +74,49 @@ export default function App() {
   };
 
   // --- UPGRADED EXCEL LOGIC ---
-  const exportToExcel = (data, fileName) => {
-    console.log("Excel Export Triggered for:", fileName); // Ye console mein dikhega
+  const exportToExcel = (bank, fileName) => {
     try {
-      const filteredData = data.map(item => ({
-        "Bank Name": item.bankName || "N/A",
-        "Account No": item.accNo || "N/A",
-        "Firm Name": item.linkedFirm || "N/A",
-        "Balance": `${item.balance || 0} ${item.type || ""}`,
-        "Status": item.status || 'Open'
-      }));
-      
-      const worksheet = XLSX.utils.json_to_sheet(filteredData);
+      // 1. Data Structure taiyar karein (PDF ki tarah)
+      const excelData = [
+        { "Date": "BANK STATEMENT", "Particulars": bank.bankName, "Debit": "", "Credit": "", "Balance": "" },
+        { "Date": "Account No", "Particulars": bank.accNo, "Debit": "", "Credit": "", "Balance": "" },
+        { "Date": "Firm Name", "Particulars": bank.linkedFirm, "Debit": "", "Credit": "", "Balance": "" },
+        { "Date": "", "Particulars": "", "Debit": "", "Credit": "", "Balance": "" }, // Khali line gap ke liye
+        
+        // Header Row (Visual clarity ke liye)
+        { "Date": "DATE", "Particulars": "PARTICULARS", "Debit": "DEBIT", "Credit": "CREDIT", "Balance": "BALANCE" },
+        
+        // Opening Balance Row (Jaise PDF mein hai)
+        { 
+          "Date": new Date().toLocaleDateString(), 
+          "Particulars": "Opening Balance B/F", 
+          "Debit": "-", 
+          "Credit": "-", 
+          "Balance": `₹ ${bank.balance} ${bank.type}` 
+        }
+      ];
+
+      // 2. Excel Sheet banayein
+      const worksheet = XLSX.utils.json_to_sheet(excelData, { skipHeader: true });
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
-      XLSX.writeFile(workbook, `${fileName}_Report.xlsx`);
-      console.log("Excel Download Initiated");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Bank Statement");
+
+      // 3. Column ki width set karein (Taaki data na kute)
+      const wscols = [
+        {wch: 15}, // Date column
+        {wch: 30}, // Particulars
+        {wch: 12}, // Debit
+        {wch: 12}, // Credit
+        {wch: 20}  // Balance
+      ];
+      worksheet['!cols'] = wscols;
+
+      // 4. Download file
+      XLSX.writeFile(workbook, `${fileName}_Excel_Report.xlsx`);
+      
     } catch (error) {
       console.error("Excel Error:", error);
-      alert("Excel Export Failed: " + error.message);
+      alert("Excel Export Failed!");
     }
   };
 
@@ -207,15 +231,14 @@ export default function App() {
                             <div style={{display:'flex', gap:'15px', marginBottom:'15px'}}>
   {/* EXCEL BUTTON */}
   <button 
-    className="btn-gold" 
-    style={{fontSize:'12px', cursor:'pointer'}} 
-    onClick={(e) => {
-      e.stopPropagation(); // Ye row expansion ko rokega aur download chalu karega
-      exportToExcel([b], b.bankName);
-    }}
-  >
-    <Download size={14}/> EXCEL REPORT
-  </button>
+  className="btn-gold" 
+  onClick={(e) => {
+    e.stopPropagation();
+    exportToExcel(b, b.bankName); // [b] ki jagah sirf b bhejein
+  }}
+>
+  <Download size={14}/> EXCEL REPORT
+</button>
 
   {/* PDF BUTTON */}
   <button 
