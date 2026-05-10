@@ -53,11 +53,63 @@ export default function App() {
     } catch (e) { alert(e.message); }
   };
 
-  const handleEdit = (item) => { setForm(item); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const handleDelete = async (coll, id) => { if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); };
+  //---const handleEdit = (item) => { setForm(item); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  //--const handleDelete = async (coll, id) => { if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); };
+  //---const handleCloseEntry = async (id) => {
+   //--- const d = prompt("Enter Closing Date:", new Date().toLocaleDateString());
+    //---if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
+  //--};
+  const handleEdit = (item) => { 
+    setForm(item); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  };
+
+  const handleDelete = async (coll, id) => { 
+    if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); 
+  };
+
   const handleCloseEntry = async (id) => {
     const d = prompt("Enter Closing Date:", new Date().toLocaleDateString());
     if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
+  };
+
+  // --- EXCEL EXPORT LOGIC ---
+  const exportToExcel = (data, fileName) => {
+    const filteredData = data.map(item => ({
+      "Bank Name": item.bankName,
+      "Account No": item.accNo,
+      "Firm Name": item.linkedFirm,
+      "Current Balance": `${item.balance} ${item.type}`,
+      "Status": item.status || 'Open'
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
+    XLSX.writeFile(workbook, `${fileName}_Report.xlsx`);
+  };
+
+  // --- PDF EXPORT LOGIC ---
+  const exportToPDF = (bank) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("BANKING PRO - STATEMENT", 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Bank: ${bank.bankName} | A/c: ${bank.accNo}`, 14, 30);
+    doc.text(`Firm: ${bank.linkedFirm}`, 14, 35);
+    
+    const tableData = [
+      [new Date().toLocaleDateString(), "Opening Balance B/F", "-", "-", `₹ ${bank.balance} ${bank.type}`]
+    ];
+
+    doc.autoTable({
+      head: [['Date', 'Particulars', 'Debit', 'Credit', 'Balance']],
+      body: tableData,
+      startY: 45,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [10, 25, 47] }
+    });
+
+    doc.save(`${bank.bankName}_Statement.pdf`);
   };
 
   if (!user) return <LoginScreen />;
