@@ -41,19 +41,16 @@ export default function App() {
   }, [user]);
 
   const handleSave = async (coll) => {
-    if (userRole === "Viewer") return alert("Permission Denied!");
-    try {
-      if (form.id) {
-        const { id, ...data } = form;
-        await updateDoc(doc(db, coll, id), { ...data, updatedAt: new Date() });
-        alert("Updated Successfully!");
-      } else {
-        await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
-        alert("Saved Successfully!");
+  if (userRole === "Viewer") return alert("Permission Denied!");
+
+  try {
+    // --- GST VALIDATION (For Firm Master) ---
+    if (coll === "Firms") {
+      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+      if (!gstRegex.test(form.gst)) {
+        return alert("Invalid GST Format! Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num. Total 15 Chars.");
       }
-      setForm({});
-    } catch (e) { alert(e.message); }
-  };
+    }
 
   //---const handleEdit = (item) => { setForm(item); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   //--const handleDelete = async (coll, id) => { if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); };
