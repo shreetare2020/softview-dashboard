@@ -45,12 +45,25 @@ export default function App() {
 
   try {
     // --- GST VALIDATION (For Firm Master) ---
-    if (coll === "Firms") {
-      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-      if (!gstRegex.test(form.gst)) {
-        return alert("Invalid GST Format! Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num. Total 15 Chars.");
-      }
-    }
+    // if (coll === "Firms") {
+    //   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    //   if (!gstRegex.test(form.gst)) {
+    //     return alert("Invalid GST Format! Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num. Total 15 Chars.");
+    //   }
+    // }
+    // handleSave ke andar ka hissa
+if (coll === "Firms") {
+  // GST Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num
+  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  
+  if (!form.gst || form.gst.length !== 15) {
+    return alert("Strictly 15 characters required for GST Number!");
+  }
+
+  if (!gstRegex.test(form.gst)) {
+    return alert("Invalid Format! Correct GST Pattern: \n1. First 2 digits (State Code)\n2. Next 10 chars (PAN)\n3. 13th char (Entity no.)\n4. 14th char (Default 'Z')\n5. 15th char (Check digit)");
+  }
+}
 
   //---const handleEdit = (item) => { setForm(item); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   //--const handleDelete = async (coll, id) => { if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); };
@@ -270,7 +283,19 @@ export default function App() {
             <div>
               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'20px', background:'white', padding:'30px'}}>
                 <input placeholder="Firm Name" className="btn-gold" style={{background:'white'}} value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} />
-                <input placeholder="GST Number" className="btn-gold" style={{background:'white'}} value={form.gst || ""} onChange={e => setForm({...form, gst: e.target.value})} />
+                <input 
+  placeholder="GST Number (15 Digits)" 
+  className="btn-gold" 
+  style={{
+    background: 'white', 
+    textTransform: 'uppercase', // Hamesha bade akshar
+    letterSpacing: '2px', // Taki readable ho
+    fontWeight: 'bold'
+  }} 
+  maxLength={15} // 15 se zyada type hi nahi hoga
+  value={form.gst || ""} 
+  onChange={e => setForm({...form, gst: e.target.value.toUpperCase().replace(/\s/g, '')})} // Space allow nahi karega
+/>
                 <input placeholder="Address" className="btn-gold" style={{background:'white'}} value={form.address || ""} onChange={e => setForm({...form, address: e.target.value})} />
                 <button className="btn-gold" style={{gridColumn:'span 3', height:'50px'}} onClick={() => handleSave("Firms")}>{form.id ? "UPDATE FIRM" : "REGISTER NEW FIRM"}</button>
               </div>
