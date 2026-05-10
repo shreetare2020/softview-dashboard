@@ -41,50 +41,50 @@ export default function App() {
   }, [user]);
 
   const handleSave = async (coll) => {
-  if (userRole === "Viewer") return alert("Permission Denied!");
+    if (userRole === "Viewer") return alert("Permission Denied!");
 
-  try {
-    // --- GST VALIDATION (For Firm Master) ---
-    // if (coll === "Firms") {
-    //   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-    //   if (!gstRegex.test(form.gst)) {
-    //     return alert("Invalid GST Format! Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num. Total 15 Chars.");
-    //   }
-    // }
-    // handleSave ke andar ka hissa
-if (coll === "Firms") {
-  // GST Format: 2 Numbers, 5 Alphabets, 4 Numbers, 1 Alpha, 1 Alpha/Num, 'Z', 1 Alpha/Num
-  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-  
-  if (!form.gst || form.gst.length !== 15) {
-    return alert("Strictly 15 characters required for GST Number!");
-  }
+    try {
+      // --- 1. GST NO. RESTRICTION (For Firm Master) ---
+      if (coll === "Firms") {
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        
+        if (!form.gst || form.gst.length !== 15) {
+          return alert("Strictly 15 characters required for GST Number!");
+        }
+        if (!gstRegex.test(form.gst)) {
+          return alert("Invalid GST Format! \nExample: 27ABCDE1234F1Z5");
+        }
+      }
 
-  if (!gstRegex.test(form.gst)) {
-    return alert("Invalid Format! Correct GST Pattern: \n1. First 2 digits (State Code)\n2. Next 10 chars (PAN)\n3. 13th char (Entity no.)\n4. 14th char (Default 'Z')\n5. 15th char (Check digit)");
-  }
-}
+      // --- 2. DUPLICATE BANK ACCOUNT CHECK (For Bank Master) ---
+      if (coll === "Bank Master" && !form.id) { // Nayi entry ke waqt hi check karega
+        const duplicateBank = banks.find(b => b.accNo === form.accNo);
+        if (duplicateBank) {
+          return alert("Error: This Account Number is already registered! Duplicate entry not allowed.");
+        }
+        if (!form.accNo || form.accNo.length < 5) {
+          return alert("Please enter a valid Account Number!");
+        }
+      }
 
-  //---const handleEdit = (item) => { setForm(item); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  //--const handleDelete = async (coll, id) => { if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); };
-  //---const handleCloseEntry = async (id) => {
-   //--- const d = prompt("Enter Closing Date:", new Date().toLocaleDateString());
-    //---if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
-  //--};
-  const handleEdit = (item) => { 
-    setForm(item); 
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-  };
-
-  const handleDelete = async (coll, id) => { 
-    if (window.confirm("Delete?")) await deleteDoc(doc(db, coll, id)); 
-  };
-
-  const handleCloseEntry = async (id) => {
-    const d = prompt("Enter Closing Date:", new Date().toLocaleDateString());
-    if (d) await updateDoc(doc(db, "Bank Master", id), { status: 'Closed', closingDate: d });
-  };
-
+      // --- 3. SAVE / UPDATE LOGIC ---
+      if (form.id) {
+        // Update existing record
+        const { id, ...dataWithoutId } = form;
+        await updateDoc(doc(db, coll, id), { ...dataWithoutId, updatedAt: new Date() });
+        alert("Record Updated Successfully!");
+      } else {
+        // Create new record
+        await addDoc(collection(db, coll), { ...form, status: 'Open', createdAt: new Date() });
+        alert("New Record Saved Successfully!");
+      }
+      
+      setForm({}); // Form clear karein
+    } catch (error) {
+      console.error("Save Error:", error);
+      alert("Error: " + error.message);
+    }
+  }; // <--- Ye bracket band hona zaroori hai!
   // --- UPGRADED EXCEL LOGIC ---
   const exportToExcel = async (bank, fileName) => {
     const workbook = new ExcelJS.Workbook();
@@ -312,7 +312,14 @@ if (coll === "Firms") {
             <div>
               <div className="ledger-box" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'15px', background:'white', padding:'30px'}}>
                 <input placeholder="Bank Name" className="btn-gold" style={{background:'white'}} value={form.bankName || ""} onChange={e => setForm({...form, bankName: e.target.value})} />
-                <input placeholder="Account No" className="btn-gold" style={{background:'white'}} value={form.accNo || ""} onChange={e => setForm({...form, accNo: e.target.value})} />
+                <input 
+  placeholder="Account No" 
+  className="btn-gold" 
+  style={{background:'white'}} 
+  onKeyPress={(e) => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }} // Sirf numbers allow honge
+  value={form.accNo || ""} 
+  onChange={e => setForm({...form, accNo: e.target.value})} 
+/>
                 <input placeholder="Balance" className="btn-gold" style={{background:'white'}} value={form.balance || ""} onChange={e => setForm({...form, balance: e.target.value})} />
                 <select className="btn-gold" style={{background:'white'}} value={form.type || ""} onChange={e => setForm({...form, type: e.target.value})}><option>Type</option><option value="dr">Debit (Dr)</option><option value="cr">Credit (Cr)</option></select>
                 <select className="btn-gold" style={{background:'white'}} value={form.linkedFirm || ""} onChange={e => setForm({...form, linkedFirm: e.target.value})}><option>Link Firm</option>{firms.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}</select>
